@@ -39,6 +39,8 @@ int heap_caps_get_free_size(int);
 #define gpio_get_level(n) 0
 #define disableCore0WDT()
 #define disableCore1WDT()
+inline bool psramInit() { return false; }
+inline void *ps_malloc(size_t sz) { return malloc(sz); }
 
 extern int esp_timer_get_time();
 

@@ -83,6 +83,7 @@ pub fn main() {
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
+    sdl2::hint::set("SDL_HINT_RENDER_SCALE_QUALITY", "2");
 
     let window = video_subsystem.window("FAB Agon Emulator", 1024, 768)
         .position_centered()
@@ -136,6 +137,7 @@ pub fn main() {
             }
 
             if w != mode_w || h != mode_h {
+                println!("Mode change to {} x {}", w, h);
                 mode_w = w;
                 mode_h = h;
                 texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();

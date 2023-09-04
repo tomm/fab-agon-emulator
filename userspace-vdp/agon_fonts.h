@@ -1,7 +1,7 @@
 //
-// Title:	        Agon Video BIOS - font file
-// Author:        	Damien Guard
-// Created:       	06/08/2022
+// Title:			Agon Video BIOS - font file
+// Author:			Damien Guard
+// Created:			06/08/2022
 // Last Updated:	20/02/2023
 //
 // Modinfo:

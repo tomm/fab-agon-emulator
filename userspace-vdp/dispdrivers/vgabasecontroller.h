@@ -38,6 +38,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <atomic>
+#include <mutex>
 
 #include "driver/gpio.h"
 
@@ -289,7 +290,9 @@ public:
 
   uint8_t createBlankRawPixel()                  { return m_HVSync; }
 
-
+  std::unique_lock<std::mutex> lock() {
+    return std::unique_lock<std::mutex>(m_bigLock);
+  }
 
 protected:
 
@@ -387,6 +390,7 @@ private:
 
   int16_t                m_rawFrameHeight;
 
+  std::mutex             m_bigLock;
 };
 
 

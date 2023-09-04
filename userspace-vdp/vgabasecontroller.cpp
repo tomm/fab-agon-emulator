@@ -26,6 +26,7 @@
 
 
 #include <alloca.h>
+#include <mutex>
 #include <stdarg.h>
 #include <math.h>
 #include <string.h>
@@ -376,6 +377,7 @@ void VGABaseController::startGPIOStream()
 
 void VGABaseController::setResolution(char const * modeline, int viewPortWidth, int viewPortHeight, bool doubleBuffered)
 {
+  auto lock = this->lock();
   VGATimings timings;
   if (convertModelineToTimings(modeline, &timings))
     setResolution(timings, viewPortWidth, viewPortHeight, doubleBuffered);

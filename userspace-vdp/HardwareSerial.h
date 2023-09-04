@@ -5,6 +5,9 @@
 #include <mutex>
 
 struct HardwareSerial {
+    HardwareSerial() {}
+    HardwareSerial(int) {}
+
     int available();
     unsigned char read();
     void write(unsigned char);
@@ -14,9 +17,11 @@ struct HardwareSerial {
     void setHwFlowCtrlMode(int, int) {}
     void begin(int, int, int, int) {}
     void setPins(int, int, int, int) {}
+    void print(const char *) {}
 
     void writeToInQueue(uint8_t b);
     bool readFromOutQueue(uint8_t *out);
+    
 
 private:
     std::deque<uint8_t> m_buf_in;

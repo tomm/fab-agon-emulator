@@ -1,10 +1,12 @@
 #include "fabgl.h"
 #include "dispdrivers/vga16controller.h"
 
+extern fabgl::VGABaseController *	_VGAController;		// Pointer to the current VGA controller class (one of the above)
+
 /* Buffer must be big enough for any screen resolution - up to 1024x768x3 bytes :) */
 void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 {
-	auto vga = fabgl::VGA16Controller::instance();
+	auto vga = _VGAController;
 	const int w = vga->getScreenWidth();
 	const int h = vga->getScreenHeight();
 	*outHeight = h;
