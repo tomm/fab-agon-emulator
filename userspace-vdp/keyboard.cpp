@@ -400,6 +400,115 @@ VirtualKey Keyboard::VKtoAlternateVK(VirtualKey in_vk, bool down, KeyboardLayout
 }
 
 
+void Keyboard::injectScancode(uint16_t scancode, bool isDown)
+{
+	struct fabgl::VirtualKeyItem k;
+  auto item = &k;
+
+  item->vk         = VK_NONE;
+  item->down       = isDown;
+  item->CTRL       = m_CTRL;
+  item->LALT       = m_LALT;
+  item->RALT       = m_RALT;
+  item->SHIFT      = m_SHIFT;
+  item->GUI        = m_GUI;
+  item->CAPSLOCK   = m_CAPSLOCK;
+  item->NUMLOCK    = m_NUMLOCK;
+  item->SCROLLLOCK = m_SCROLLLOCK;
+
+  // XXX -TM- not actually setting scancode
+  uint8_t * scode = item->scancode;
+
+  if (scancode <= 0xff) {
+    item->vk = scancodeToVK(scancode, false);
+  } else {
+    item->vk = scancodeToVK(scancode & 0xff, true);
+  }
+
+  if (item->vk != VK_NONE) {
+
+    // manage CAPSLOCK
+    item->vk = manageCAPSLOCK(item->vk);
+
+    // alternate VK (virtualkeys modified by shift, alt, ...)
+    item->vk = VKtoAlternateVK(item->vk, item->down);
+
+    // update shift, alt, ctrl, capslock, numlock and scrollock states and LEDs
+    switch (item->vk) {
+      case VK_LCTRL:
+      case VK_RCTRL:
+        m_CTRL = item->down;
+        break;
+      case VK_LALT:
+        m_LALT = item->down;
+        break;
+      case VK_RALT:
+        m_RALT = item->down;
+        break;
+      case VK_LSHIFT:
+      case VK_RSHIFT:
+        m_SHIFT = item->down;
+        break;
+      case VK_LGUI:
+      case VK_RGUI:
+        m_GUI = item->down;
+        break;
+      case VK_CAPSLOCK:
+        if (!item->down) {
+          m_CAPSLOCK = !m_CAPSLOCK;
+          updateLEDs();
+        }
+        break;
+      case VK_NUMLOCK:
+        if (!item->down) {
+          m_NUMLOCK = !m_NUMLOCK;
+          updateLEDs();
+        }
+        break;
+      case VK_SCROLLLOCK:
+        if (!item->down) {
+          m_SCROLLLOCK = !m_SCROLLLOCK;
+          updateLEDs();
+        }
+        break;
+      default:
+        break;
+    }
+
+  }
+
+  // manage dead keys - Implemented by Carles Oriol (https://github.com/carlesoriol)
+  for (VirtualKey const * dk = m_layout->deadKeysVK; *dk != VK_NONE; ++dk) {
+    if (item->vk == *dk) {
+      m_lastDeadKey = item->vk;
+      item->vk = VK_NONE;
+    }
+  }
+  if (item->vk != m_lastDeadKey && item->vk != VK_NONE) {
+    for (DeadKeyVirtualKeyDef const * dk = m_layout->deadkeysToVK; dk->deadKey != VK_NONE; ++dk) {
+      if (item->vk == dk->reqVirtualKey && m_lastDeadKey == dk->deadKey) {
+        item->vk = dk->virtualKey;
+        break;
+      }
+    }
+    if (!item->down && (item->vk != m_lastDeadKey) && (item->vk != VK_RSHIFT) && (item->vk != VK_LSHIFT))
+      m_lastDeadKey = VK_NONE;
+  }
+
+  // ending zero to item->scancode
+  if (scode < item->scancode + sizeof(VirtualKeyItem::scancode) - 1)
+    *(++scode) = 0;
+
+  // fill ASCII field
+  int ascii = fabgl::virtualKeyToASCII(*item, m_codepage);
+  item->ASCII = ascii > -1 ? ascii : 0;
+
+  if (item->vk != VK_NONE) {
+    injectVirtualKey(*item, false);
+  }
+}
+
+
 bool Keyboard::blockingGetVirtualKey(VirtualKeyItem * item)
 {
   item->vk         = VK_NONE;

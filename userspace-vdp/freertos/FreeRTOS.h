@@ -19,3 +19,4 @@ typedef void *SemaphoreHandle_t;
 #define vQueueDelete(a)
 #define vSemaphoreDelete(a)
 #define xQueueCreate(a,b) 0
+#define xTaskAbortDelay(a)

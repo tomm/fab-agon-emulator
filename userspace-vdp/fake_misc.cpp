@@ -14,6 +14,9 @@ void *heap_caps_free(void *ptr) {
 size_t heap_caps_get_largest_free_block(int sz) {
 	return sz;
 }
+int heap_caps_get_free_size(int) {
+	return 1024*1024;
+}
 
 int esp_timer_get_time() {
 	return 0;

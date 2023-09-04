@@ -3,7 +3,6 @@ fn main() {
         .cpp(true)
         .include("./userspace-vdp")
         .include("./userspace-vdp/dispdrivers/")
-        .file("./userspace-vdp/video.cpp")
         .file("./userspace-vdp/canvas.cpp")
         .file("./userspace-vdp/codepages.cpp")
         .file("./userspace-vdp/collisiondetector.cpp")

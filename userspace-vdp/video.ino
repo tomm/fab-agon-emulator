@@ -1349,6 +1349,7 @@ void vdu_sys_scroll() {
 // Play a note
 //
 word play_note(byte channel, byte volume, word frequency, word duration) {
+	// -TM- return 1;
 	if(channel >=0 && channel < AUDIO_CHANNELS) {
 		return audio_channels[channel]->play_note(volume, frequency, duration);
 	}

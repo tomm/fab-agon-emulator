@@ -145,6 +145,7 @@ void VGABaseController::setupGPIO(gpio_num_t gpio, int bit, gpio_mode_t mode)
 
 void VGABaseController::freeBuffers()
 {
+  freeViewPort();
 #if 0
   if (m_DMABuffersCount > 0) {
     heap_caps_free((void*)m_HBlankLine_withVSync);

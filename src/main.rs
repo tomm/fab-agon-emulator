@@ -4,14 +4,15 @@ use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
 use std::thread;
 use std::time::Duration;
+mod sdl2ps2;
 
 extern "C" {
     fn vdp_setup();
     fn vdp_loop();
-    fn copyVgaFramebuffer(outWidth: *mut i32, outHeight: *mut i32, buffer: *mut u8);
+    fn copyVgaFramebuffer(outWidth: *mut u32, outHeight: *mut u32, buffer: *mut u8);
     fn z80_send_to_vdp(b: u8);
     fn z80_recv_from_vdp(out: *mut u8) -> bool;
-    fn sendHostKbEventToFabgl(ascii: u8, isDown: bool);
+    fn sendHostKbEventToFabgl(ps2scancode: u16, isDown: bool);
 }
 
 pub fn main() {
@@ -90,9 +91,15 @@ pub fn main() {
 
     let mut canvas = window.into_canvas().build().unwrap();
     let texture_creator = canvas.texture_creator();
-    let mut texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, 512, 384).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
+    let mut vgabuf: [u8; 1024*1024*3] = [0; 1024*1024*3];
+    let mut mode_w = 512;
+    let mut mode_h = 384;
+    let mut texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
+
+    // give vdp time to init the vga controllers
+    std::thread::sleep(std::time::Duration::from_millis(500));
 
     'running: loop {
 
@@ -101,29 +108,45 @@ pub fn main() {
                 Event::Quit {..} => {
                     break 'running
                 },
-                Event::KeyDown { keycode, scancode, keymod, .. } => {
-                    println!("key down {:?}", keycode);
-
-                    unsafe {
-                        sendHostKbEventToFabgl(keycode.unwrap() as u8, true);
+                Event::KeyDown { scancode, .. } => {
+                    let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
+                    if ps2scancode > 0 {
+                        unsafe {
+                            sendHostKbEventToFabgl(ps2scancode, true);
+                        }
                     }
                 }
-                Event::KeyUp { keycode, scancode, keymod, .. } => {
-                    unsafe {
-                        sendHostKbEventToFabgl(keycode.unwrap() as u8, false);
+                Event::KeyUp { scancode, .. } => {
+                    let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
+                    if ps2scancode > 0 {
+                        unsafe {
+                            sendHostKbEventToFabgl(ps2scancode, false);
+                        }
                     }
                 }
                 _ => {}
             }
         }
 
-        texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, 512, 384)), |data, _pitch| {
-            let mut w: i32 = 0;
-            let mut h: i32 = 0;
+        {
+            let mut w: u32 = 0;
+            let mut h: u32 = 0;
             unsafe {
-                copyVgaFramebuffer(&mut w as *mut i32, &mut h as *mut i32, &mut data[0] as *mut u8);
+                copyVgaFramebuffer(&mut w as *mut u32, &mut h as *mut u32, &mut vgabuf[0] as *mut u8);
             }
-        }).unwrap();
+
+            if w != mode_w || h != mode_h {
+                mode_w = w;
+                mode_h = h;
+                texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
+            }
+
+            texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, _pitch| {
+                for i in 0..w*h*3 {
+                    data[i as usize] = vgabuf[i as usize];
+                }
+            }).unwrap();
+        }
 
         canvas.copy(&texture, None, None).unwrap();
         canvas.present();

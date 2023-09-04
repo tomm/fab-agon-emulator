@@ -391,6 +391,7 @@ public:
    */
   static int scancodeToVirtualKeyTaskStackSize;
 
+  void injectScancode(uint16_t scancode, bool isDown);
 
 
 private:

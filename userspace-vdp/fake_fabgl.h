@@ -30,10 +30,12 @@ typedef void(*intr_handle_t)();
 #define MALLOC_CAP_32BIT 0
 #define MALLOC_CAP_INTERNAL 0
 #define MALLOC_CAP_DMA 0
+#define MALLOC_CAP_SPIRAM 0
 void *heap_caps_malloc(size_t, int);
 void *heap_caps_realloc(void *, size_t, int);
 void *heap_caps_free(void *);
 size_t heap_caps_get_largest_free_block(int);
+int heap_caps_get_free_size(int);
 #define gpio_get_level(n) 0
 #define disableCore0WDT()
 #define disableCore1WDT()
