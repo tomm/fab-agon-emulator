@@ -3,7 +3,6 @@ use sdl2::event::Event;
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
 use std::thread;
-use std::time::Duration;
 mod sdl2ps2;
 
 extern "C" {
@@ -83,76 +82,117 @@ pub fn main() {
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
+    let mut event_pump = sdl_context.event_pump().unwrap();
+    let mut is_fullscreen = false;
+    let mut vgabuf: [u8; 1024*1024*3] = [0; 1024*1024*3];
+    let mut mode_w = 640;
+    let mut mode_h = 480;
+
+    // doesn't seem to work...
     sdl2::hint::set("SDL_HINT_RENDER_SCALE_QUALITY", "2");
 
-    let window = video_subsystem.window("FAB Agon Emulator", 1024, 768)
-        .position_centered()
-        .build()
-        .unwrap();
-
-    let mut canvas = window.into_canvas().build().unwrap();
-    let texture_creator = canvas.texture_creator();
-
-    let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut vgabuf: [u8; 1024*1024*3] = [0; 1024*1024*3];
-    let mut mode_w = 512;
-    let mut mode_h = 384;
-    let mut texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
-
-    // give vdp time to init the vga controllers
-    std::thread::sleep(std::time::Duration::from_millis(500));
-
     'running: loop {
+        let mut window = video_subsystem.window("FAB Agon Emulator", 1024, 768)
+            .position_centered()
+            .build()
+            .unwrap();
 
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit {..} => {
-                    break 'running
-                },
-                Event::KeyDown { scancode, .. } => {
-                    let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
-                    if ps2scancode > 0 {
-                        unsafe {
-                            sendHostKbEventToFabgl(ps2scancode, true);
-                        }
-                    }
-                }
-                Event::KeyUp { scancode, .. } => {
-                    let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
-                    if ps2scancode > 0 {
-                        unsafe {
-                            sendHostKbEventToFabgl(ps2scancode, false);
-                        }
-                    }
-                }
-                _ => {}
-            }
+        if is_fullscreen {
+            window.set_fullscreen(sdl2::video::FullscreenType::True).unwrap();
         }
 
-        {
-            let mut w: u32 = 0;
-            let mut h: u32 = 0;
-            unsafe {
-                copyVgaFramebuffer(&mut w as *mut u32, &mut h as *mut u32, &mut vgabuf[0] as *mut u8);
-            }
+        let mut canvas = window.into_canvas().build().unwrap();
+        let texture_creator = canvas.texture_creator();
+        let mut texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
 
-            if w != mode_w || h != mode_h {
-                println!("Mode change to {} x {}", w, h);
-                mode_w = w;
-                mode_h = h;
-                texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
-            }
-
-            texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, _pitch| {
-                for i in 0..w*h*3 {
-                    data[i as usize] = vgabuf[i as usize];
-                }
-            }).unwrap();
-        }
-
-        canvas.copy(&texture, None, None).unwrap();
+        // clear the screen, so user isn't staring at garbage while things init
         canvas.present();
-        vsync_counter_vdp.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        std::thread::sleep(Duration::from_millis(1));
+
+        // give vdp time to init the vga controllers
+        std::thread::sleep(std::time::Duration::from_millis(500));
+
+        let mut last_frame_time = std::time::Instant::now();
+        // XXX assumes 60Hz video mode
+        let frame_duration = std::time::Duration::from_micros(16666);
+
+        'inner: loop {
+            let elapsed_since_last_frame = last_frame_time.elapsed();
+            if elapsed_since_last_frame < frame_duration {
+                std::thread::sleep(std::time::Duration::from_millis(1));
+                continue;
+            }
+            else if elapsed_since_last_frame > std::time::Duration::from_millis(100) {
+                // don't let lots of frames queue up, due to system lag or whatever
+                last_frame_time = std::time::Instant::now();
+            }
+
+            // Present a frame
+            last_frame_time = last_frame_time.checked_add(frame_duration).unwrap_or(std::time::Instant::now());
+
+            // signal the vsync to the ez80
+            vsync_counter_vdp.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+            for event in event_pump.poll_iter() {
+                match event {
+                    Event::Quit {..} => {
+                        break 'running
+                    },
+                    Event::KeyDown { keycode, scancode, keymod, .. } => {
+                        // handle emulator shortcut keys
+                        if keymod.contains(sdl2::keyboard::Mod::RALTMOD) {
+                            match keycode {
+                                Some(sdl2::keyboard::Keycode::F) => {
+                                    is_fullscreen = !is_fullscreen;
+                                    break 'inner;
+                                }
+                                Some(sdl2::keyboard::Keycode::Q) => {
+                                    break 'running;
+                                }
+                                _ => {}
+                            }
+                        }
+                        let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
+                        if ps2scancode > 0 {
+                            unsafe {
+                                sendHostKbEventToFabgl(ps2scancode, true);
+                            }
+                        }
+                    }
+                    Event::KeyUp { scancode, .. } => {
+                        let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
+                        if ps2scancode > 0 {
+                            unsafe {
+                                sendHostKbEventToFabgl(ps2scancode, false);
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            {
+                let mut w: u32 = 0;
+                let mut h: u32 = 0;
+                unsafe {
+                    copyVgaFramebuffer(&mut w as *mut u32, &mut h as *mut u32, &mut vgabuf[0] as *mut u8);
+                }
+
+                if w != mode_w || h != mode_h {
+                    println!("Mode change to {} x {}", w, h);
+                    mode_w = w;
+                    mode_h = h;
+                    texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
+                }
+
+                texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, _pitch| {
+                    for i in 0..w*h*3 {
+                        data[i as usize] = vgabuf[i as usize];
+                    }
+                }).unwrap();
+            }
+
+            canvas.copy(&texture, None, None).unwrap();
+            canvas.present();
+        }
     }
 }
