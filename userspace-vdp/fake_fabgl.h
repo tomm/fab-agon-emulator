@@ -46,7 +46,6 @@ extern int esp_timer_get_time();
 
 // RTOS
 typedef int TickType_t;
-void delay(int);
 
 // ESP32
 #define LOW 0

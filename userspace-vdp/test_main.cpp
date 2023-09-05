@@ -16,7 +16,7 @@ void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 	vga->readScreen(rect, (fabgl::RGB888*)buffer);
 }
 int main() {
-	printf("Hello world\n");
+	printf("Starting the userspace fabgl+VDP...\n");
 	// VDP_GP to get past wait_ez80
 	z80_send_to_vdp(23);
 	z80_send_to_vdp(0);

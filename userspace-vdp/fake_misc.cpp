@@ -1,5 +1,7 @@
 #include "fake_fabgl.h"
 #include <math.h>
+#include <chrono>
+#include <thread>
 
 void *heap_caps_malloc(size_t sz, int) {
 	return malloc(sz);
@@ -22,8 +24,9 @@ int esp_timer_get_time() {
 	return 0;
 }
 
-void delay(int) {
-
+/* Arduino.h */
+void delay(int ms) {
+	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 unsigned long millis() {

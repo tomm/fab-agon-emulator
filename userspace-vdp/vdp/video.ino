@@ -92,6 +92,8 @@ void loop() {
 	bool cursorState = false;
 
 	while (true) {
+		if ((count & 0x7f) == 0) delay(1 /* -TM- ms */);
+
 		if (terminalMode) {
 			do_keyboard_terminal();
 			continue;
