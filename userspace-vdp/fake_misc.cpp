@@ -30,7 +30,7 @@ void delay(int ms) {
 }
 
 unsigned long millis() {
-	return 0;
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 int sqrt(int x) {
@@ -38,3 +38,18 @@ int sqrt(int x) {
 }
 
 void digitalWrite(int, int) {}
+
+/* FreeRTOS */
+int xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode, const char *const pcName, const uint32_t usStackDepth, void *const pvParameters, int uxPriority, TaskHandle_t *const pvCreatedTask, const int xCoreID)
+{
+	printf("Spawning thread %s...\n", pcName);
+	auto t = std::thread(pvTaskCode, pvParameters);
+	t.detach();
+	return 0;
+}
+
+void vTaskDelay(int n)
+{
+	// n isn't ms, but whatever
+	delay(n);
+}

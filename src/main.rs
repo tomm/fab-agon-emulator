@@ -12,7 +12,10 @@ extern "C" {
     fn z80_send_to_vdp(b: u8);
     fn z80_recv_from_vdp(out: *mut u8) -> bool;
     fn sendHostKbEventToFabgl(ps2scancode: u16, isDown: bool);
+    fn getAudioSamples(out: *mut u8, length: u32);
 }
+
+const AUDIO_BUFLEN: usize = 2000;
 
 pub fn main() {
     let (tx_vdp_to_ez80, rx_vdp_to_ez80): (Sender<u8>, Receiver<u8>) = mpsc::channel();
@@ -82,7 +85,19 @@ pub fn main() {
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
+    let audio_subsystem = sdl_context.audio().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
+
+
+    let desired_spec = sdl2::audio::AudioSpecDesired {
+        freq: Some(22050), // real VDP uses 16384Hz
+        channels: Some(1),
+        samples: None,
+    };
+    let device: sdl2::audio::AudioQueue<u8> = audio_subsystem.open_queue(None, &desired_spec).unwrap();
+    device.resume();
+
+
     let mut is_fullscreen = false;
     let mut vgabuf: [u8; 1024*1024*3] = [0; 1024*1024*3];
     let mut mode_w = 640;
@@ -92,6 +107,7 @@ pub fn main() {
     sdl2::hint::set("SDL_HINT_RENDER_SCALE_QUALITY", "2");
 
     'running: loop {
+
         let mut window = video_subsystem.window("FAB Agon Emulator", 1024, 768)
             .position_centered()
             .build()
@@ -124,6 +140,15 @@ pub fn main() {
             else if elapsed_since_last_frame > std::time::Duration::from_millis(100) {
                 // don't let lots of frames queue up, due to system lag or whatever
                 last_frame_time = std::time::Instant::now();
+            }
+
+            // fill audio buffer
+            if device.size() < AUDIO_BUFLEN as u32 {
+                let mut audio_buf: [u8; AUDIO_BUFLEN] = [0; AUDIO_BUFLEN];
+                unsafe {
+                    getAudioSamples(&mut audio_buf as *mut u8, AUDIO_BUFLEN as u32);
+                };
+                device.queue_audio(&audio_buf).unwrap();
             }
 
             // Present a frame

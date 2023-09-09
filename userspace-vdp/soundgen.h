@@ -473,6 +473,7 @@ public:
    */
   int volume() { return m_volume; }
 
+  int getSample();
 
 private:
 
@@ -484,8 +485,6 @@ private:
   void detachNoSuspend(WaveformGenerator * value);
   void setDMANode(int index, volatile uint16_t * buf, int len);
   void init();
-  
-  int getSample();
   
   #ifdef FABGL_EMULATED
   void sdl_init();
