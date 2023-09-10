@@ -1,11 +1,11 @@
 #include "fabgl.h"
 #include "dispdrivers/vga16controller.h"
-#include "vdp-console8.h"
+#include "vdp.h"
 
 /* Buffer must be big enough for any screen resolution - up to 1024x768x3 bytes :) */
 void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 {
-	auto vga = _VGAController;
+	auto vga = getVDPVGAController();
 	const int w = vga->getScreenWidth();
 	const int h = vga->getScreenHeight();
 	*outHeight = h;

@@ -45,6 +45,13 @@ int xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode, const char *const pcName,
 	printf("Spawning thread %s...\n", pcName);
 	auto t = std::thread(pvTaskCode, pvParameters);
 	t.detach();
+
+	// XXX A horrible workaround. pvParameters can be a pointer to
+	// local vars in the caller, which will be GONE by the time std::thread starts.
+	// So wait around a bit in the hope that the thread gets going
+	// before we wipe its arguments... :wince:
+	delay(1);
+
 	return 0;
 }
 

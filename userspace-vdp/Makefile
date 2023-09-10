@@ -6,6 +6,7 @@ CFLAGS = -fmax-errors=1 -g -I. -I./dispdrivers
 OPTIONS = 
 
 SRCS = \
+       vdp-console8.cpp \
        canvas.cpp \
        codepages.cpp \
        collisiondetector.cpp \
@@ -29,7 +30,6 @@ SRCS = \
        vgabasecontroller.cpp \
        vgacontroller.cpp \
        vgapalettedcontroller.cpp \
-       vdp-console8.cpp \
 
 OBJS = $(SRCS:.cpp=.o)
 

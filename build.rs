@@ -27,6 +27,7 @@ fn main() {
         .file("./userspace-vdp/vgacontroller.cpp")
         .file("./userspace-vdp/vgapalettedcontroller.cpp")
         .file("./userspace-vdp/vdp-console8.cpp")
+        //.file("./userspace-vdp/vdp-1.03.cpp")
         .cpp_link_stdlib("stdc++")
         .compile("hostvdp");
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "dispdrivers/vgabasecontroller.h"
 #include "fabgl.h"
 #include "fake_fabgl.h"
 #include "fabutils.h"
@@ -15,9 +16,10 @@ extern void do_keyboard();
 extern void vdu(byte c);
 extern void vdu_sys();
 extern void audio_driver(void *parameters);
-extern void send_packet(uint8_t code, uint16_t len, uint8_t data[]);
+extern void send_packet(byte code, byte len, byte data[]);
 extern char get_screen_char(int px, int py);
 extern fabgl::Point scale(fabgl::Point p);
+extern fabgl::Point scale(int x, int y);
 extern fabgl::Point translate(fabgl::Point p);
 extern fabgl::Point translate(int X, int Y);
 extern bool cmp_char(uint8_t *c1, uint8_t *c2, int len);
@@ -38,13 +40,15 @@ extern void vdu_mode();
 extern void vdu_sys_video();
 extern void vdu_sys_scroll();
 extern void vdu_sys_sprites();
-extern void vdu_sys_udg(char mode);
+extern void vdu_sys_udg(byte mode);
 extern void vdu_sys_video_kblayout();
 extern void vdu_sys_audio();
 extern void vdu_sys_video_time();
 extern void vdu_sys_keystate();
-extern uint8_t play_note(uint8_t channel, uint8_t volume, uint16_t frequency, uint16_t duration);
+extern word play_note(byte channel, byte volume, word frequency, word duration);
 extern void printFmt(const char *format, ...);
+extern void set_mode(int mode);
+extern void init_audio_channel(int channel);
 
 extern fabgl::SoundGenerator		SoundGenerator;		// The audio class
-extern fabgl::VGABaseController *	_VGAController;		// Pointer to the current VGA controller class (one of the above)
+extern fabgl::VGABaseController *	VGAController;		// Pointer to the current VGA controller class (one of the above)
