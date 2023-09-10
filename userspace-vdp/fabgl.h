@@ -313,7 +313,6 @@
 #include "terminal.h"
 #include "displaycontroller.h"
 #include "vgacontroller.h"
-#include "vgatextcontroller.h"
 #include "vga2controller.h"
 #include "vga4controller.h"
 #include "vga8controller.h"
@@ -371,3 +370,6 @@ using fabgl::CharStyle;
 using fabgl::TerminalTransition;
 using fabgl::SupportedLayouts;
 using fabgl::CoreUsage;
+
+extern bool is_fabgl_terminating;
+#define task_loop while (!is_fabgl_terminating)

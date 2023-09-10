@@ -13,6 +13,7 @@ extern "C" {
     fn z80_recv_from_vdp(out: *mut u8) -> bool;
     fn sendHostKbEventToFabgl(ps2scancode: u16, isDown: bool);
     fn getAudioSamples(out: *mut u8, length: u32);
+    fn vdp_shutdown();
 }
 
 const AUDIO_BUFLEN: usize = 2000;
@@ -219,4 +220,8 @@ pub fn main() {
             canvas.present();
         }
     }
+    println!("Shutting down fabgl+vdp...");
+    unsafe { vdp_shutdown(); }
+    std::thread::sleep(std::time::Duration::from_millis(200));
+    println!("Bye nenê!");
 }

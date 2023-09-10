@@ -48,6 +48,7 @@
 #include "esp_intr_alloc.h"
 
 
+#include "fabgl.h"
 #include "fabfonts.h"
 #include "fabutils.h"
 #include "terminal.h"
@@ -1171,7 +1172,7 @@ bool Terminal::enableBlinkingText(bool value)
 // Converted to a thread for userspace-vdp
 void Terminal::blinkTimerFunc(Terminal *term)
 {
-  for (;;) {
+  task_loop {
     vTaskDelay(FABGLIB_DEFAULT_BLINK_PERIOD_MS);
 
     if (term->isActive()) {
@@ -2434,7 +2435,7 @@ void Terminal::charsConsumerTask(void * pvParameters)
 {
   Terminal * term = (Terminal*) pvParameters;
 
-  while (true) {
+  task_loop {
     term->consumeInputQueue();
     vTaskDelay(1); // -TM-
   }

@@ -31,7 +31,7 @@ void audio_driver(void * parameters) {
 	uint8_t channel = *(uint8_t *)parameters;
 
 	audio_channels[channel] = make_shared_psram<audio_channel>(channel);
-	while (true) {
+	task_loop {
 		audio_channels[channel]->loop();
 		vTaskDelay(1);
 	}

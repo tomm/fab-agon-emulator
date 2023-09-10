@@ -65,14 +65,14 @@ namespace fabgl {
 
 
 TimeOut::TimeOut()
-  : m_start(esp_timer_get_time())
+  : m_start(millis())
 {
 }
 
 
 bool TimeOut::expired(int valueMS)
 {
-  return valueMS > -1 && ((esp_timer_get_time() - m_start) / 1000) > valueMS;
+  return (millis() - m_start) > valueMS;
 }
 
 

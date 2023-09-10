@@ -71,4 +71,6 @@ int sqrt(int x);
 #define HW_FLOWCTRL_RTS 0
 extern struct HardwareSerial Serial2;
 
+// New stuff for userspace vdp
 extern "C" void z80_send_to_vdp(uint8_t b);
+

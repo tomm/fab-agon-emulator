@@ -65,3 +65,5 @@ void vTaskDelay(int n)
 	// n isn't ms, but whatever
 	delay(n);
 }
+
+bool is_fabgl_terminating = false;

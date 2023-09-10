@@ -1,6 +1,7 @@
 fn main() {
     cc::Build::new()
         .cpp(true)
+        .warnings(false)
         .include("./userspace-vdp")
         .include("./userspace-vdp/dispdrivers/")
         .file("./userspace-vdp/canvas.cpp")
