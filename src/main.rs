@@ -83,11 +83,13 @@ pub fn main() {
         }
     });
 
+    // give vdp time to init the vga controllers
+    std::thread::sleep(std::time::Duration::from_millis(500));
+
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let audio_subsystem = sdl_context.audio().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
-
 
     let desired_spec = sdl2::audio::AudioSpecDesired {
         freq: Some(22050), // real VDP uses 16384Hz
@@ -123,9 +125,6 @@ pub fn main() {
 
         // clear the screen, so user isn't staring at garbage while things init
         canvas.present();
-
-        // give vdp time to init the vga controllers
-        std::thread::sleep(std::time::Duration::from_millis(500));
 
         let mut last_frame_time = std::time::Instant::now();
         // XXX assumes 60Hz video mode
