@@ -92,7 +92,7 @@ pub fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
 
     let desired_spec = sdl2::audio::AudioSpecDesired {
-        freq: Some(22050), // real VDP uses 16384Hz
+        freq: Some(16384), // real VDP uses 16384Hz
         channels: Some(1),
         samples: None,
     };
