@@ -24,9 +24,11 @@
  */
 
 
+#include <mutex>
 #include <stdarg.h>
 #include <string.h>
 
+#include "fabglconf.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/timers.h"
@@ -190,7 +192,6 @@ int Terminal::keyboardReaderTaskStackSize = FABGLIB_DEFAULT_TERMINAL_KEYBOARD_RE
 
 Terminal::Terminal()
   : m_canvas(nullptr),
-    m_mutex(nullptr),
     m_uartRXEnabled(true),
     m_soundGenerator(nullptr),
     m_sprites(nullptr),
@@ -204,7 +205,7 @@ Terminal::Terminal()
 Terminal::~Terminal()
 {
   // end() called?
-  if (m_mutex)
+  //if (m_mutex)
     end();
 
   if (m_soundGenerator)
@@ -216,7 +217,7 @@ Terminal::~Terminal()
 
 void Terminal::activate(TerminalTransition transition)
 {
-  xSemaphoreTake(m_mutex, portMAX_DELAY);
+  auto lock = std::unique_lock<std::mutex>(m_mutex);
   if (s_activeTerminal != this) {
 
     if (s_activeTerminal && transition != TerminalTransition::None) {
@@ -285,17 +286,15 @@ void Terminal::activate(TerminalTransition transition)
     vTaskResume(m_keyboardReaderTaskHandle);
     syncDisplayController();
   }
-  xSemaphoreGive(m_mutex);
 }
 
 
 void Terminal::deactivate()
 {
-  xSemaphoreTake(m_mutex, portMAX_DELAY);
+  auto lock = std::unique_lock<std::mutex>(m_mutex);
   if (s_activeTerminal == this) {
     s_activeTerminal = nullptr;
   }
-  xSemaphoreGive(m_mutex);
 }
 
 
@@ -338,12 +337,11 @@ bool Terminal::begin(BaseDisplayController * displayController, int maxColumns, 
   }
 
   m_keyboard = keyboard;
-#if 0
+
   if (m_keyboard == nullptr && PS2Controller::initialized()) {
     // get default keyboard from PS/2 controller
     m_keyboard = PS2Controller::keyboard();
   }
-#endif /* 0 */
 
   m_logStream = nullptr;
 
@@ -377,17 +375,17 @@ bool Terminal::begin(BaseDisplayController * displayController, int maxColumns, 
   m_coloredAttributesMaintainStyle = true;
   m_coloredAttributesMask = 0;
 
-  m_mutex = xSemaphoreCreateMutex();
-
   set132ColumnMode(false);
 
   // blink support
-  m_blinkTimer = xTimerCreate("", pdMS_TO_TICKS(FABGLIB_DEFAULT_BLINK_PERIOD_MS), pdTRUE, this, blinkTimerFunc);
-  xTimerStart(m_blinkTimer, portMAX_DELAY);
+  std::thread(blinkTimerFunc, this).detach();
+  //m_blinkTimer = xTimerCreate("", pdMS_TO_TICKS(FABGLIB_DEFAULT_BLINK_PERIOD_MS), pdTRUE, this, blinkTimerFunc);
+  //xTimerStart(m_blinkTimer, portMAX_DELAY);
 
   // queue and task to consume input characters
-  m_inputQueue = xQueueCreate(Terminal::inputQueueSize, sizeof(uint8_t));
-  xTaskCreate(&charsConsumerTask, "", Terminal::inputConsumerTaskStackSize, this, FABGLIB_CHARS_CONSUMER_TASK_PRIORITY, &m_charsConsumerTaskHandle);
+  m_inputQueue.clear();
+  //m_inputQueue = xQueueCreate(Terminal::inputQueueSize, sizeof(uint8_t));
+  xTaskCreate(&charsConsumerTask, "terminal_queue", Terminal::inputConsumerTaskStackSize, this, FABGLIB_CHARS_CONSUMER_TASK_PRIORITY, &m_charsConsumerTaskHandle);
 
   m_defaultBackgroundColor = Color::Black;
   m_defaultForegroundColor = Color::White;
@@ -399,7 +397,7 @@ bool Terminal::begin(BaseDisplayController * displayController, int maxColumns, 
   m_keyboardReaderTaskHandle = nullptr;
   m_uart = false;
 
-  m_outputQueue = nullptr;
+  //m_outputQueue = nullptr;
 
   m_termInfo = nullptr;
 
@@ -417,22 +415,19 @@ void Terminal::end()
   if (m_keyboardReaderTaskHandle)
     vTaskDelete(m_keyboardReaderTaskHandle);
 
-  xTimerDelete(m_blinkTimer, portMAX_DELAY);
+  //xTimerDelete(m_blinkTimer, portMAX_DELAY);
 
   clearSavedCursorStates();
 
   vTaskDelete(m_charsConsumerTaskHandle);
   vQueueDelete(m_inputQueue);
 
-  if (m_outputQueue)
-    vQueueDelete(m_outputQueue);
+  //if (m_outputQueue)
+    //vQueueDelete(m_outputQueue);
 
   freeFont();
   freeTabStops();
   freeGlyphsMap();
-
-  vSemaphoreDelete(m_mutex);
-  m_mutex = nullptr;
 
   delete m_canvas;
 
@@ -452,7 +447,7 @@ void Terminal::connectSerialPort(HardwareSerial & serialPort, bool autoXONXOFF)
   m_serialPort->setRxBufferSize(Terminal::inputQueueSize);
 
   if (!m_keyboardReaderTaskHandle && m_keyboard->isKeyboardAvailable())
-    xTaskCreate(&keyboardReaderTask, "", Terminal::keyboardReaderTaskStackSize, this, FABGLIB_KEYBOARD_READER_TASK_PRIORITY, &m_keyboardReaderTaskHandle);
+    xTaskCreate(&keyboardReaderTask, "terminal_kb", Terminal::keyboardReaderTaskStackSize, this, FABGLIB_KEYBOARD_READER_TASK_PRIORITY, &m_keyboardReaderTaskHandle);
 
   // just in case a reset occurred after an XOFF
   if (autoXONXOFF)
@@ -669,7 +664,7 @@ void Terminal::connectSerialPort(uint32_t baud, int dataLength, char parity, flo
 
 void Terminal::connectLocally()
 {
-  m_outputQueue = xQueueCreate(FABGLIB_TERMINAL_OUTPUT_QUEUE_SIZE, sizeof(uint8_t));
+  //m_outputQueue = xQueueCreate(FABGLIB_TERMINAL_OUTPUT_QUEUE_SIZE, sizeof(uint8_t));
   if (!m_keyboardReaderTaskHandle && m_keyboard->isKeyboardAvailable())
     xTaskCreate(&keyboardReaderTask, "", Terminal::keyboardReaderTaskStackSize, this, FABGLIB_KEYBOARD_READER_TASK_PRIORITY, &m_keyboardReaderTaskHandle);
 }
@@ -677,9 +672,11 @@ void Terminal::connectLocally()
 
 void Terminal::disconnectLocally()
 {
+#if 0
   if (m_outputQueue)
     vQueueDelete(m_outputQueue);
   m_outputQueue = nullptr;
+#endif /* 0 */
 }
 
 
@@ -754,7 +751,7 @@ void Terminal::reset()
   log("reset()\n");
   #endif
 
-  xSemaphoreTake(m_mutex, portMAX_DELAY);
+  auto lock = std::unique_lock<std::mutex>(m_mutex);
   m_resetRequested = false;
 
   m_emuState.originMode            = false;
@@ -817,8 +814,6 @@ void Terminal::reset()
   clearSavedCursorStates();
 
   int_clear();
-
-  xSemaphoreGive(m_mutex);
 }
 
 
@@ -1144,11 +1139,10 @@ bool Terminal::int_enableCursor(bool value)
   bool prev = m_emuState.cursorEnabled;
   if (m_emuState.cursorEnabled != value) {
     m_emuState.cursorEnabled = value;
-#if 0
     if (m_bitmappedDisplayController) {
       // bitmapped display, simulated cursor
       if (m_emuState.cursorEnabled) {
-        if (uxQueueMessagesWaiting(m_inputQueue) == 0) {
+        if (m_inputQueue.size() == 0) {
           // just to show the cursor before next blink
           blinkCursor();
         }
@@ -1162,7 +1156,6 @@ bool Terminal::int_enableCursor(bool value)
       // textual display, native cursor
       static_cast<TextualDisplayController*>(m_displayController)->enableCursor(value);
     }
-#endif /* 0 */
   }
   return prev;
 }
@@ -1175,28 +1168,25 @@ bool Terminal::enableBlinkingText(bool value)
   return prev;
 }
 
-
-// callback for blink timer
-void Terminal::blinkTimerFunc(TimerHandle_t xTimer)
+// Converted to a thread for userspace-vdp
+void Terminal::blinkTimerFunc(Terminal *term)
 {
-#if 0
-  Terminal * term = (Terminal*) pvTimerGetTimerID(xTimer);
+  for (;;) {
+    vTaskDelay(FABGLIB_DEFAULT_BLINK_PERIOD_MS);
 
-  if (term->isActive() && xSemaphoreTake(term->m_mutex, 0) == pdTRUE) {
-    // cursor blink
-    if (term->m_emuState.cursorEnabled && term->m_emuState.cursorBlinkingEnabled)
-      term->blinkCursor();
+    if (term->isActive()) {
+      auto lock = std::unique_lock<std::mutex>(term->m_mutex);
+      // cursor blink
+      if (term->m_emuState.cursorEnabled && term->m_emuState.cursorBlinkingEnabled)
+        term->blinkCursor();
 
-    // text blink
-    if (term->m_blinkingTextEnabled)
-      term->blinkText();
+      // text blink
+      if (term->m_blinkingTextEnabled)
+        term->blinkText();
 
-    xSemaphoreGive(term->m_mutex);
-
+    }
   }
-#endif /* 0 */
 }
-
 
 void Terminal::blinkCursor()
 {
@@ -1691,6 +1681,8 @@ void Terminal::useAlternateScreenBuffer(bool value)
 
 void Terminal::localInsert(uint8_t c)
 {
+  auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
+  m_outputQueue.push_front(c);
 #if 0
   if (m_outputQueue)
     xQueueSendToFront(m_outputQueue, &c, portMAX_DELAY);
@@ -1700,6 +1692,8 @@ void Terminal::localInsert(uint8_t c)
 
 void Terminal::localWrite(uint8_t c)
 {
+  auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
+  m_outputQueue.push_back(c);
 #if 0
   if (m_outputQueue)
     xQueueSendToBack(m_outputQueue, &c, portMAX_DELAY);
@@ -1709,10 +1703,11 @@ void Terminal::localWrite(uint8_t c)
 
 void Terminal::localWrite(char const * str)
 {
-#if 0
-  if (m_outputQueue) {
+  if (true) {//m_outputQueue) {
     while (*str) {
-      xQueueSendToBack(m_outputQueue, str, portMAX_DELAY);
+      auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
+      m_outputQueue.push_back(*str);
+      //xQueueSendToBack(m_outputQueue, str, portMAX_DELAY);
 
       #if FABGLIB_TERMINAL_DEBUG_REPORT_OUT_CODES
       logFmt("=> %02X  %s%c\n", (int)*str, (*str <= ASCII_SPC ? CTRLCHAR_TO_STR[(int)(*str)] : ""), (*str > ASCII_SPC ? *str : ASCII_SPC));
@@ -1721,16 +1716,16 @@ void Terminal::localWrite(char const * str)
       ++str;
     }
   }
-#endif /* 0 */
 }
 
 
 int Terminal::available()
 {
+  auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
+  return m_outputQueue.size();
 #if 0
   return m_outputQueue ? uxQueueMessagesWaiting(m_outputQueue) : 0;
 #endif /* 0 */
-  return 1;
 }
 
 
@@ -1749,7 +1744,16 @@ int Terminal::read(int timeOutMS)
     return c;
   } else
 #endif /* 0 */
-    return -1;
+
+  // XXX -TM- ignoring timeOutMS
+
+  auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
+  if (m_outputQueue.size()) {
+    uint8_t c = m_outputQueue.front();
+    m_outputQueue.pop_front();
+    return c;
+  }
+  return -1;
 }
 
 
@@ -1953,6 +1957,9 @@ int Terminal::availableForWrite()
 
 bool Terminal::addToInputQueue(uint8_t c, bool fromISR)
 {
+  auto lock = std::unique_lock<std::mutex>(m_inputQueueLock);
+  m_inputQueue.push_back(c);
+  return true;
 #if 0
   if (fromISR)
     return xQueueSendToBackFromISR(m_inputQueue, &c, nullptr);
@@ -1964,6 +1971,9 @@ bool Terminal::addToInputQueue(uint8_t c, bool fromISR)
 
 bool Terminal::insertToInputQueue(uint8_t c, bool fromISR)
 {
+  auto lock = std::unique_lock<std::mutex>(m_inputQueueLock);
+  m_inputQueue.push_front(c);
+  return true;
 #if 0
   if (fromISR)
     return xQueueSendToFrontFromISR(m_inputQueue, &c, nullptr);
@@ -2391,10 +2401,18 @@ GlyphOptions Terminal::getGlyphOptionsAt(int X, int Y)
 // blocking operation
 uint8_t Terminal::getNextCode(bool processCtrlCodes)
 {
-#if 0
   while (true) {
     uint8_t c;
-    xQueueReceive(m_inputQueue, &c, portMAX_DELAY);
+    {
+      auto lock = std::unique_lock<std::mutex>(m_inputQueueLock);
+      if (m_inputQueue.size() > 0) {
+        c = m_inputQueue.front();
+        m_inputQueue.pop_front();
+      } else {
+        c = 0;
+      }
+    }
+    //xQueueReceive(m_inputQueue, &c, portMAX_DELAY);
 
     #if FABGLIB_TERMINAL_DEBUG_REPORT_INQUEUE_CODES
     logFmt("<= %02X  %s%c\n", (int)c, (c <= ASCII_SPC ? CTRLCHAR_TO_STR[(int)c] : ""), (c > ASCII_SPC ? c : ASCII_SPC));
@@ -2409,7 +2427,6 @@ uint8_t Terminal::getNextCode(bool processCtrlCodes)
     else
       return c;
   }
-#endif /* 0 */
 }
 
 
@@ -2417,8 +2434,10 @@ void Terminal::charsConsumerTask(void * pvParameters)
 {
   Terminal * term = (Terminal*) pvParameters;
 
-  while (true)
+  while (true) {
     term->consumeInputQueue();
+    vTaskDelay(1); // -TM-
+  }
 }
 
 
@@ -2426,7 +2445,8 @@ void Terminal::consumeInputQueue()
 {
   uint8_t c = getNextCode(false);  // blocking call. false: do not process ctrl chars
 
-  xSemaphoreTake(m_mutex, portMAX_DELAY);
+  {
+  auto lock = std::unique_lock<std::mutex>(m_mutex);
 
   m_prevCursorEnabled = int_enableCursor(false);
   m_prevBlinkingTextEnabled = enableBlinkingText(false);
@@ -2448,7 +2468,7 @@ void Terminal::consumeInputQueue()
   enableBlinkingText(m_prevBlinkingTextEnabled);
   int_enableCursor(m_prevCursorEnabled);
 
-  xSemaphoreGive(m_mutex);
+  }
 
   if (m_resetRequested)
     reset();
@@ -2772,7 +2792,6 @@ uint8_t Terminal::consumeParamsAndGetCode(int * params, int * paramsCount, bool 
 // consume CSI sequence (ESC + '[' already consumed)
 void Terminal::consumeCSI()
 {
-#if 0
   #if FABGLIB_TERMINAL_DEBUG_REPORT_ESC
   log("ESC[");
   #endif
@@ -3034,9 +3053,11 @@ void Terminal::consumeCSI()
         {
           sendCSI();
           char s[4];
-          send(itoa(m_emuState.originMode ? m_emuState.cursorY - m_emuState.scrollingRegionTop + 1 : m_emuState.cursorY, s, 10));
+          snprintf(s, sizeof(s), "%d", m_emuState.originMode ? m_emuState.cursorY - m_emuState.scrollingRegionTop + 1 : m_emuState.cursorY);
+          send(s);
           send(';');
-          send(itoa(m_emuState.cursorX, s, 10));
+          snprintf(s, sizeof(s), "%d", m_emuState.cursorX);
+          send(s);
           send('R');
           break;
         }
@@ -3054,7 +3075,6 @@ void Terminal::consumeCSI()
       #endif
       break;
   }
-#endif /* 0 */
 }
 
 
@@ -3696,7 +3716,6 @@ void Terminal::extGetCmdParam(char * cmd)
 // consume FabGL specific sequence (ESC FABGLEXT_STARTCODE ....)
 void Terminal::consumeFabGLSeq()
 {
-#if 0
   #if FABGLIB_TERMINAL_DEBUG_REPORT_ESC
   log("ESC FABGLEXT_STARTCODE");
   #endif
@@ -4015,9 +4034,11 @@ void Terminal::consumeFabGLSeq()
           mode = GPIO_MODE_INPUT_OUTPUT;
           break;
       }
+#if 0
       auto gpio = (gpio_num_t) extGetIntParam();
       extGetByteParam(); // FABGLEXT_ENDCODE
       configureGPIO(gpio, mode);
+#endif /* 0 */
       break;
     }
 
@@ -4033,7 +4054,7 @@ void Terminal::consumeFabGLSeq()
       auto level = (l == 1 || l == '1' || l == 'H') ? 1 : 0;
       auto gpio = (gpio_num_t) extGetIntParam();
       extGetByteParam(); // FABGLEXT_ENDCODE
-      gpio_set_level(gpio, level);
+      //gpio_set_level(gpio, level);
       break;
     }
 
@@ -4067,7 +4088,14 @@ void Terminal::consumeFabGLSeq()
     //    GPIONUM (text)     : '32'...'39'
     case FABGLEXTX_SETUPADC:
     {
-      auto width   = (adc_bits_width_t) (extGetIntParam() - 9);
+      extGetIntParam();
+      extGetByteParam();  // ';'
+      extGetIntParam();
+      extGetByteParam();  // ';'
+      extGetIntParam();
+      extGetByteParam();  // FABGLEXT_ENDCODE
+#if 0
+      auto width   = (adc_bits_width_t)*/ (extGetIntParam() - 9);
       extGetByteParam();  // ';'
       auto atten   = (adc_atten_t) extGetIntParam();
       extGetByteParam();  // ';'
@@ -4075,6 +4103,7 @@ void Terminal::consumeFabGLSeq()
       extGetByteParam();  // FABGLEXT_ENDCODE
       adc1_config_width(width);
       adc1_config_channel_atten(channel, atten);
+#endif /* 0 */
       break;
     }
 
@@ -4095,12 +4124,15 @@ void Terminal::consumeFabGLSeq()
     //       '0'
     case FABGLEXTX_READADC:
     {
-      auto val = adc1_get_raw(ADC1_GPIO2Channel((gpio_num_t)extGetIntParam()));
+      extGetIntParam();
+      //auto val = adc1_get_raw(ADC1_GPIO2Channel((gpio_num_t)extGetIntParam()));
       extGetByteParam(); // FABGLEXT_ENDCODE
+#if 0
       send(FABGLEXT_REPLYCODE);
       send(toupper(digit2hex((val & 0xF00) >> 8)));
       send(toupper(digit2hex((val & 0x0F0) >> 4)));
       send(toupper(digit2hex(val & 0x00F)));
+#endif /* 0 */
       break;
     }
 
@@ -4246,7 +4278,6 @@ void Terminal::consumeFabGLSeq()
       #endif
       break;
   }
-#endif /* 0 */
 }
 
 
@@ -4635,13 +4666,14 @@ void Terminal::consumeFabGLGraphicsSeq()
 
 void Terminal::keyboardReaderTask(void * pvParameters)
 {
-#if 0
   Terminal * term = (Terminal*) pvParameters;
 
   while (true) {
 
+#if 0
     if (!term->isActive())
       vTaskSuspend(NULL);
+#endif /* 0 */
 
     VirtualKeyItem item;
     if (term->m_keyboard->getNextVirtualKey(&item)) {
@@ -4661,7 +4693,7 @@ void Terminal::keyboardReaderTask(void * pvParameters)
               continue; // don't repeat
             term->m_lastPressedKey = item.vk;
 
-            xSemaphoreTake(term->m_mutex, portMAX_DELAY);
+            auto lock = std::unique_lock<std::mutex>(term->m_mutex);
 
             if (term->m_termInfo == nullptr) {
               if (term->m_emuState.ANSIMode)
@@ -4670,8 +4702,6 @@ void Terminal::keyboardReaderTask(void * pvParameters)
                 term->VT52DecodeVirtualKey(item);
             } else
               term->TermDecodeVirtualKey(item);
-
-            xSemaphoreGive(term->m_mutex);
 
           } else {
             // !keyDown
@@ -4688,7 +4718,6 @@ void Terminal::keyboardReaderTask(void * pvParameters)
     }
 
   }
-#endif /* 0 */
 }
 
 

@@ -1587,7 +1587,7 @@ private:
   static void charsConsumerTask(void * pvParameters);
   static void keyboardReaderTask(void * pvParameters);
 
-  static void blinkTimerFunc(TimerHandle_t xTimer);
+  static void blinkTimerFunc(Terminal *term);
   void blinkText();
   bool enableBlinkingText(bool value);
   void blinkCursor();
@@ -1712,7 +1712,7 @@ private:
   TimerHandle_t      m_blinkTimer;
 
   // main terminal mutex
-  volatile SemaphoreHandle_t m_mutex;
+  std::mutex         m_mutex;
 
   volatile bool      m_blinkingTextVisible;    // true = blinking text is currently visible
   volatile bool      m_blinkingTextEnabled;
@@ -1724,12 +1724,12 @@ private:
   int                m_maxColumns;
   int                m_maxRows;
 
-  #ifdef ARDUINO
+  //#ifdef ARDUINO
   // optional serial port
   // data from serial port is processed and displayed
   // keys from keyboard are processed and sent to serial port
   HardwareSerial *          m_serialPort;
-  #endif
+  //#endif
 
   // optional serial port (directly handled)
   // data from serial port is processed and displayed
@@ -1740,10 +1740,12 @@ private:
   volatile bool             m_uartRXEnabled;
 
   // contains characters to be processed (from write() calls)
-  volatile QueueHandle_t    m_inputQueue;
+  std::deque<uint8_t>       m_inputQueue;
+  std::mutex                m_inputQueueLock;
 
   // contains characters received and decoded from keyboard (or as replyes from ANSI-VT queries)
-  QueueHandle_t             m_outputQueue;
+  std::deque<uint8_t>       m_outputQueue;
+  std::mutex                m_outputQueueLock;
 
   // linked list that contains saved cursor states (first item is the last added)
   TerminalCursorState *     m_savedCursorStateList;

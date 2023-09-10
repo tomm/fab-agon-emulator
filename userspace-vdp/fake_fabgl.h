@@ -26,6 +26,13 @@ typedef void(*intr_handle_t)();
 #define xSemaphoreGive(n)
 #define portTICK_PERIOD_MS 1
 
+#define GPIO_MODE_DISABLE 0
+#define GPIO_MODE_INPUT 0
+#define GPIO_MODE_OUTPUT 0
+#define GPIO_MODE_OUTPUT_OD 0
+#define GPIO_MODE_INPUT_OUTPUT_OD 0
+#define GPIO_MODE_INPUT_OUTPUT 0
+
 #define MALLOC_CAP_8BIT 0
 #define MALLOC_CAP_32BIT 0
 #define MALLOC_CAP_INTERNAL 0
