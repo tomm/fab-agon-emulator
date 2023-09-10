@@ -1,7 +1,7 @@
 #include "fabutils.h"
 #include "fake_fabgl.h"
 #include "fabgl.h"
-#include "video.h"
+#include "vdp-console8.h"
 #include "dispdrivers/vga16controller.h"
 #include "dispdrivers/vgabasecontroller.h"
 #include "ps2controller.h"

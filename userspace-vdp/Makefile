@@ -2,7 +2,7 @@
 # Use cargo build for the real thing
 CXX = g++
 LIBS = -g
-CFLAGS = -fmax-errors=1 -g -I. -I./dispdrivers -I./vdp
+CFLAGS = -fmax-errors=1 -g -I. -I./dispdrivers
 OPTIONS = 
 
 SRCS = \
@@ -29,7 +29,7 @@ SRCS = \
        vgabasecontroller.cpp \
        vgacontroller.cpp \
        vgapalettedcontroller.cpp \
-       video.cpp \
+       vdp-console8.cpp \
 
 OBJS = $(SRCS:.cpp=.o)
 

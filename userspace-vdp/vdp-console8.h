@@ -1,4 +1,5 @@
 #pragma once
+#include "fabgl.h"
 #include "fake_fabgl.h"
 #include "fabutils.h"
 
@@ -45,3 +46,5 @@ extern uint8_t play_note(uint8_t channel, uint8_t volume, uint16_t frequency, ui
 extern void printFmt(const char *format, ...);
 extern void setup();
 extern void loop();
+
+extern fabgl::VGABaseController *	_VGAController;		// Pointer to the current VGA controller class (one of the above)

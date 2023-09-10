@@ -3,7 +3,6 @@ fn main() {
         .cpp(true)
         .include("./userspace-vdp")
         .include("./userspace-vdp/dispdrivers/")
-        .include("./userspace-vdp/vdp/")
         .file("./userspace-vdp/canvas.cpp")
         .file("./userspace-vdp/codepages.cpp")
         .file("./userspace-vdp/collisiondetector.cpp")
@@ -27,7 +26,7 @@ fn main() {
         .file("./userspace-vdp/vgabasecontroller.cpp")
         .file("./userspace-vdp/vgacontroller.cpp")
         .file("./userspace-vdp/vgapalettedcontroller.cpp")
-        .file("./userspace-vdp/video.cpp")
+        .file("./userspace-vdp/vdp-console8.cpp")
         .cpp_link_stdlib("stdc++")
         .compile("hostvdp");
 }

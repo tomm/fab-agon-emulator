@@ -371,5 +371,3 @@ using fabgl::CharStyle;
 using fabgl::TerminalTransition;
 using fabgl::SupportedLayouts;
 using fabgl::CoreUsage;
-
-#include "video.h"
