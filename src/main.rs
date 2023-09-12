@@ -118,7 +118,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     let device: sdl2::audio::AudioQueue<u8> = audio_subsystem.open_queue(None, &desired_spec).unwrap();
     device.resume();
 
-    let mut is_fullscreen = false;
+    let mut is_fullscreen = args.fullscreen;
     // large enough for any agon video mode
     let mut vgabuf: [u8; 1024*768*3] = [0; 1024*768*3];
     let mut mode_w = 640;

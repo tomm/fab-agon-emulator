@@ -11,6 +11,7 @@ OPTIONS:
   --sdcard PATH         Sets the path of the emulated SDCard
   --mos PATH            Use a different MOS.bin firmware
   -d, --debugger        Enable the eZ80 debugger
+  -f, --fullscreen      Start in fullscreen mode
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
 ";
 
@@ -19,6 +20,7 @@ pub struct AppArgs {
     pub sdcard: Option<String>,
     pub debugger: bool,
     pub unlimited_cpu: bool,
+    pub fullscreen: bool,
     pub mos_bin: Option<std::path::PathBuf>,
 }
 
@@ -34,6 +36,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         sdcard: pargs.opt_value_from_str("--sdcard")?,
         debugger: pargs.contains(["-d", "--debugger"]),
         unlimited_cpu: pargs.contains(["-u", "--unlimited_cpu"]),
+        fullscreen: pargs.contains(["-f", "--fullscreen"]),
         mos_bin: pargs.opt_value_from_str("--mos")?
     };
 
