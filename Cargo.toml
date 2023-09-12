@@ -2,12 +2,20 @@
 name = "fab-agon-emulator"
 version = "0.6.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Tom Morton <tomm8086@gmail.com>"]
+license = "BSD-3-Clause"
+keywords = ["Agon Light", "Agon Console8", "emulator"]
+homepage = "https://github.com/tomm/fab-agon-emulator"
+repository = "https://github.com/tomm/fab-agon-emulator"
 
 [dependencies]
-sdl2 = "*"
-agon-cpu-emulator = { path="../agon-cpu-emulator" }
+sdl2 = "0.35.2"
+pico-args = "0.5.0"
+agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="a7ef9053fa4488db2b8b0e03f8c05d1b67d06689"}
+agon-light-emulator-debugger = { git = "https://github.com/tomm/agon-light-emulator-debugger.git", rev="0f185c73480e00100b6299de87075a01d6f777d4"}
+
+#agon-cpu-emulator = { path = "../agon-cpu-emulator" }
+#agon-light-emulator-debugger = { path = "../agon-light-emulator-debugger" }
 
 [build-dependencies]
 cc = "1.0"

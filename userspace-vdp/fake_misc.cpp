@@ -47,7 +47,7 @@ int xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode, const char *const pcName,
 
 int xTaskCreate(TaskFunction_t pvTaskCode, const char *const pcName, const uint32_t usStackDepth, void *const pvParameters, int uxPriority, TaskHandle_t *const pvCreatedTask)
 {
-	printf("Spawning thread %s...\n", pcName);
+	//printf("Spawning thread %s...\n", pcName);
 	auto t = std::thread(pvTaskCode, pvParameters);
 	t.detach();
 

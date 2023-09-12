@@ -1,9 +1,24 @@
-fn main() {
+fn main() -> Result<(), String> {
+    let vdp_version = std::env::var("VDP_VERSION").ok().unwrap_or("console8".to_string());
+
+    let vdp_source = match vdp_version.as_str() {
+        "console8" => "./userspace-vdp/vdp-console8.cpp",
+        "quark103" => "./userspace-vdp/vdp-1.03.cpp",
+        _ => {
+            return Err(format!("Invalid env var VDP_VERSION: {}. Valid versions are: console8, quark103", vdp_version));
+        }
+    };
+
+    println!("cargo:rustc-cfg=vdp_{}", vdp_version);
+
     cc::Build::new()
         .cpp(true)
+        .cpp_link_stdlib("stdc++")
         .warnings(false)
+        .extra_warnings(false)
         .include("./userspace-vdp")
         .include("./userspace-vdp/dispdrivers/")
+        .file(vdp_source)
         .file("./userspace-vdp/canvas.cpp")
         .file("./userspace-vdp/codepages.cpp")
         .file("./userspace-vdp/collisiondetector.cpp")
@@ -27,8 +42,7 @@ fn main() {
         .file("./userspace-vdp/vgabasecontroller.cpp")
         .file("./userspace-vdp/vgacontroller.cpp")
         .file("./userspace-vdp/vgapalettedcontroller.cpp")
-        .file("./userspace-vdp/vdp-console8.cpp")
-        //.file("./userspace-vdp/vdp-1.03.cpp")
-        .cpp_link_stdlib("stdc++")
         .compile("hostvdp");
+
+    Ok(())
 }

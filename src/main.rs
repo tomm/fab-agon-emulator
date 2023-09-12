@@ -1,9 +1,13 @@
 use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit };
+use agon_cpu_emulator::debugger::{ DebugCmd, DebugResp, DebuggerConnection };
 use sdl2::event::Event;
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
 use std::thread;
+
+use crate::parse_args::parse_args;
 mod sdl2ps2;
+mod parse_args;
 
 extern "C" {
     fn vdp_setup();
@@ -18,21 +22,32 @@ extern "C" {
 
 const AUDIO_BUFLEN: usize = 2000;
 
-pub fn main() {
+#[cfg(vdp_quark103)]
+const MOS_VER: &'static str = "quark103";
+#[cfg(vdp_console8)]
+const MOS_VER: &'static str = "quark104rc1";
+
+pub fn main() -> Result<(), pico_args::Error> {
+    let args = parse_args()?;
+
+    // Set up various comms channels
     let (tx_vdp_to_ez80, rx_vdp_to_ez80): (Sender<u8>, Receiver<u8>) = mpsc::channel();
     let (tx_ez80_to_vdp, rx_ez80_to_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
+
+    let (tx_cmd_debugger, rx_cmd_debugger): (Sender<DebugCmd>, Receiver<DebugCmd>) = mpsc::channel();
+    let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) = mpsc::channel();
 
     let vsync_counter_vdp = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
     let vsync_counter_ez80 = vsync_counter_vdp.clone();
 
-    let debugger_con = None;/*if args.debugger {
+    let debugger_con = if args.debugger {
         let _debugger_thread = thread::spawn(move || {
             agon_light_emulator_debugger::start(tx_cmd_debugger, rx_resp_debugger);
         });
         Some(DebuggerConnection { tx: tx_resp_debugger, rx: rx_cmd_debugger })
     } else {
         None
-    };*/
+    };
 
     let _cpu_thread = thread::spawn(move || {
         // Prepare the device
@@ -41,11 +56,16 @@ pub fn main() {
             to_vdp: tx_ez80_to_vdp,
             from_vdp: rx_vdp_to_ez80,
             vsync_counter: vsync_counter_ez80,
-            clockspeed_hz: 18_432_000
+            clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },
+            mos_bin: if let Some(mos_bin) = args.mos_bin {
+                mos_bin
+            } else {
+                std::path::PathBuf::from(format!("mos_{}.bin", MOS_VER))
+            },
         });
-        machine.set_sdcard_directory(std::path::PathBuf::from("sdcard"));
+        machine.set_sdcard_directory(std::path::PathBuf::from(args.sdcard.unwrap_or("sdcard".to_string())));
         machine.start(debugger_con);
-        println!("Cpu thread finished.");
+        panic!("ez80 cpu thread terminated");
     });
 
     let _comms_thread = thread::spawn(move || {
@@ -84,9 +104,6 @@ pub fn main() {
         }
     });
 
-    // give vdp time to init the vga controllers
-    std::thread::sleep(std::time::Duration::from_millis(500));
-
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let audio_subsystem = sdl_context.audio().unwrap();
@@ -97,12 +114,13 @@ pub fn main() {
         channels: Some(1),
         samples: None,
     };
+
     let device: sdl2::audio::AudioQueue<u8> = audio_subsystem.open_queue(None, &desired_spec).unwrap();
     device.resume();
 
-
     let mut is_fullscreen = false;
-    let mut vgabuf: [u8; 1024*1024*3] = [0; 1024*1024*3];
+    // large enough for any agon video mode
+    let mut vgabuf: [u8; 1024*768*3] = [0; 1024*768*3];
     let mut mode_w = 640;
     let mut mode_h = 480;
 
@@ -111,7 +129,7 @@ pub fn main() {
 
     'running: loop {
 
-        let mut window = video_subsystem.window("FAB Agon Emulator", 1024, 768)
+        let mut window = video_subsystem.window("Fab Agon Emulator", 1024, 768)
             .position_centered()
             .build()
             .unwrap();
@@ -223,5 +241,6 @@ pub fn main() {
     println!("Shutting down fabgl+vdp...");
     unsafe { vdp_shutdown(); }
     std::thread::sleep(std::time::Duration::from_millis(200));
-    println!("Bye nenê!");
+
+    Ok(())
 }

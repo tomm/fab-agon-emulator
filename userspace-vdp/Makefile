@@ -2,7 +2,7 @@
 # Use cargo build for the real thing
 CXX = g++
 LIBS = -g
-CFLAGS = -fmax-errors=1 -g -I. -I./dispdrivers
+CFLAGS = -Wall -fmax-errors=1 -g -I. -I./dispdrivers
 OPTIONS = 
 
 SRCS = \

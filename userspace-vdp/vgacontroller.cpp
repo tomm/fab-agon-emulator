@@ -496,8 +496,9 @@ void IRAM_ATTR VGAController::copyRect(Rect const & source, Rect & updateRect)
 // no bounds check is done!
 void VGAController::readScreen(Rect const & rect, RGB888 * destBuf)
 {
+  auto frontbuffer = isDoubleBuffered() ? m_viewPortVisible : m_viewPort;
   for (int y = rect.Y1; y <= rect.Y2; ++y) {
-    uint8_t * row = (uint8_t*) m_viewPort[y];
+    uint8_t * row = (uint8_t*) frontbuffer[y];
     for (int x = rect.X1; x <= rect.X2; ++x, ++destBuf) {
       uint8_t rawpix = VGA_PIXELINROW(row, x);
       *destBuf = RGB888((rawpix & 3) * 85, ((rawpix >> 2) & 3) * 85, ((rawpix >> 4) & 3) * 85);

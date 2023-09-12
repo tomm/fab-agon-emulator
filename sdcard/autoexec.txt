@@ -1,0 +1,2 @@
+load bbcbasic.bin
+run

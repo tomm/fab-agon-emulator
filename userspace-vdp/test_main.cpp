@@ -27,6 +27,7 @@ int main() {
 	fabgl::RGB888 buf[1024*768];
 	copyVgaFramebuffer(&w, &h, buf);
 	printf("Screen dimensions: %d x %d\n", w, h);
+	printf("Dumping VGA framebuffer post-VDP-setup():\n");
 
 	for (int y=0; y<16; y++) {
 		for (int x=0; x<100; x++) {

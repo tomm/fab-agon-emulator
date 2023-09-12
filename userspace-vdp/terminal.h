@@ -836,8 +836,8 @@ struct EmuState {
 
 
 struct Print {
-  virtual size_t write(uint8_t) {}
-  virtual size_t write(const uint8_t * buffer, size_t size) {}
+  virtual size_t write(uint8_t) { return 0; }
+  virtual size_t write(const uint8_t * buffer, size_t size) { return 0; }
   size_t write(const char *str) {
     if (str == NULL)
         return 0;

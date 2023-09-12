@@ -354,8 +354,9 @@ void VGA8Controller::copyRect(Rect const & source, Rect & updateRect)
 // no bounds check is done!
 void VGA8Controller::readScreen(Rect const & rect, RGB888 * destBuf)
 {
+  auto frontbuffer = isDoubleBuffered() ? m_viewPortVisible : m_viewPort;
   for (int y = rect.Y1; y <= rect.Y2; ++y) {
-    auto row = (uint8_t*) m_viewPort[y];
+    auto row = (uint8_t*) frontbuffer[y];
     for (int x = rect.X1; x <= rect.X2; ++x, ++destBuf) {
       const RGB222 v = m_palette[VGA8_GETPIXELINROW(row, x)];
       *destBuf = RGB888(v.R * 85, v.G * 85, v.B * 85);  // 85 x 3 = 255
