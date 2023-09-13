@@ -92,6 +92,7 @@ void loop() {
 	bool cursorState = false;
 
 	while (true) {
+		count++;
 		if ((count & 0x7f) == 0) delay(1 /* -TM- ms */);
 
 		if (terminalMode) {
@@ -112,7 +113,6 @@ void loop() {
 			auto c = readByte();
 			vdu(c);
 		}
-		count++;
 	}
 }
 

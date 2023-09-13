@@ -1,0 +1,34 @@
+Common subdirectories: ../../console8/agon-vdp/video/envelopes and vdp-console8/envelopes
+diff -u ../../console8/agon-vdp/video/vdu_audio.h vdp-console8/vdu_audio.h
+--- ../../console8/agon-vdp/video/vdu_audio.h	2023-09-04 21:45:51.146993300 +0100
++++ vdp-console8/vdu_audio.h	2023-09-12 10:25:39.796254448 +0100
+@@ -31,7 +31,7 @@
+ 	uint8_t channel = *(uint8_t *)parameters;
+ 
+ 	audio_channels[channel] = make_shared_psram<audio_channel>(channel);
+-	while (true) {
++	task_loop {
+ 		audio_channels[channel]->loop();
+ 		vTaskDelay(1);
+ 	}
+diff -u ../../console8/agon-vdp/video/video.ino vdp-console8/video.ino
+--- ../../console8/agon-vdp/video/video.ino	2023-09-04 21:45:51.146993300 +0100
++++ vdp-console8/video.ino	2023-09-13 14:12:44.705356301 +0100
+@@ -92,6 +92,9 @@
+ 	bool cursorState = false;
+ 
+ 	while (true) {
++		count++;
++		if ((count & 0x7f) == 0) delay(1 /* -TM- ms */);
++
+ 		if (terminalMode) {
+ 			do_keyboard_terminal();
+ 			continue;
+@@ -110,7 +113,6 @@
+ 			auto c = readByte();
+ 			vdu(c);
+ 		}
+-		count++;
+ 	}
+ }
+ 

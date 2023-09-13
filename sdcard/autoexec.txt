@@ -1,2 +1,2 @@
-load bbcbasic.bin
-run
+cd cpm
+load cpm.bin
