@@ -2402,7 +2402,7 @@ GlyphOptions Terminal::getGlyphOptionsAt(int X, int Y)
 // blocking operation
 uint8_t Terminal::getNextCode(bool processCtrlCodes)
 {
-  while (true) {
+  for (;; vTaskDelay(1)) {
     uint8_t c;
     {
       auto lock = std::unique_lock<std::mutex>(m_inputQueueLock);
@@ -2410,7 +2410,7 @@ uint8_t Terminal::getNextCode(bool processCtrlCodes)
         c = m_inputQueue.front();
         m_inputQueue.pop_front();
       } else {
-        c = 0;
+        continue;
       }
     }
     //xQueueReceive(m_inputQueue, &c, portMAX_DELAY);
