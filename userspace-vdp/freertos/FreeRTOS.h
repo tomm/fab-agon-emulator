@@ -21,4 +21,8 @@ extern void vTaskDelay(int);
 #define vQueueDelete(a)
 #define vSemaphoreDelete(a)
 #define xQueueCreate(a,b) 0
+#define xQueueSendToFront(a,b,c)
+#define xQueueSendToBack(a,b,c)
 #define xTaskAbortDelay(a)
+#define uxQueueMessagesWaiting(q) 0
+#define xQueueReceive(a,b,c)

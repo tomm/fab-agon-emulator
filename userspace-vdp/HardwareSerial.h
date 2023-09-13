@@ -18,6 +18,7 @@ struct HardwareSerial {
     void begin(int, int, int, int) {}
     void setPins(int, int, int, int) {}
     void print(const char *) {}
+    int availableForWrite() { return 1; }
 
     void writeToInQueue(uint8_t b);
     bool readFromOutQueue(uint8_t *out);

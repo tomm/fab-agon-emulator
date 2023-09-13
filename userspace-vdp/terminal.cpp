@@ -391,14 +391,14 @@ bool Terminal::begin(BaseDisplayController * displayController, int maxColumns, 
   m_defaultBackgroundColor = Color::Black;
   m_defaultForegroundColor = Color::White;
 
-  #ifdef ARDUINO
+  //#ifdef ARDUINO
   m_serialPort = nullptr;
-  #endif
+  //#endif
 
   m_keyboardReaderTaskHandle = nullptr;
   m_uart = false;
 
-  //m_outputQueue = nullptr;
+  m_outputQueue = nullptr;
 
   m_termInfo = nullptr;
 
@@ -423,8 +423,8 @@ void Terminal::end()
   vTaskDelete(m_charsConsumerTaskHandle);
   vQueueDelete(m_inputQueue);
 
-  //if (m_outputQueue)
-    //vQueueDelete(m_outputQueue);
+  if (m_outputQueue)
+    vQueueDelete(m_outputQueue);
 
   freeFont();
   freeTabStops();
@@ -437,7 +437,7 @@ void Terminal::end()
 }
 
 
-#ifdef ARDUINO
+//#ifdef ARDUINO
 void Terminal::connectSerialPort(HardwareSerial & serialPort, bool autoXONXOFF)
 {
   if (m_serialPort)
@@ -454,9 +454,9 @@ void Terminal::connectSerialPort(HardwareSerial & serialPort, bool autoXONXOFF)
   if (autoXONXOFF)
     send(ASCII_XON);
 }
-#else
-void Terminal::connectSerialPort(HardwareSerial & serialPort, bool autoXONXOFF) {}
-#endif
+//#else
+//void Terminal::connectSerialPort(HardwareSerial & serialPort, bool autoXONXOFF) {}
+//#endif
 
 
 // returns number of bytes received (in the UART2 rx fifo buffer)
@@ -665,7 +665,7 @@ void Terminal::connectSerialPort(uint32_t baud, int dataLength, char parity, flo
 
 void Terminal::connectLocally()
 {
-  //m_outputQueue = xQueueCreate(FABGLIB_TERMINAL_OUTPUT_QUEUE_SIZE, sizeof(uint8_t));
+  m_outputQueue = xQueueCreate(FABGLIB_TERMINAL_OUTPUT_QUEUE_SIZE, sizeof(uint8_t));
   if (!m_keyboardReaderTaskHandle && m_keyboard->isKeyboardAvailable())
     xTaskCreate(&keyboardReaderTask, "", Terminal::keyboardReaderTaskStackSize, this, FABGLIB_KEYBOARD_READER_TASK_PRIORITY, &m_keyboardReaderTaskHandle);
 }
@@ -673,11 +673,9 @@ void Terminal::connectLocally()
 
 void Terminal::disconnectLocally()
 {
-#if 0
   if (m_outputQueue)
     vQueueDelete(m_outputQueue);
   m_outputQueue = nullptr;
-#endif /* 0 */
 }
 
 
@@ -1682,33 +1680,23 @@ void Terminal::useAlternateScreenBuffer(bool value)
 
 void Terminal::localInsert(uint8_t c)
 {
-  auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
-  m_outputQueue.push_front(c);
-#if 0
   if (m_outputQueue)
     xQueueSendToFront(m_outputQueue, &c, portMAX_DELAY);
-#endif /* 0 */
 }
 
 
 void Terminal::localWrite(uint8_t c)
 {
-  auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
-  m_outputQueue.push_back(c);
-#if 0
   if (m_outputQueue)
     xQueueSendToBack(m_outputQueue, &c, portMAX_DELAY);
-#endif /* 0 */
 }
 
 
 void Terminal::localWrite(char const * str)
 {
-  if (true) {//m_outputQueue) {
+  if (m_outputQueue) {
     while (*str) {
-      auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
-      m_outputQueue.push_back(*str);
-      //xQueueSendToBack(m_outputQueue, str, portMAX_DELAY);
+      xQueueSendToBack(m_outputQueue, str, portMAX_DELAY);
 
       #if FABGLIB_TERMINAL_DEBUG_REPORT_OUT_CODES
       logFmt("=> %02X  %s%c\n", (int)*str, (*str <= ASCII_SPC ? CTRLCHAR_TO_STR[(int)(*str)] : ""), (*str > ASCII_SPC ? *str : ASCII_SPC));
@@ -1722,11 +1710,7 @@ void Terminal::localWrite(char const * str)
 
 int Terminal::available()
 {
-  auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
-  return m_outputQueue.size();
-#if 0
   return m_outputQueue ? uxQueueMessagesWaiting(m_outputQueue) : 0;
-#endif /* 0 */
 }
 
 
@@ -1738,23 +1722,12 @@ int Terminal::read()
 
 int Terminal::read(int timeOutMS)
 {
-#if 0
   if (m_outputQueue) {
     uint8_t c;
     xQueueReceive(m_outputQueue, &c, msToTicks(timeOutMS));
     return c;
   } else
-#endif /* 0 */
-
-  // XXX -TM- ignoring timeOutMS
-
-  auto lock = std::unique_lock<std::mutex>(m_outputQueueLock);
-  if (m_outputQueue.size()) {
-    uint8_t c = m_outputQueue.front();
-    m_outputQueue.pop_front();
-    return c;
-  }
-  return -1;
+    return -1;
 }
 
 
@@ -1870,13 +1843,13 @@ void Terminal::send(uint8_t c)
   logFmt("=> %02X  %s%c\n", (int)c, (c <= ASCII_SPC ? CTRLCHAR_TO_STR[(int)c] : ""), (c > ASCII_SPC ? c : ASCII_SPC));
   #endif
 
-  #ifdef ARDUINO
+  //#ifdef ARDUINO
   if (m_serialPort) {
     while (m_serialPort->availableForWrite() == 0)
       vTaskDelay(1 / portTICK_PERIOD_MS);
     m_serialPort->write(c);
   }
-  #endif
+  //#endif
 
 #if 0
   if (m_uart) {
@@ -1896,7 +1869,7 @@ void Terminal::send(uint8_t c)
 // send a string to m_serialPort or m_outputQueue
 void Terminal::send(char const * str)
 {
-  #ifdef ARDUINO
+  //#ifdef ARDUINO
   if (m_serialPort) {
     while (*str) {
       while (m_serialPort->availableForWrite() == 0)
@@ -1910,7 +1883,7 @@ void Terminal::send(char const * str)
       ++str;
     }
   }
-  #endif
+  //#endif
 
 #if 0
   if (m_uart) {
@@ -4669,7 +4642,7 @@ void Terminal::keyboardReaderTask(void * pvParameters)
 {
   Terminal * term = (Terminal*) pvParameters;
 
-  while (true) {
+  task_loop {
 
 #if 0
     if (!term->isActive())

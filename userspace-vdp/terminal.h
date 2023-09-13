@@ -1744,8 +1744,7 @@ private:
   std::mutex                m_inputQueueLock;
 
   // contains characters received and decoded from keyboard (or as replyes from ANSI-VT queries)
-  std::deque<uint8_t>       m_outputQueue;
-  std::mutex                m_outputQueueLock;
+  QueueHandle_t             m_outputQueue;
 
   // linked list that contains saved cursor states (first item is the last added)
   TerminalCursorState *     m_savedCursorStateList;

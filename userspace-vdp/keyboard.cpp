@@ -133,6 +133,7 @@ bool Keyboard::reset()
   // sets default layout
   setLayout(&USLayout);
 
+  m_keyboardAvailable = true;
 #if 0
   // 350ms keyboard poweron delay (look at NXP M68HC08 designer reference manual)
   vTaskDelay(350 / portTICK_PERIOD_MS);
