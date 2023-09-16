@@ -36,6 +36,7 @@
 
 
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -1241,9 +1242,10 @@ protected:
     if (glyphX > clipX2 || glyphY > clipY2)
       return;
 
+    bool needToFree = false;
     int16_t glyphWidth        = glyph.width;
     int16_t glyphHeight       = glyph.height;
-    uint8_t const * glyphData = glyph.data;
+    uint8_t * glyphData = const_cast<uint8_t *>(glyph.data);
     int16_t glyphWidthByte    = (glyphWidth + 7) / 8;
     int16_t glyphSize         = glyphHeight * glyphWidthByte;
 
@@ -1257,7 +1259,8 @@ protected:
     // modify glyph to handle top half and bottom half double height
     // doubleWidth = 1 is handled directly inside drawing routine
     if (doubleWidth > 1) {
-      uint8_t * newGlyphData = (uint8_t*) alloca(glyphSize);
+      uint8_t * newGlyphData = (uint8_t*)malloc(glyphSize);//(uint8_t*) alloca(glyphSize);
+      needToFree = true;
       // doubling top-half or doubling bottom-half?
       int offset = (doubleWidth == 2 ? 0 : (glyphHeight >> 1));
       for (int y = 0; y < glyphHeight ; ++y)
@@ -1282,8 +1285,10 @@ protected:
       X1 = (clipX1 - destX) / (doubleWidth ? 2 : 1);
       destX = clipX1;
     }
-    if (X1 >= glyphWidth)
+    if (X1 >= glyphWidth) {
+      if (needToFree) free(glyphData);
       return;
+    }
 
     if (destX + XCount + skewAdder > clipX2 + 1)
       XCount = clipX2 + 1 - destX - skewAdder;
@@ -1298,8 +1303,10 @@ protected:
       Y1 = clipY1 - destY;
       destY = clipY1;
     }
-    if (Y1 >= glyphHeight)
+    if (Y1 >= glyphHeight) {
+      if (needToFree) free(glyphData);
       return;
+    }
 
     if (destY + YCount > clipY2 + 1)
       YCount = clipY2 + 1 - destY;
@@ -1378,6 +1385,8 @@ protected:
         --skewAdder;
 
     }
+    
+    if (needToFree) free(glyphData);
   }
 
 

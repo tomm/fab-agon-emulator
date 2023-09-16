@@ -27,6 +27,7 @@
 
 #include <string.h>
 
+#include "fabutils.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/timers.h"
@@ -401,7 +402,7 @@ VirtualKey Keyboard::VKtoAlternateVK(VirtualKey in_vk, bool down, KeyboardLayout
 }
 
 
-void Keyboard::injectScancode(uint16_t scancode, bool isDown)
+void Keyboard::injectScancode(uint16_t scancode, uint8_t isDown)
 {
 	struct fabgl::VirtualKeyItem k;
   auto item = &k;
@@ -417,12 +418,15 @@ void Keyboard::injectScancode(uint16_t scancode, bool isDown)
   item->NUMLOCK    = m_NUMLOCK;
   item->SCROLLLOCK = m_SCROLLLOCK;
 
-  // XXX -TM- not actually setting scancode
   uint8_t * scode = item->scancode;
 
   if (scancode <= 0xff) {
+    *(scode++) = scancode & 0xff;
     item->vk = scancodeToVK(scancode, false);
   } else {
+    *(scode++) = scancode & 0xff;
+    *(scode++) = (scancode >> 8) & 0xff;
+
     item->vk = scancodeToVK(scancode & 0xff, true);
   }
 

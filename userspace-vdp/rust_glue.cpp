@@ -10,7 +10,7 @@
 extern void delay(int ms);
 
 /* ps2scancode is the set2 'make' code */
-extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, bool isDown)
+extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 {
 	// get the VGA controller, since if it's initialized we know the keyboard is ready
 	fabgl::VGABaseController *vga = getVDPVGAController();

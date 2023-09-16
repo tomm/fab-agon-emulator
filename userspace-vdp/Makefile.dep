@@ -1,0 +1,222 @@
+canvas.o: canvas.cpp canvas.h displaycontroller.h freertos/FreeRTOS.h \
+ freertos/queue.h freertos/task.h fabglconf.h esp_wifi.h fabutils.h \
+ fake_fabgl.h HardwareSerial.h fabfonts.h fonts/font_4x6.h \
+ fonts/font_5x7.h fonts/font_5x8.h fonts/font_6x8.h fonts/font_6x9.h \
+ fonts/font_6x10.h fonts/font_6x12.h fonts/font_6x13.h fonts/font_7x13.h \
+ fonts/font_7x14.h fonts/font_8x13.h fonts/font_8x8.h fonts/font_8x9.h \
+ fonts/font_8x14.h fonts/font_8x16.h fonts/font_8x19.h fonts/font_9x15.h \
+ fonts/font_9x18.h fonts/font_10x20.h fonts/font_slant_8x14.h \
+ fonts/font_sanserif_8x16.h fonts/font_sanserif_8x14.h \
+ fonts/font_lcd_8x14.h fonts/font_courier_8x14.h \
+ fonts/font_computer_8x14.h fonts/font_bigserif_8x14.h \
+ fonts/font_bigserif_8x16.h fonts/font_block_8x14.h \
+ fonts/font_broadway_8x14.h fonts/font_oldengl_8x16.h \
+ fonts/font_wiggly_8x16.h fonts/font_std_12.h fonts/font_std_14.h \
+ fonts/font_std_15.h fonts/font_std_16.h fonts/font_std_17.h \
+ fonts/font_std_18.h fonts/font_std_22.h fonts/font_std_24.h
+codepages.o: codepages.cpp codepages.h fabutils.h fake_fabgl.h \
+ freertos/FreeRTOS.h HardwareSerial.h
+collisiondetector.o: collisiondetector.cpp freertos/FreeRTOS.h \
+ freertos/task.h collisiondetector.h fabglconf.h esp_wifi.h \
+ displaycontroller.h freertos/queue.h fabutils.h fake_fabgl.h \
+ HardwareSerial.h
+displaycontroller.o: displaycontroller.cpp displaycontroller.h \
+ freertos/FreeRTOS.h freertos/queue.h freertos/task.h fabglconf.h \
+ esp_wifi.h fabutils.h fake_fabgl.h HardwareSerial.h images/cursors.h
+esp32time.o: esp32time.cpp ESP32Time.h
+fabfonts.o: fabfonts.cpp fabfonts.h fabutils.h fake_fabgl.h \
+ freertos/FreeRTOS.h HardwareSerial.h fabglconf.h esp_wifi.h \
+ fonts/font_4x6.h fonts/font_5x7.h fonts/font_5x8.h fonts/font_6x8.h \
+ fonts/font_6x9.h fonts/font_6x10.h fonts/font_6x12.h fonts/font_6x13.h \
+ fonts/font_7x13.h fonts/font_7x14.h fonts/font_8x13.h fonts/font_8x8.h \
+ fonts/font_8x9.h fonts/font_8x14.h fonts/font_8x16.h fonts/font_8x19.h \
+ fonts/font_9x15.h fonts/font_9x18.h fonts/font_10x20.h \
+ fonts/font_slant_8x14.h fonts/font_sanserif_8x16.h \
+ fonts/font_sanserif_8x14.h fonts/font_lcd_8x14.h \
+ fonts/font_courier_8x14.h fonts/font_computer_8x14.h \
+ fonts/font_bigserif_8x14.h fonts/font_bigserif_8x16.h \
+ fonts/font_block_8x14.h fonts/font_broadway_8x14.h \
+ fonts/font_oldengl_8x16.h fonts/font_wiggly_8x16.h fonts/font_std_12.h \
+ fonts/font_std_14.h fonts/font_std_15.h fonts/font_std_16.h \
+ fonts/font_std_17.h fonts/font_std_18.h fonts/font_std_22.h \
+ fonts/font_std_24.h
+fabutils.o: fabutils.cpp soc/rtc.h fabutils.h fake_fabgl.h \
+ freertos/FreeRTOS.h HardwareSerial.h dispdrivers/vgacontroller.h \
+ driver/gpio.h freertos/queue.h fabglconf.h esp_wifi.h \
+ devdrivers/swgenerator.h displaycontroller.h freertos/queue.h \
+ freertos/task.h dispdrivers/vgabasecontroller.h \
+ dispdrivers/vga2controller.h dispdrivers/vgapalettedcontroller.h \
+ dispdrivers/vga16controller.h ps2controller.h freertos/task.h \
+ freertos/timers.h
+fake_misc.o: fake_misc.cpp fake_fabgl.h freertos/FreeRTOS.h \
+ HardwareSerial.h
+HardwareSerial.o: HardwareSerial.cpp HardwareSerial.h
+kbdlayouts.o: kbdlayouts.cpp kbdlayouts.h fabutils.h fake_fabgl.h \
+ freertos/FreeRTOS.h HardwareSerial.h
+keyboard.o: keyboard.cpp fabutils.h fake_fabgl.h freertos/FreeRTOS.h \
+ HardwareSerial.h freertos/task.h freertos/timers.h freertos/queue.h \
+ keyboard.h fabglconf.h esp_wifi.h kbdlayouts.h codepages.h
+ps2controller.o: ps2controller.cpp ps2controller.h freertos/FreeRTOS.h \
+ freertos/task.h freertos/timers.h fabutils.h fake_fabgl.h \
+ HardwareSerial.h fabglconf.h esp_wifi.h keyboard.h kbdlayouts.h \
+ codepages.h
+soundgen.o: soundgen.cpp freertos/FreeRTOS.h freertos/timers.h \
+ soc/i2s_reg.h driver/periph_ctrl.h soc/rtc.h soundgen.h fabglconf.h \
+ esp_wifi.h fabutils.h fake_fabgl.h HardwareSerial.h
+terminal.o: terminal.cpp fabglconf.h esp_wifi.h freertos/FreeRTOS.h \
+ freertos/task.h freertos/timers.h esp_attr.h rom/uart.h soc/uart_reg.h \
+ soc/uart_struct.h soc/io_mux_reg.h soc/gpio_sig_map.h soc/dport_reg.h \
+ soc/rtc.h esp_intr_alloc.h fabgl.h fabutils.h fake_fabgl.h \
+ HardwareSerial.h fabfonts.h fonts/font_4x6.h fonts/font_5x7.h \
+ fonts/font_5x8.h fonts/font_6x8.h fonts/font_6x9.h fonts/font_6x10.h \
+ fonts/font_6x12.h fonts/font_6x13.h fonts/font_7x13.h fonts/font_7x14.h \
+ fonts/font_8x13.h fonts/font_8x8.h fonts/font_8x9.h fonts/font_8x14.h \
+ fonts/font_8x16.h fonts/font_8x19.h fonts/font_9x15.h fonts/font_9x18.h \
+ fonts/font_10x20.h fonts/font_slant_8x14.h fonts/font_sanserif_8x16.h \
+ fonts/font_sanserif_8x14.h fonts/font_lcd_8x14.h \
+ fonts/font_courier_8x14.h fonts/font_computer_8x14.h \
+ fonts/font_bigserif_8x14.h fonts/font_bigserif_8x16.h \
+ fonts/font_block_8x14.h fonts/font_broadway_8x14.h \
+ fonts/font_oldengl_8x16.h fonts/font_wiggly_8x16.h fonts/font_std_12.h \
+ fonts/font_std_14.h fonts/font_std_15.h fonts/font_std_16.h \
+ fonts/font_std_17.h fonts/font_std_18.h fonts/font_std_22.h \
+ fonts/font_std_24.h terminal.h freertos/semphr.h canvas.h \
+ displaycontroller.h freertos/queue.h keyboard.h kbdlayouts.h codepages.h \
+ terminfo.h soundgen.h dispdrivers/vgacontroller.h driver/gpio.h \
+ freertos/queue.h devdrivers/swgenerator.h \
+ dispdrivers/vgabasecontroller.h dispdrivers/vga2controller.h \
+ dispdrivers/vgapalettedcontroller.h dispdrivers/vga4controller.h \
+ dispdrivers/vga8controller.h dispdrivers/vga16controller.h \
+ ps2controller.h scene.h collisiondetector.h
+terminfo.o: terminfo.cpp terminfo.h keyboard.h fabglconf.h esp_wifi.h \
+ kbdlayouts.h fabutils.h fake_fabgl.h freertos/FreeRTOS.h \
+ HardwareSerial.h codepages.h
+rust_glue.o: rust_glue.cpp fabutils.h fake_fabgl.h freertos/FreeRTOS.h \
+ HardwareSerial.h fabgl.h fabfonts.h fabglconf.h esp_wifi.h \
+ fonts/font_4x6.h fonts/font_5x7.h fonts/font_5x8.h fonts/font_6x8.h \
+ fonts/font_6x9.h fonts/font_6x10.h fonts/font_6x12.h fonts/font_6x13.h \
+ fonts/font_7x13.h fonts/font_7x14.h fonts/font_8x13.h fonts/font_8x8.h \
+ fonts/font_8x9.h fonts/font_8x14.h fonts/font_8x16.h fonts/font_8x19.h \
+ fonts/font_9x15.h fonts/font_9x18.h fonts/font_10x20.h \
+ fonts/font_slant_8x14.h fonts/font_sanserif_8x16.h \
+ fonts/font_sanserif_8x14.h fonts/font_lcd_8x14.h \
+ fonts/font_courier_8x14.h fonts/font_computer_8x14.h \
+ fonts/font_bigserif_8x14.h fonts/font_bigserif_8x16.h \
+ fonts/font_block_8x14.h fonts/font_broadway_8x14.h \
+ fonts/font_oldengl_8x16.h fonts/font_wiggly_8x16.h fonts/font_std_12.h \
+ fonts/font_std_14.h fonts/font_std_15.h fonts/font_std_16.h \
+ fonts/font_std_17.h fonts/font_std_18.h fonts/font_std_22.h \
+ fonts/font_std_24.h terminal.h freertos/task.h freertos/timers.h \
+ freertos/semphr.h canvas.h displaycontroller.h freertos/queue.h \
+ keyboard.h kbdlayouts.h codepages.h terminfo.h soundgen.h \
+ dispdrivers/vgacontroller.h driver/gpio.h freertos/queue.h \
+ devdrivers/swgenerator.h dispdrivers/vgabasecontroller.h \
+ dispdrivers/vga2controller.h dispdrivers/vgapalettedcontroller.h \
+ dispdrivers/vga4controller.h dispdrivers/vga8controller.h \
+ dispdrivers/vga16controller.h ps2controller.h scene.h \
+ collisiondetector.h vdp.h
+vga16controller.o: vga16controller.cpp freertos/FreeRTOS.h \
+ freertos/task.h soc/i2s_struct.h soc/i2s_reg.h driver/periph_ctrl.h \
+ soc/rtc.h esp_spi_flash.h esp_heap_caps.h fabutils.h fake_fabgl.h \
+ HardwareSerial.h dispdrivers/vga16controller.h driver/gpio.h \
+ freertos/queue.h fabglconf.h esp_wifi.h devdrivers/swgenerator.h \
+ displaycontroller.h freertos/queue.h freertos/task.h \
+ dispdrivers/vgapalettedcontroller.h dispdrivers/vgabasecontroller.h \
+ devdrivers/swgenerator.h
+vga2controller.o: vga2controller.cpp freertos/FreeRTOS.h freertos/task.h \
+ soc/i2s_struct.h soc/i2s_reg.h driver/periph_ctrl.h soc/rtc.h \
+ esp_spi_flash.h esp_heap_caps.h fabutils.h fake_fabgl.h HardwareSerial.h \
+ dispdrivers/vga2controller.h driver/gpio.h freertos/queue.h fabglconf.h \
+ esp_wifi.h devdrivers/swgenerator.h displaycontroller.h freertos/queue.h \
+ freertos/task.h dispdrivers/vgapalettedcontroller.h \
+ dispdrivers/vgabasecontroller.h
+vga4controller.o: vga4controller.cpp freertos/FreeRTOS.h freertos/task.h \
+ soc/i2s_struct.h soc/i2s_reg.h driver/periph_ctrl.h soc/rtc.h \
+ esp_spi_flash.h esp_heap_caps.h fabutils.h fake_fabgl.h HardwareSerial.h \
+ dispdrivers/vga4controller.h driver/gpio.h freertos/queue.h fabglconf.h \
+ esp_wifi.h devdrivers/swgenerator.h displaycontroller.h freertos/queue.h \
+ freertos/task.h dispdrivers/vgapalettedcontroller.h \
+ dispdrivers/vgabasecontroller.h devdrivers/swgenerator.h
+vga8controller.o: vga8controller.cpp freertos/FreeRTOS.h freertos/task.h \
+ soc/i2s_struct.h soc/i2s_reg.h driver/periph_ctrl.h soc/rtc.h \
+ esp_spi_flash.h esp_heap_caps.h fabutils.h fake_fabgl.h HardwareSerial.h \
+ dispdrivers/vga8controller.h driver/gpio.h freertos/queue.h fabglconf.h \
+ esp_wifi.h devdrivers/swgenerator.h displaycontroller.h freertos/queue.h \
+ freertos/task.h dispdrivers/vgapalettedcontroller.h \
+ dispdrivers/vgabasecontroller.h devdrivers/swgenerator.h
+vgabasecontroller.o: vgabasecontroller.cpp freertos/FreeRTOS.h \
+ freertos/task.h soc/i2s_struct.h soc/i2s_reg.h driver/periph_ctrl.h \
+ soc/rtc.h fabutils.h fake_fabgl.h HardwareSerial.h \
+ devdrivers/swgenerator.h dispdrivers/vgabasecontroller.h driver/gpio.h \
+ freertos/queue.h fabglconf.h esp_wifi.h devdrivers/swgenerator.h \
+ displaycontroller.h freertos/queue.h freertos/task.h
+vgacontroller.o: vgacontroller.cpp freertos/FreeRTOS.h freertos/task.h \
+ soc/i2s_struct.h soc/i2s_reg.h driver/periph_ctrl.h soc/rtc.h \
+ esp_spi_flash.h fabutils.h fake_fabgl.h HardwareSerial.h \
+ dispdrivers/vgacontroller.h driver/gpio.h freertos/queue.h fabglconf.h \
+ esp_wifi.h devdrivers/swgenerator.h displaycontroller.h freertos/queue.h \
+ freertos/task.h dispdrivers/vgabasecontroller.h devdrivers/swgenerator.h
+vgapalettedcontroller.o: vgapalettedcontroller.cpp freertos/FreeRTOS.h \
+ freertos/task.h soc/i2s_struct.h soc/i2s_reg.h driver/periph_ctrl.h \
+ soc/rtc.h esp_spi_flash.h esp_heap_caps.h fabutils.h fake_fabgl.h \
+ HardwareSerial.h dispdrivers/vgapalettedcontroller.h driver/gpio.h \
+ freertos/queue.h fabglconf.h esp_wifi.h devdrivers/swgenerator.h \
+ displaycontroller.h freertos/queue.h freertos/task.h \
+ dispdrivers/vgabasecontroller.h
+vdp-1.03.o: vdp-1.03.cpp Arduino.h vdp-1.03.h \
+ dispdrivers/vgabasecontroller.h driver/gpio.h freertos/FreeRTOS.h \
+ freertos/queue.h fabglconf.h esp_wifi.h fabutils.h fake_fabgl.h \
+ HardwareSerial.h devdrivers/swgenerator.h displaycontroller.h \
+ freertos/queue.h freertos/task.h fabgl.h fabfonts.h fonts/font_4x6.h \
+ fonts/font_5x7.h fonts/font_5x8.h fonts/font_6x8.h fonts/font_6x9.h \
+ fonts/font_6x10.h fonts/font_6x12.h fonts/font_6x13.h fonts/font_7x13.h \
+ fonts/font_7x14.h fonts/font_8x13.h fonts/font_8x8.h fonts/font_8x9.h \
+ fonts/font_8x14.h fonts/font_8x16.h fonts/font_8x19.h fonts/font_9x15.h \
+ fonts/font_9x18.h fonts/font_10x20.h fonts/font_slant_8x14.h \
+ fonts/font_sanserif_8x16.h fonts/font_sanserif_8x14.h \
+ fonts/font_lcd_8x14.h fonts/font_courier_8x14.h \
+ fonts/font_computer_8x14.h fonts/font_bigserif_8x14.h \
+ fonts/font_bigserif_8x16.h fonts/font_block_8x14.h \
+ fonts/font_broadway_8x14.h fonts/font_oldengl_8x16.h \
+ fonts/font_wiggly_8x16.h fonts/font_std_12.h fonts/font_std_14.h \
+ fonts/font_std_15.h fonts/font_std_16.h fonts/font_std_17.h \
+ fonts/font_std_18.h fonts/font_std_22.h fonts/font_std_24.h terminal.h \
+ freertos/task.h freertos/timers.h freertos/semphr.h canvas.h keyboard.h \
+ kbdlayouts.h codepages.h terminfo.h soundgen.h \
+ dispdrivers/vgacontroller.h dispdrivers/vga2controller.h \
+ dispdrivers/vgapalettedcontroller.h dispdrivers/vga4controller.h \
+ dispdrivers/vga8controller.h dispdrivers/vga16controller.h \
+ ps2controller.h scene.h collisiondetector.h vdp.h vdp-quark103/video.ino \
+ ESP32Time.h vdp-quark103/agon.h vdp-quark103/agon_fonts.h \
+ vdp-quark103/agon_audio.h vdp-quark103/agon_palette.h
+vdp-console8.o: vdp-console8.cpp Arduino.h vdp-console8.h fabgl.h \
+ fabutils.h fake_fabgl.h freertos/FreeRTOS.h HardwareSerial.h fabfonts.h \
+ fabglconf.h esp_wifi.h fonts/font_4x6.h fonts/font_5x7.h \
+ fonts/font_5x8.h fonts/font_6x8.h fonts/font_6x9.h fonts/font_6x10.h \
+ fonts/font_6x12.h fonts/font_6x13.h fonts/font_7x13.h fonts/font_7x14.h \
+ fonts/font_8x13.h fonts/font_8x8.h fonts/font_8x9.h fonts/font_8x14.h \
+ fonts/font_8x16.h fonts/font_8x19.h fonts/font_9x15.h fonts/font_9x18.h \
+ fonts/font_10x20.h fonts/font_slant_8x14.h fonts/font_sanserif_8x16.h \
+ fonts/font_sanserif_8x14.h fonts/font_lcd_8x14.h \
+ fonts/font_courier_8x14.h fonts/font_computer_8x14.h \
+ fonts/font_bigserif_8x14.h fonts/font_bigserif_8x16.h \
+ fonts/font_block_8x14.h fonts/font_broadway_8x14.h \
+ fonts/font_oldengl_8x16.h fonts/font_wiggly_8x16.h fonts/font_std_12.h \
+ fonts/font_std_14.h fonts/font_std_15.h fonts/font_std_16.h \
+ fonts/font_std_17.h fonts/font_std_18.h fonts/font_std_22.h \
+ fonts/font_std_24.h terminal.h freertos/task.h freertos/timers.h \
+ freertos/semphr.h canvas.h displaycontroller.h freertos/queue.h \
+ keyboard.h kbdlayouts.h codepages.h terminfo.h soundgen.h \
+ dispdrivers/vgacontroller.h driver/gpio.h freertos/queue.h \
+ devdrivers/swgenerator.h dispdrivers/vgabasecontroller.h \
+ dispdrivers/vga2controller.h dispdrivers/vgapalettedcontroller.h \
+ dispdrivers/vga4controller.h dispdrivers/vga8controller.h \
+ dispdrivers/vga16controller.h ps2controller.h scene.h \
+ collisiondetector.h vdp.h vdp-console8/video.ino vdp-console8/agon.h \
+ vdp-console8/agon_keyboard.h vdp-console8/vdp_protocol.h \
+ vdp-console8/agon_screen.h vdp-console8/graphics.h \
+ vdp-console8/agon_fonts.h vdp-console8/agon_palette.h \
+ vdp-console8/cursor.h vdp-console8/viewport.h vdp-console8/sprites.h \
+ vdp-console8/vdu.h vdp-console8/vdu_audio.h vdp-console8/agon_audio.h \
+ vdp-console8/envelopes/volume.h vdp-console8/envelopes/frequency.h \
+ vdp-console8/vdu_sys.h ESP32Time.h vdp-console8/vdu_sprites.h

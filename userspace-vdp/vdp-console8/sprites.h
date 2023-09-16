@@ -1,6 +1,7 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
+#include <Arduino.h>
 #include <fabgl.h>
 
 #include "agon.h"
@@ -16,7 +17,7 @@ Bitmap * getBitmap(uint8_t b = current_bitmap) {
 	return &bitmaps[b];
 }
 
-inline void setCurrentBitmap(uint8_t b) {
+void setCurrentBitmap(uint8_t b) {
 	current_bitmap = b;
 }
 
@@ -33,13 +34,13 @@ void clearBitmap(uint8_t b = current_bitmap) {
 	bitmap->dataAllocated = false;
 }
 
-void createBitmap(uint16_t width, uint16_t height, void * data, PixelFormat format = PixelFormat::RGBA8888) {
+void createBitmap(int width, int height, void * data, PixelFormat format = PixelFormat::RGBA8888) {
 	clearBitmap();
 	bitmaps[current_bitmap] = Bitmap(width, height, (uint8_t *)data, format);
 	bitmaps[current_bitmap].dataAllocated = false;
 }
 
-void drawBitmap(uint16_t x, uint16_t y) {
+void drawBitmap(int x, int y) {
 	auto bitmap = getBitmap();
 	if (bitmap->data) {
 		canvas->drawBitmap(x, y, bitmap);
@@ -48,7 +49,7 @@ void drawBitmap(uint16_t x, uint16_t y) {
 }
 
 void resetBitmaps() {
-	for (uint8_t n = 0; n < MAX_BITMAPS; n++) {
+	for (int n = 0; n < MAX_BITMAPS; n++) {
 		clearBitmap(n);
 	}
 	waitPlotCompletion();
@@ -58,7 +59,7 @@ Sprite * getSprite(uint8_t sprite = current_sprite) {
 	return &sprites[sprite];
 }
 
-inline void setCurrentSprite(uint8_t s) {
+void setCurrentSprite(uint8_t s) {
 	current_sprite = s;
 }
 
@@ -94,7 +95,7 @@ void activateSprites(uint8_t n) {
 	waitPlotCompletion();
 }
 
-inline bool hasActiveSprites() {
+bool hasActiveSprites() {
 	return numsprites > 0;
 }
 
@@ -143,7 +144,7 @@ void refreshSprites() {
 }
 
 void resetSprites() {
-	for (uint8_t n = 0; n < MAX_SPRITES; n++) {
+	for (int n = 0; n < MAX_SPRITES; n++) {
 		clearSpriteFrames(n);
 	}
 	waitPlotCompletion();

@@ -1,10 +1,12 @@
 # This makefile is for a pure c++ vdp build, for testing purposes.
 # Use cargo build for the real thing
 CXX = g++
-CFLAGS = -Wall -O2 -fmax-errors=1 -g -I. -I./dispdrivers
+LIBS = -g
+CFLAGS = -Wall -fmax-errors=1 -g -I. -I./dispdrivers
 OPTIONS = 
 
 SRCS = \
+       vdp-console8.cpp \
        canvas.cpp \
        codepages.cpp \
        collisiondetector.cpp \
@@ -20,7 +22,7 @@ SRCS = \
        soundgen.cpp \
        terminal.cpp \
        terminfo.cpp \
-       rust_glue.cpp \
+       test_main.cpp \
        vga16controller.cpp \
        vga2controller.cpp \
        vga4controller.cpp \
@@ -32,28 +34,20 @@ SRCS = \
 OBJS = $(SRCS:.cpp=.o)
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(OPTIONS) -fPIC -c $<
+	$(CXX) $(CFLAGS) $(OPTIONS) -c $<
 
-all: vdp_console8.so vdp_quark103.so
-
-vdp_console8.so: $(OBJS) vdp-console8.o
-	$(CXX) -shared $(OBJS) vdp-console8.o -o vdp_console8.so
-
-vdp_quark103.so: $(OBJS) vdp-1.03.o
-	$(CXX) -shared $(OBJS) vdp-1.03.o -o vdp_quark103.so
+userspace-vdp: $(OBJS)
+	$(CXX) -o userspace-vdp $(OBJS) $(LIBS)
 
 clean:
 	-rm *.o
-	-rm vdp_console8.so
-	-rm vdp_quark103.so
+	-rm userspace-vdp
 
-SRC_VDP = vdp-1.03.cpp vdp-console8.cpp
-
-depends: $(SRCS) $(SRC_VDP)
-	$(CXX) -MM $(CFLAGS) $(SRCS) $(SRC_VDP) > Makefile.dep
+depends: $(SRCS)
+	$(CXX) -MM $(CFLAGS) $(SRCS) > Makefile.dep
 
 format:
-	clang-format -i rust_glue.cpp
+	clang-format -i vgabasecontroller.cpp fabgl.h
 
 ifneq (,$(wildcard Makefile.dep))
 include Makefile.dep

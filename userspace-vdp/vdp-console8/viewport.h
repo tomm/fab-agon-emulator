@@ -9,8 +9,8 @@
 extern void setClippingRect(Rect r);
 
 Point			origin;							// Screen origin
-uint16_t		canvasW;						// Canvas width
-uint16_t		canvasH;						// Canvas height
+int				canvasW;						// Canvas width
+int				canvasH;						// Canvas height
 bool			logicalCoords = true;			// Use BBC BASIC logical coordinates
 double			logicalScaleX;					// Scaling factor for logical coordinates
 double			logicalScaleY;
@@ -30,7 +30,7 @@ void viewportReset() {
 	useViewports = false;
 }
 
-Rect * getViewport(uint8_t type) {
+Rect * getViewport(byte type) {
 	switch (type) {
 		case VIEWPORT_TEXT: return &textViewport;
 		case VIEWPORT_DEFAULT: return &defaultViewport;
@@ -40,13 +40,13 @@ Rect * getViewport(uint8_t type) {
 	}
 }
 
-void setActiveViewport(uint8_t type) {
+void setActiveViewport(byte type) {
 	activeViewport = getViewport(type);
 }
 
 // Translate a point relative to the graphics viewport
 //
-Point translateViewport(uint16_t X, uint16_t Y) {
+Point translateViewport(int X, int Y) {
 	if (logicalCoords) {
 		return Point(graphicsViewport.X1 + (origin.X + X), graphicsViewport.Y2 - (origin.Y + Y));
 	}
@@ -58,7 +58,7 @@ Point translateViewport(Point p) {
 
 // Scale a point
 //
-Point scale(uint16_t X, uint16_t Y) {
+Point scale(int X, int Y) {
 	if (logicalCoords) {
 		return Point((double)X / logicalScaleX, (double)Y / logicalScaleY);
 	}
@@ -70,7 +70,7 @@ Point scale(Point p) {
 
 // Translate a point relative to the canvas
 //
-Point translateCanvas(uint16_t X, uint16_t Y) {
+Point translateCanvas(int X, int Y) {
 	if (logicalCoords) {
 		return Point(origin.X + X, (canvasH - 1) - (origin.Y + Y));
 	}
@@ -81,9 +81,9 @@ Point translateCanvas(Point p) {
 }
 
 // Set graphics viewport
-bool setGraphicsViewport(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
-	auto p1 = translateCanvas(scale(x1, y1));
-	auto p2 = translateCanvas(scale(x2, y2));
+bool setGraphicsViewport(short x1, short y1, short x2, short y2) {
+	Point p1 = translateCanvas(scale(x1, y1));
+	Point p2 = translateCanvas(scale(x2, y2));
 
 	if (p1.X >= 0 && p2.X < canvasW && p1.Y >= 0 && p2.Y < canvasH && p2.X > p1.X && p2.Y > p1.Y) {
 		graphicsViewport = Rect(p1.X, p1.Y, p2.X, p2.Y);
@@ -95,7 +95,7 @@ bool setGraphicsViewport(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
 }
 
 // Set text viewport
-bool setTextViewport(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+bool setTextViewport(short x1, short y1, short x2, short y2) {
 	if (x2 >= canvasW) x2 = canvasW - 1;
 	if (y2 >= canvasH) y2 = canvasH - 1;
 

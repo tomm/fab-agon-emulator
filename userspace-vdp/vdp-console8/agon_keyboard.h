@@ -1,6 +1,7 @@
 #ifndef AGON_KEYBOARD_H
 #define AGON_KEYBOARD_H
 
+#include <Arduino.h>
 #include <fabgl.h>
 
 #include "agon.h"
@@ -8,10 +9,10 @@
 
 fabgl::PS2Controller		_PS2Controller;		// The keyboard class
 
-uint8_t			_keycode = 0;					// Last pressed key code
-uint8_t			_modifiers = 0;					// Last pressed key modifiers
-uint16_t		kbRepeatDelay = 500;			// Keyboard repeat delay ms (250, 500, 750 or 1000)		
-uint16_t		kbRepeatRate = 100;				// Keyboard repeat rate ms (between 33 and 500)
+byte			_keycode = 0;					// Last pressed key code
+byte			_modifiers = 0;					// Last pressed key modifiers
+int				kbRepeatDelay = 500;			// Keyboard repeat delay ms (250, 500, 750 or 1000)		
+int				kbRepeatRate = 100;				// Keyboard repeat rate ms (between 33 and 500)
 
 // Get keyboard instance
 inline fabgl::Keyboard* getKeyboard() {
@@ -30,7 +31,7 @@ void setupKeyboard() {
 
 // Set keyboard layout
 //
-void setKeyboardLayout(uint8_t region) {
+void setKeyboardLayout(int region) {
 	auto kb = getKeyboard();
 	switch(region) {
 		case 1:	kb->setLayout(&fabgl::USLayout); break;
@@ -50,7 +51,7 @@ void setKeyboardLayout(uint8_t region) {
 // Get keyboard key presses
 // returns true only if there's a new keypress update
 //
-bool getKeyboardKey(uint8_t *keycode, uint8_t *modifiers, uint8_t *vk, uint8_t *down) {
+bool getKeyboardKey(byte *keycode, byte *modifiers, byte *vk, byte *down) {
 	auto kb = getKeyboard();
 	fabgl::VirtualKeyItem item;
 
@@ -116,7 +117,7 @@ bool getKeyboardKey(uint8_t *keycode, uint8_t *modifiers, uint8_t *vk, uint8_t *
 
 // Simpler keyboard read for CP/M Terminal Mode
 //
-bool getKeyboardKey(uint8_t *ascii) {
+bool getKeyboardKey(byte *ascii) {
 	auto kb = getKeyboard();
 	fabgl::VirtualKeyItem item;
 
@@ -134,7 +135,7 @@ bool getKeyboardKey(uint8_t *ascii) {
 
 // Wait for shift key to be released, then pressed (used for paged mode)
 // 
-bool wait_shiftkey(uint8_t *ascii, uint8_t* vk, uint8_t* down) {
+bool wait_shiftkey(byte *ascii, byte* vk, byte* down) {
 	auto kb = getKeyboard();
 	fabgl::VirtualKeyItem item;
 
@@ -159,7 +160,7 @@ bool wait_shiftkey(uint8_t *ascii, uint8_t* vk, uint8_t* down) {
 	return true;
 }
 
-void getKeyboardState(uint16_t *repeatDelay, uint16_t *repeatRate, uint8_t *ledState) {
+void getKeyboardState(int *repeatDelay, int *repeatRate, byte *ledState) {
 	bool numLock;
 	bool capsLock;
 	bool scrollLock;
@@ -169,7 +170,7 @@ void getKeyboardState(uint16_t *repeatDelay, uint16_t *repeatRate, uint8_t *ledS
     *repeatRate = kbRepeatRate;
 }
 
-void setKeyboardState(uint16_t delay, uint16_t rate, uint8_t ledState) {
+void setKeyboardState(int delay, int rate, byte ledState) {
 	auto kb = getKeyboard();
 	if (delay >= 250 && delay <= 1000) kbRepeatDelay = (delay / 250) * 250;	// In steps of 250ms
 	if (rate >=  33 && rate <=  500) kbRepeatRate  = rate;

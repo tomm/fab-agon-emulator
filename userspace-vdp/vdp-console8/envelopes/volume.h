@@ -9,25 +9,25 @@
 
 class VolumeEnvelope {
 	public:
-		virtual uint8_t getVolume(uint8_t baseVolume, uint32_t elapsed, int32_t duration) = 0;
-		virtual bool isReleasing(uint32_t elapsed, int32_t duration) = 0;
-		virtual bool isFinished(uint32_t elapsed, int32_t duration) = 0;
+		virtual byte getVolume(byte baseVolume, word elapsed, long duration) = 0;
+		virtual bool isReleasing(word elapsed, long duration) = 0;
+		virtual bool isFinished(word elapsed, long duration) = 0;
 };
 
 class ADSRVolumeEnvelope : public VolumeEnvelope {
 	public:
-		ADSRVolumeEnvelope(uint16_t attack, uint16_t decay, uint8_t sustain, uint16_t release);
-		uint8_t getVolume(uint8_t baseVolume, uint32_t elapsed, int32_t duration);
-		bool isReleasing(uint32_t elapsed, int32_t duration);
-		bool isFinished(uint32_t elapsed, int32_t duration);
+		ADSRVolumeEnvelope(word attack, word decay, byte sustain, word release);
+		byte getVolume(byte baseVolume, word elapsed, long duration);
+		bool isReleasing(word elapsed, long duration);
+		bool isFinished(word elapsed, long duration);
 	private:
-		uint16_t _attack;
-		uint16_t _decay;
-		uint8_t _sustain;
-		uint16_t _release;
+		word _attack;
+		word _decay;
+		byte _sustain;
+		word _release;
 };
 
-ADSRVolumeEnvelope::ADSRVolumeEnvelope(uint16_t attack, uint16_t decay, uint8_t sustain, uint16_t release)
+ADSRVolumeEnvelope::ADSRVolumeEnvelope(word attack, word decay, byte sustain, word release)
 	: _attack(attack), _decay(decay), _sustain(sustain), _release(release)
 {
 	// attack, decay, release are time values in milliseconds
@@ -35,23 +35,23 @@ ADSRVolumeEnvelope::ADSRVolumeEnvelope(uint16_t attack, uint16_t decay, uint8_t 
 	debug_log("audio_driver: ADSRVolumeEnvelope: attack=%d, decay=%d, sustain=%d, release=%d\n\r", this->_attack, this->_decay, this->_sustain, this->_release);
 }
 
-uint8_t ADSRVolumeEnvelope::getVolume(uint8_t baseVolume, uint32_t elapsed, int32_t duration) {
+byte ADSRVolumeEnvelope::getVolume(byte baseVolume, word elapsed, long duration) {
 	// returns volume for the given elapsed time
 	// baseVolume is the level the attack phase should reach
 	// sustain volume level is calculated relative to baseVolume
 	// volume for fab-gl is 0-127 but accepts higher values, so we're not clamping
 	// a duration of -1 means we're playing forever
-	auto phaseTime = elapsed;
+	long phaseTime = elapsed;
 	if (phaseTime < this->_attack) {
 		return (phaseTime * baseVolume) / this->_attack;
 	}
 	phaseTime -= this->_attack;
-	uint8_t sustainVolume = baseVolume * this->_sustain / 127;
+	byte sustainVolume = baseVolume * this->_sustain / 127;
 	if (phaseTime < this->_decay) {
 		return map(phaseTime, 0, this->_decay, baseVolume, sustainVolume);
 	}
 	phaseTime -= this->_decay;
-	auto sustainDuration = duration < 0 ? elapsed : duration - (this->_attack + this->_decay);
+	long sustainDuration = duration < 0 ? elapsed : duration - (this->_attack + this->_decay);
 	if (sustainDuration < 0) sustainDuration = 0;
 	if (phaseTime < sustainDuration) {
 		return sustainVolume;
@@ -63,17 +63,17 @@ uint8_t ADSRVolumeEnvelope::getVolume(uint8_t baseVolume, uint32_t elapsed, int3
 	return 0;
 }
 
-bool ADSRVolumeEnvelope::isReleasing(uint32_t elapsed, int32_t duration) {
+bool ADSRVolumeEnvelope::isReleasing(word elapsed, long duration) {
 	if (duration < 0) return false;
-	auto minDuration = this->_attack + this->_decay;
+	word minDuration = this->_attack + this->_decay;
 	if (duration < minDuration) duration = minDuration;
 
 	return (elapsed >= duration);
 }
 
-bool ADSRVolumeEnvelope::isFinished(uint32_t elapsed, int32_t duration) {
+bool ADSRVolumeEnvelope::isFinished(word elapsed, long duration) {
 	if (duration < 0) return false;
-	auto minDuration = this->_attack + this->_decay;
+	word minDuration = this->_attack + this->_decay;
 	if (duration < minDuration) duration = minDuration;
 
 	return (elapsed >= duration + this->_release);

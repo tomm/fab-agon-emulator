@@ -15,7 +15,8 @@ extern void do_keyboard();
 extern void vdu(byte c);
 extern void vdu_sys();
 extern void audio_driver(void *parameters);
-extern void send_packet(uint8_t code, uint16_t len, uint8_t data[]);
+//extern void send_packet(uint8_t code, uint16_t len, uint8_t data[]);
+extern void send_packet(byte code, byte len, byte data[]);
 extern char get_screen_char(int px, int py);
 extern fabgl::Point scale(fabgl::Point p);
 extern fabgl::Point translate(fabgl::Point p);
@@ -38,12 +39,14 @@ extern void vdu_mode();
 extern void vdu_sys_video();
 extern void vdu_sys_scroll();
 extern void vdu_sys_sprites();
-extern void vdu_sys_udg(char mode);
+//extern void vdu_sys_udg(char mode);
+extern void vdu_sys_udg(byte mode);
 extern void vdu_sys_video_kblayout();
 extern void vdu_sys_audio();
 extern void vdu_sys_video_time();
 extern void vdu_sys_keystate();
-extern uint8_t play_note(uint8_t channel, uint8_t volume, uint16_t frequency, uint16_t duration);
+//extern uint8_t play_note(uint8_t channel, uint8_t volume, uint16_t frequency, uint16_t duration);
+extern word play_note(byte, byte, word, word);
 extern void printFmt(const char *format, ...);
 
 extern fabgl::SoundGenerator		SoundGenerator;		// The audio class

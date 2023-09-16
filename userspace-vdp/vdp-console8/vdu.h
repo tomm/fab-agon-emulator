@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "agon.h"
 #include "cursor.h"
 #include "graphics.h"
@@ -8,7 +10,7 @@
 // VDU 17 Handle COLOUR
 // 
 void vdu_colour() {
-	auto colour = readByte_t();
+	int		colour = readByte_t();
 
 	setTextColour(colour);
 }
@@ -16,8 +18,8 @@ void vdu_colour() {
 // VDU 18 Handle GCOL
 // 
 void vdu_gcol() {
-	auto mode = readByte_t();
-	auto colour = readByte_t();
+	int		mode = readByte_t();
+	int		colour = readByte_t();
 
 	setGraphicsColour(mode, colour);
 }
@@ -25,11 +27,11 @@ void vdu_gcol() {
 // VDU 19 Handle palette
 //
 void vdu_palette() {
-	auto l = readByte_t(); if (l == -1) return; // Logical colour
-	auto p = readByte_t(); if (p == -1) return; // Physical colour
-	auto r = readByte_t(); if (r == -1) return; // The red component
-	auto g = readByte_t(); if (g == -1) return; // The green component
-	auto b = readByte_t(); if (b == -1) return; // The blue component
+	int l = readByte_t(); if (l == -1) return; // Logical colour
+	int p = readByte_t(); if (p == -1) return; // Physical colour
+	int r = readByte_t(); if (r == -1) return; // The red component
+	int g = readByte_t(); if (g == -1) return; // The green component
+	int b = readByte_t(); if (b == -1) return; // The blue component
 
 	setPalette(l, p, r, g, b);
 }
@@ -37,7 +39,7 @@ void vdu_palette() {
 // VDU 22 Handle MODE
 //
 void vdu_mode() {
-	auto mode = readByte_t();
+	int mode = readByte_t();
 	debug_log("vdu_mode: %d\n\r", mode);
 	if (mode >= 0) {
 	  	set_mode(mode);
@@ -48,10 +50,10 @@ void vdu_mode() {
 // Example: VDU 24,640;256;1152;896;
 //
 void vdu_graphicsViewport() {
-	auto x1 = readWord_t();			// Left
-	auto y2 = readWord_t();			// Bottom
-	auto x2 = readWord_t();			// Right
-	auto y1 = readWord_t();			// Top
+	int x1 = readWord_t();			// Left
+	int y2 = readWord_t();			// Bottom
+	int x2 = readWord_t();			// Right
+	int y1 = readWord_t();			// Top
 
 	if (setGraphicsViewport(x1, y1, x2, y2)) {
 		debug_log("vdu_graphicsViewport: OK %d,%d,%d,%d\n\r", x1, y1, x2, y2);
@@ -63,10 +65,10 @@ void vdu_graphicsViewport() {
 // VDU 25 Handle PLOT
 //
 void vdu_plot() {
-	auto mode = readByte_t(); if (mode == -1) return;
+	int mode = readByte_t(); if (mode == -1) return;
 
-	auto x = readWord_t(); if (x == -1) return; else x = (short)x;
-	auto y = readWord_t(); if (y == -1) return; else y = (short)y;
+	int x = readWord_t(); if (x == -1) return; else x = (short)x;
+	int y = readWord_t(); if (y == -1) return; else y = (short)y;
 
 	pushPoint(x, y);
 	setGraphicsOptions();
@@ -106,10 +108,10 @@ void vdu_resetViewports() {
 // Example: VDU 28,20,23,34,4
 //
 void vdu_textViewport() {
-	auto x1 = readByte_t() * fontW;				// Left
-	auto y2 = (readByte_t() + 1) * fontH - 1;	// Bottom
-	auto x2 = (readByte_t() + 1) * fontW - 1;	// Right
-	auto y1 = readByte_t() * fontH;				// Top
+	int x1 = readByte_t() * fontW;				// Left
+	int y2 = (readByte_t() + 1) * fontH - 1;	// Bottom
+	int x2 = (readByte_t() + 1) * fontW - 1;	// Right
+	int y1 = readByte_t() * fontH;				// Top
 
 	if (setTextViewport(x1, y1, x2, y2)) {
 		ensureCursorInViewport(textViewport);
@@ -122,9 +124,9 @@ void vdu_textViewport() {
 // Handle VDU 29
 //
 void vdu_origin() {
-	auto x = readWord_t();
+	int x = readWord_t();
 	if (x >= 0) {
-		auto y = readWord_t();
+		int y = readWord_t();
 		if (y >= 0) {
 			setOrigin(x, y);
 			debug_log("vdu_origin: %d,%d\n\r", x, y);
@@ -135,9 +137,9 @@ void vdu_origin() {
 // VDU 30 TAB(x,y)
 //
 void vdu_cursorTab() {
-	auto x = readByte_t();
+	int x = readByte_t();
 	if (x >= 0) {
-		auto y = readByte_t();
+		int y = readByte_t();
 		if (y >= 0) {
 			cursorTab(x, y);
 		}
@@ -146,7 +148,7 @@ void vdu_cursorTab() {
 
 // Handle VDU commands
 //
-void vdu(uint8_t c) {
+void vdu(byte c) {
 	switch(c) {
 		case 0x04:	
 			// enable text cursor

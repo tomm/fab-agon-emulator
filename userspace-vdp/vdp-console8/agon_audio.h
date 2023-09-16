@@ -12,61 +12,55 @@
 
 #include <memory>
 #include <unordered_map>
+#include <array>
 #include <fabgl.h>
 
 #include "envelopes/volume.h"
 #include "envelopes/frequency.h"
-#include "types.h"
 
-extern void audioTaskAbortDelay(uint8_t channel);
+extern void audioTaskAbortDelay(int channel);
 
 // The audio channel class
 //
 class audio_channel {	
 	public:
-		audio_channel(uint8_t channel);
+		audio_channel(int channel);
 		~audio_channel();
-		uint8_t		play_note(uint8_t volume, uint16_t frequency, int32_t duration);
-		uint8_t		getStatus();
-		void		setWaveform(int8_t waveformType, std::shared_ptr<audio_channel> channelRef);
-		void		setVolume(uint8_t volume);
-		void		setFrequency(uint16_t frequency);
-		void		setVolumeEnvelope(std::shared_ptr<VolumeEnvelope> envelope);
-		void		setFrequencyEnvelope(std::shared_ptr<FrequencyEnvelope> envelope);
-		void		loop();
-		uint8_t		channel() { return _channel; }
+		word	play_note(byte volume, word frequency, word duration);
+		byte	getStatus();
+		void	setWaveform(int8_t waveformType, std::shared_ptr<audio_channel> channelRef);
+		void	setVolume(byte volume);
+		void	setFrequency(word frequency);
+		void	setVolumeEnvelope(std::shared_ptr<VolumeEnvelope> envelope);
+		void	setFrequencyEnvelope(std::shared_ptr<FrequencyEnvelope> envelope);
+		void	loop();
+		byte	channel() { return _channel; }
 	private:
-		void		waitForAbort();
-		uint8_t		getVolume(uint32_t elapsed);
-		uint16_t	getFrequency(uint32_t elapsed);
-		bool		isReleasing(uint32_t elapsed);
-		bool		isFinished(uint32_t elapsed);
-		uint8_t		_state;
-		uint8_t		_channel;
-		uint8_t		_volume;
-		uint16_t	_frequency;
-		int32_t		_duration;
-		uint32_t	_startTime;
-		uint8_t		_waveformType;
-		std::unique_ptr<WaveformGenerator>	_waveform;
-		std::shared_ptr<VolumeEnvelope>		_volumeEnvelope;
-		std::shared_ptr<FrequencyEnvelope>	_frequencyEnvelope;
+		void	waitForAbort();
+		byte	getVolume(word elapsed);
+		word	getFrequency(word elapsed);
+		bool	isReleasing(word elapsed);
+		bool	isFinished(word elapsed);
+		std::unique_ptr<WaveformGenerator> _waveform;
+		byte _waveformType;
+		byte _state;
+		byte _channel;
+		byte _volume;
+		word _frequency;
+		long _duration;
+		long _startTime;
+		std::shared_ptr<VolumeEnvelope> _volumeEnvelope;
+		std::shared_ptr<FrequencyEnvelope> _frequencyEnvelope;
 };
 
 struct audio_sample {
-	audio_sample(uint32_t length) : length(length) {
-		data = (int8_t *) PreferPSRAMAlloc(length);
-		if (!data) {
-			debug_log("audio_sample: failed to allocate %d bytes\n\r", length);
-		}
-	}
 	~audio_sample();
-	uint32_t		length = 0;			// Length of the sample in bytes
-	int8_t *		data = nullptr;		// Pointer to the sample data
-	std::unordered_map<uint8_t, std::weak_ptr<audio_channel>> channels;	// Channels playing this sample
+	int length = 0;					// Length of the sample in bytes
+	int8_t * data = nullptr;		// Pointer to the sample data
+	std::unordered_map<byte, std::weak_ptr<audio_channel>> channels;	// Channels playing this sample
 };
 
-extern std::unordered_map<uint8_t, std::shared_ptr<audio_sample>> samples;	// Storage for the sample data
+extern std::array<std::shared_ptr<audio_sample>, MAX_AUDIO_SAMPLES> samples;
 
 audio_sample::~audio_sample() {
 	// iterate over channels
@@ -120,7 +114,7 @@ int EnhancedSamplesGenerator::getSample() {
 	}
 
 	auto samplePtr = _sample.lock();
-	auto sample = samplePtr->data[_index++];
+	int sample = samplePtr->data[_index++];
 	
 	// Insert looping magic here
 	if (_index >= samplePtr->length) {
@@ -136,7 +130,7 @@ int EnhancedSamplesGenerator::getSample() {
 	return sample;
 }
 
-audio_channel::audio_channel(uint8_t channel) {
+audio_channel::audio_channel(int channel) {
 	this->_channel = channel;
 	this->_state = AUDIO_STATE_IDLE;
 	this->_volume = 0;
@@ -156,7 +150,7 @@ audio_channel::~audio_channel() {
 	debug_log("audio_driver: deinit %d\n\r", this->_channel);
 }
 
-uint8_t audio_channel::play_note(uint8_t volume, uint16_t frequency, int32_t duration) {
+word audio_channel::play_note(byte volume, word frequency, word duration) {
 	switch (this->_state) {
 		case AUDIO_STATE_IDLE:
 		case AUDIO_STATE_RELEASE:
@@ -170,8 +164,8 @@ uint8_t audio_channel::play_note(uint8_t volume, uint16_t frequency, int32_t dur
 	return 0;
 }
 
-uint8_t audio_channel::getStatus() {
-	uint8_t status = 0;
+byte audio_channel::getStatus() {
+	byte status = 0;
 	if (this->_waveform && this->_waveform->enabled()) {
 		status |= AUDIO_STATUS_ACTIVE;
 		if (this->_duration == -1) {
@@ -224,13 +218,13 @@ void audio_channel::setWaveform(int8_t waveformType, std::shared_ptr<audio_chann
 				int8_t sampleNum = -waveformType - 1;
 				if (sampleNum >= 0 && sampleNum < MAX_AUDIO_SAMPLES) {
 					debug_log("audio_driver: using sample %d for waveform (%d)\n\r", waveformType, sampleNum);
-					if (samples.find(sampleNum) != samples.end()) {
-						auto sample = samples.at(sampleNum);
+					auto sample = samples.at(sampleNum);
+					if (sample) {
 						newWaveform = new EnhancedSamplesGenerator(sample);
 						// remove this channel from other samples
-						for (auto samplePair : samples) {
-							if (samplePair.second) {
-								samplePair.second->channels.erase(_channel);
+						for (auto sample : samples) {
+							if (sample) {
+								sample->channels.erase(_channel);
 							}
 						}
 						sample->channels[_channel] = channelRef;
@@ -265,7 +259,7 @@ void audio_channel::setWaveform(int8_t waveformType, std::shared_ptr<audio_chann
 	}
 }
 
-void audio_channel::setVolume(uint8_t volume) {
+void audio_channel::setVolume(byte volume) {
 	debug_log("audio_driver: setVolume %d\n\r", volume);
 
 	if (this->_waveform) {
@@ -312,7 +306,7 @@ void audio_channel::setVolume(uint8_t volume) {
 	}
 }
 
-void audio_channel::setFrequency(uint16_t frequency) {
+void audio_channel::setFrequency(word frequency) {
 	debug_log("audio_driver: setFrequency %d\n\r", frequency);
 	this->_frequency = frequency;
 
@@ -355,21 +349,21 @@ void audio_channel::waitForAbort() {
 	}
 }
 
-uint8_t audio_channel::getVolume(uint32_t elapsed) {
+byte audio_channel::getVolume(word elapsed) {
 	if (this->_volumeEnvelope) {
 		return this->_volumeEnvelope->getVolume(this->_volume, elapsed, this->_duration);
 	}
 	return this->_volume;
 }
 
-uint16_t audio_channel::getFrequency(uint32_t elapsed) {
+word audio_channel::getFrequency(word elapsed) {
 	if (this->_frequencyEnvelope) {
-		return this->_frequencyEnvelope->getFrequency(this->_frequency, elapsed, this->_duration);
+		return this->_frequencyEnvelope->getFrequency((uint16_t) this->_frequency, (uint16_t) elapsed, this->_duration);
 	}
 	return this->_frequency;
 }
 
-bool audio_channel::isReleasing(uint32_t elapsed) {
+bool audio_channel::isReleasing(word elapsed) {
 	if (this->_volumeEnvelope) {
 		return this->_volumeEnvelope->isReleasing(elapsed, this->_duration);
 	}
@@ -379,7 +373,7 @@ bool audio_channel::isReleasing(uint32_t elapsed) {
 	return elapsed >= this->_duration;
 }
 
-bool audio_channel::isFinished(uint32_t elapsed) {
+bool audio_channel::isFinished(word elapsed) {
 	if (this->_volumeEnvelope) {
 		return this->_volumeEnvelope->isFinished(elapsed, this->_duration);
 	}
@@ -416,7 +410,7 @@ void audio_channel::loop() {
 		case AUDIO_STATE_PLAYING:
 			if (this->_duration >= 0) {
 				// simple playback - delay until we have reached our duration
-				uint32_t elapsed = millis() - this->_startTime;
+				word elapsed = millis() - this->_startTime;
 				debug_log("audio_driver: elapsed %d\n\r", elapsed);
 				if (elapsed >= this->_duration) {
 					this->_waveform->enable(false);
@@ -434,7 +428,7 @@ void audio_channel::loop() {
 			break;
 		// loop and release states used for envelopes
 		case AUDIO_STATE_PLAY_LOOP: {
-			uint32_t elapsed = millis() - this->_startTime;
+			word elapsed = millis() - this->_startTime;
 			if (isReleasing(elapsed)) {
 				debug_log("audio_driver: releasing...\n\r");
 				this->_state = AUDIO_STATE_RELEASE;
@@ -447,7 +441,7 @@ void audio_channel::loop() {
 			break;
 		}
 		case AUDIO_STATE_RELEASE: {
-			uint32_t elapsed = millis() - this->_startTime;
+			word elapsed = millis() - this->_startTime;
 			// update volume and frequency as appropriate
 			if (this->_volumeEnvelope)
 				this->_waveform->setVolume(this->getVolume(elapsed));

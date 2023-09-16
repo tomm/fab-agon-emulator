@@ -25,7 +25,6 @@
 
 
 
-#include <alloca.h>
 #include <mutex>
 #include <stdarg.h>
 #include <math.h>

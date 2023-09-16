@@ -9,7 +9,7 @@ Emulator shortcuts are accessed with the *right alt* key (AltGr on some keyboard
  * RightAlt-F - Toggle fullscreen mode
  * RightAlt-Q - Quit
 
-## Compiling the Fab Agon Emulator
+## Compiling the Fab Agon Emulator (on Linux)
 
 To make an optimised release build, run:
 
@@ -31,26 +31,12 @@ or
 
 ## Changing VDP version
 
-By default, Fab Agon Emulator is compiled with Console8 VDP firmware.
-To build with Quark VDP 1.03 firmware, run:
+By default, Fab Agon Emulator boots with 1.04 firmware. To start up
+with 1.03 firmware, run:
 
 ```
-VDP_VERSION=quark103 cargo build -r
+./target/release/fab-agon-emulator --firmware 1.03
 ```
-
-If you want to quickly switch between VDP versions, the best option currently
-is to keep a fab-agon-emulator binary for each VDP version you wish to use.
-
-## Changing MOS version
-
-To start the emulator using a different MOS binary:
-
-```
-./target/release/fab-agon-emulator --mos my_mos.bin
-```
-
-Note that you will need a .map file with the same name (ie my_mos.map), or
-host filesystem integration will not be enabled.
 
 ## Other command-line options
 
@@ -59,3 +45,11 @@ Read about other command-line options with:
 ```
 ./target/release/fab-agon-emulator --help
 ```
+
+## Compiling for Windows
+
+WIP
+
+apt install mingw-w64
+rustup target add x86_64-pc-windows-gnu
+

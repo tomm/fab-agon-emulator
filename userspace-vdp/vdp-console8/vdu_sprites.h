@@ -1,24 +1,24 @@
 #ifndef _VDU_SPRITES_H_
 #define _VDU_SPRITES_H_
 
+#include <Arduino.h>
 #include <fabgl.h>
 
 #include "sprites.h"
 #include "vdp_protocol.h"
-#include "types.h"
 
-void receiveBitmap(uint8_t cmd, uint16_t width, uint16_t height) {
+void receiveBitmap(int cmd, uint16_t width, uint16_t height) {
 	//
 	// Allocate new heap data
 	//
-	void * dataptr = PreferPSRAMAlloc(sizeof(uint32_t)*width*height);
+	void * dataptr = (void *)heap_caps_malloc(sizeof(uint32_t)*width*height, MALLOC_CAP_SPIRAM);
 
 	if (dataptr != NULL) {                  
 		if (cmd == 1) {
 			//
 			// Read data to the new databuffer
 			//
-			for (auto n = 0; n < width*height; n++) ((uint32_t *)dataptr)[n] = readLong_b();  
+			for (int n = 0; n < width*height; n++) ((uint32_t *)dataptr)[n] = readLong_b();  
 			debug_log("vdu_sys_sprites: bitmap %d - data received - width %d, height %d\n\r", getCurrentBitmap(), width, height);
 		}
 		if (cmd == 2) {
@@ -26,12 +26,12 @@ void receiveBitmap(uint8_t cmd, uint16_t width, uint16_t height) {
 			//
 			// Define single color
 			//
-			for (auto n = 0; n < width*height; n++) ((uint32_t *)dataptr)[n] = color;            
+			for (int n = 0; n < width*height; n++) ((uint32_t *)dataptr)[n] = color;            
 			debug_log("vdu_sys_sprites: bitmap %d - set to solid color - width %d, height %d\n\r", getCurrentBitmap(), width, height);            
 		}
 		// Create bitmap structure
 		//
-		createBitmap(width, height, dataptr);
+		createBitmap(width,height,dataptr);
 	}
 	else { 
 		//
@@ -51,11 +51,11 @@ void receiveBitmap(uint8_t cmd, uint16_t width, uint16_t height) {
 // Sprite Engine
 //
 void vdu_sys_sprites(void) {
-	auto cmd = readByte_t();
+	int cmd = readByte_t();
 
-	switch (cmd) {
+	switch(cmd) {
 		case 0: {	// Select bitmap
-			auto	rb = readByte_t();
+			int	rb = readByte_t();
 			if (rb >= 0) {
 				setCurrentBitmap(rb);
 				debug_log("vdu_sys_sprites: bitmap %d selected\n\r", getCurrentBitmap());
@@ -64,16 +64,16 @@ void vdu_sys_sprites(void) {
 
 		case 1:		// Send bitmap data
 		case 2: {	// Define bitmap in single color
-			auto rw = readWord_t(); if (rw == -1) return;
-			auto rh = readWord_t(); if (rh == -1) return;
+			int rw = readWord_t(); if (rw == -1) return;
+			int rh = readWord_t(); if (rh == -1) return;
 
 			receiveBitmap(cmd, rw, rh);
 
 		}	break;
 
 		case 3: {	// Draw bitmap to screen (x,y)
-			auto	rx = readWord_t(); if (rx == -1) return;
-			auto ry = readWord_t(); if (ry == -1) return;
+			int	rx = readWord_t(); if (rx == -1) return;
+			int ry = readWord_t(); if (ry == -1) return;
 
 			drawBitmap(rx,ry);
 			debug_log("vdu_sys_sprites: bitmap %d draw command\n\r", getCurrentBitmap());
@@ -92,7 +92,7 @@ void vdu_sys_sprites(void) {
 		* 7) Refresh
 		*/
 		case 4: {	// Select sprite
-			auto b = readByte_t(); if (b == -1) return;
+			int b = readByte_t(); if (b == -1) return;
 			setCurrentSprite(b);
 			debug_log("vdu_sys_sprites: sprite %d selected\n\r", getCurrentSprite());
 		}	break;
@@ -103,13 +103,13 @@ void vdu_sys_sprites(void) {
 		}	break;
 
 		case 6:	{	// Add frame to sprite
-			auto b = readByte_t(); if (b == -1) return;
+			int b = readByte_t(); if (b == -1) return;
 			addSpriteFrame(b);
 			debug_log("vdu_sys_sprites: sprite %d - bitmap %d added as frame %d\n\r", getCurrentSprite(), b, getSprite()->framesCount-1);
 		}	break;
 
 		case 7:	{	// Active sprites to GDU
-			auto b = readByte_t(); if (b == -1) return;
+			int b = readByte_t(); if (b == -1) return;
 			activateSprites(b);
 			debug_log("vdu_sys_sprites: %d sprites activated\n\r", numsprites);
 		}	break;
@@ -125,7 +125,7 @@ void vdu_sys_sprites(void) {
 		}	break;
 
 		case 10: {	// Set current frame id on sprite
-			auto b = readByte_t(); if (b == -1) return;
+			int b = readByte_t(); if (b == -1) return;
 			setSpriteFrame(b);
 			debug_log("vdu_sys_sprites: sprite %d set to frame %d\n\r", getCurrentSprite(), b);
 		}	break;
@@ -141,15 +141,15 @@ void vdu_sys_sprites(void) {
 		}	break;
 
 		case 13: {	// Move sprite to coordinate on screen
-			auto rx = readWord_t(); if (rx == -1) return;
-			auto ry = readWord_t(); if (ry == -1) return;
+			int	rx = readWord_t(); if (rx == -1) return;
+			int ry = readWord_t(); if (ry == -1) return;
 			moveSprite(rx, ry);
 			debug_log("vdu_sys_sprites: sprite %d - move to (%d,%d)\n\r", getCurrentSprite(), rx, ry);
 		}	break;
 
 		case 14: {	// Move sprite by offset to current coordinate on screen
-			auto rx = readWord_t(); if (rx == -1) return;
-			auto ry = readWord_t(); if (ry == -1) return;
+			int	rx = readWord_t(); if (rx == -1) return;
+			int ry = readWord_t(); if (ry == -1) return;
 			moveSpriteBy(rx, ry);
 			debug_log("vdu_sys_sprites: sprite %d - move by offset (%d,%d)\n\r", getCurrentSprite(), rx, ry);
 		}	break;

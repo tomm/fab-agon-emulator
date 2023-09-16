@@ -3,7 +3,7 @@
 #include "vdp.h"
 
 /* Buffer must be big enough for any screen resolution - up to 1024x768x3 bytes :) */
-void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
+static void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 {
 	auto vga = getVDPVGAController();
 	const int w = vga->getScreenWidth();
@@ -14,6 +14,9 @@ void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 	Rect rect(0, 0, w-1, h-1);
 	vga->readScreen(rect, (fabgl::RGB888*)buffer);
 }
+
+static fabgl::RGB888 buf[1024*768];
+
 int main() {
 	printf("Starting the userspace fabgl+VDP...\n");
 	// VDP_GP to get past wait_ez80
@@ -24,7 +27,6 @@ int main() {
 	setup();
 	auto vga = fabgl::VGA16Controller::instance();
 	int h, w;
-	fabgl::RGB888 buf[1024*768];
 	copyVgaFramebuffer(&w, &h, buf);
 	printf("Screen dimensions: %d x %d\n", w, h);
 	printf("Dumping VGA framebuffer post-VDP-setup():\n");

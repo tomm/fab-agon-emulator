@@ -4,31 +4,16 @@ use sdl2::event::Event;
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
 use std::thread;
-
 use crate::parse_args::parse_args;
 mod sdl2ps2;
 mod parse_args;
-
-extern "C" {
-    fn vdp_setup();
-    fn vdp_loop();
-    fn copyVgaFramebuffer(outWidth: *mut u32, outHeight: *mut u32, buffer: *mut u8);
-    fn z80_send_to_vdp(b: u8);
-    fn z80_recv_from_vdp(out: *mut u8) -> bool;
-    fn sendHostKbEventToFabgl(ps2scancode: u16, isDown: bool);
-    fn getAudioSamples(out: *mut u8, length: u32);
-    fn vdp_shutdown();
-}
+mod vdp_interface;
 
 const AUDIO_BUFLEN: usize = 2000;
 
-#[cfg(vdp_quark103)]
-const MOS_VER: &'static str = "quark103";
-#[cfg(vdp_console8)]
-const MOS_VER: &'static str = "quark104rc1";
-
 pub fn main() -> Result<(), pico_args::Error> {
     let args = parse_args()?;
+    let vdp_interface = vdp_interface::init(&format!("vdp_{:?}.so", args.firmware), &args);
 
     // Set up various comms channels
     let (tx_vdp_to_ez80, rx_vdp_to_ez80): (Sender<u8>, Receiver<u8>) = mpsc::channel();
@@ -60,7 +45,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             mos_bin: if let Some(mos_bin) = args.mos_bin {
                 mos_bin
             } else {
-                std::path::PathBuf::from(format!("mos_{}.bin", MOS_VER))
+                std::path::PathBuf::from(format!("mos_{:?}.bin", args.firmware))
             },
         });
         machine.set_sdcard_directory(std::path::PathBuf::from(args.sdcard.unwrap_or("sdcard".to_string())));
@@ -73,7 +58,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             'z80_to_vdp: loop {
                 match rx_ez80_to_vdp.try_recv() {
                     Ok(data) => unsafe {
-                        z80_send_to_vdp(data);
+                        (*vdp_interface.z80_send_to_vdp)(data);
                     }
                     Err(mpsc::TryRecvError::Disconnected) => panic!(),
                     Err(mpsc::TryRecvError::Empty) => {
@@ -85,7 +70,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             'vdp_to_z80: loop {
                 let mut data: u8 = 0;
                 unsafe {
-                    if !z80_recv_from_vdp(&mut data as *mut u8) {
+                    if !(*vdp_interface.z80_recv_from_vdp)(&mut data as *mut u8) {
                         break 'vdp_to_z80;
                     }
                     tx_vdp_to_ez80.send(data).unwrap();
@@ -99,8 +84,8 @@ pub fn main() -> Result<(), pico_args::Error> {
     // VDP thread
     let _vdp_thread = thread::spawn(move || {
         unsafe {
-            vdp_setup();
-            vdp_loop();
+            (*vdp_interface.vdp_setup)();
+            (*vdp_interface.vdp_loop)();
         }
     });
 
@@ -120,9 +105,12 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     let mut is_fullscreen = args.fullscreen;
     // large enough for any agon video mode
-    let mut vgabuf: [u8; 1024*768*3] = [0; 1024*768*3];
+    let mut vgabuf: Vec<u8> = Vec::with_capacity(1024*768*3);
+    unsafe { vgabuf.set_len(1024*768*3); }
     let mut mode_w = 640;
     let mut mode_h = 480;
+    let mut audio_buf: Vec<u8> = Vec::with_capacity(AUDIO_BUFLEN);
+    unsafe { audio_buf.set_len(AUDIO_BUFLEN); }
 
     // doesn't seem to work...
     sdl2::hint::set("SDL_HINT_RENDER_SCALE_QUALITY", "2");
@@ -162,9 +150,8 @@ pub fn main() -> Result<(), pico_args::Error> {
 
             // fill audio buffer
             if device.size() < AUDIO_BUFLEN as u32 {
-                let mut audio_buf: [u8; AUDIO_BUFLEN] = [0; AUDIO_BUFLEN];
                 unsafe {
-                    getAudioSamples(&mut audio_buf as *mut u8, AUDIO_BUFLEN as u32);
+                    (*vdp_interface.getAudioSamples)(&mut audio_buf[0] as *mut u8, AUDIO_BUFLEN as u32);
                 };
                 device.queue_audio(&audio_buf).unwrap();
             }
@@ -197,7 +184,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                         let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
                         if ps2scancode > 0 {
                             unsafe {
-                                sendHostKbEventToFabgl(ps2scancode, true);
+                                (*vdp_interface.sendHostKbEventToFabgl)(ps2scancode, 1);
                             }
                         }
                     }
@@ -205,7 +192,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                         let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
                         if ps2scancode > 0 {
                             unsafe {
-                                sendHostKbEventToFabgl(ps2scancode, false);
+                                (*vdp_interface.sendHostKbEventToFabgl)(ps2scancode, 0);
                             }
                         }
                     }
@@ -217,7 +204,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                 let mut w: u32 = 0;
                 let mut h: u32 = 0;
                 unsafe {
-                    copyVgaFramebuffer(&mut w as *mut u32, &mut h as *mut u32, &mut vgabuf[0] as *mut u8);
+                    (*vdp_interface.copyVgaFramebuffer)(&mut w as *mut u32, &mut h as *mut u32, &mut vgabuf[0] as *mut u8);
                 }
 
                 if w != mode_w || h != mode_h {
@@ -239,7 +226,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         }
     }
     println!("Shutting down fabgl+vdp...");
-    unsafe { vdp_shutdown(); }
+    unsafe { (*vdp_interface.vdp_shutdown)(); }
     std::thread::sleep(std::time::Duration::from_millis(200));
 
     Ok(())

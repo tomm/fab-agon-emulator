@@ -13,7 +13,7 @@ fabgl::VGAController		_VGAController64;	// VGA class - 64 colours
 
 fabgl::VGABaseController *	_VGAController;		// Pointer to the current VGA controller class (one of the above)
 
-uint8_t			_VGAColourDepth;				// Number of colours per pixel (2, 4, 8, 16 or 64)
+int				_VGAColourDepth;				// Number of colours per pixel (2, 4, 8, 16 or 64)
 bool			doubleBuffered = false;			// Disable double buffering by default
 
 
@@ -23,7 +23,7 @@ bool			doubleBuffered = false;			// Disable double buffering by default
 // Returns:
 // - A singleton instance of a VGAController class
 //
-fabgl::VGABaseController * getVGAController(uint8_t colours = _VGAColourDepth) {
+fabgl::VGABaseController * getVGAController(int colours = _VGAColourDepth) {
 	switch (colours) {
 		case  2: return _VGAController2.instance();
 		case  4: return _VGAController4.instance();
@@ -47,7 +47,7 @@ void updateRGB2PaletteLUT() {
 
 // Get current colour depth
 //
-inline uint8_t getVGAColourDepth() {
+inline int getVGAColourDepth() {
 	return _VGAColourDepth;
 }
 
@@ -56,8 +56,8 @@ inline uint8_t getVGAColourDepth() {
 // - l: The logical colour to change
 // - c: The new colour
 // 
-void setPaletteItem(uint8_t l, RGB888 c) {
-	auto depth = getVGAColourDepth();
+void setPaletteItem(int l, RGB888 c) {
+	int depth = getVGAColourDepth();
 	if (l < depth) {
 		switch (depth) {
 			case 2: _VGAController2.setPaletteItem(l, c); break;
@@ -77,7 +77,7 @@ void setPaletteItem(uint8_t l, RGB888 c) {
 // - 1: Invalid # of colours
 // - 2: Not enough memory for mode
 //
-int8_t change_resolution(uint8_t colours, char * modeLine) {
+int change_resolution(int colours, char * modeLine) {
 	auto controller = getVGAController(colours);
 
 	if (controller == nullptr) {					// If controller is null, then an invalid # of colours was passed
@@ -106,12 +106,6 @@ int8_t change_resolution(uint8_t colours, char * modeLine) {
 	controller->enableBackgroundPrimitiveTimeout(false);
 
 	canvas = new fabgl::Canvas(controller);			// Create the new canvas
-	debug_log("after change of canvas...\n\r");
-	debug_log("  free internal: %d\n\r  free 8bit: %d\n\r  free 32bit: %d\n\r",
-		heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
-		heap_caps_get_free_size(MALLOC_CAP_8BIT),
-		heap_caps_get_free_size(MALLOC_CAP_32BIT)
-	);
 	//
 	// Check whether the selected mode has enough memory for the vertical resolution
 	//

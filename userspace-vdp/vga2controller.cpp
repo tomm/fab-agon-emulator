@@ -25,7 +25,6 @@
 
 
 
-#include <alloca.h>
 #include <stdarg.h>
 #include <math.h>
 #include <string.h>
