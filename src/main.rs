@@ -118,6 +118,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     'running: loop {
 
         let mut window = video_subsystem.window("Fab Agon Emulator", 1024, 768)
+            .resizable()
             .position_centered()
             .build()
             .unwrap();
