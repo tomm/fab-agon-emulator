@@ -107,17 +107,15 @@ pub fn main() -> Result<(), pico_args::Error> {
     // large enough for any agon video mode
     let mut vgabuf: Vec<u8> = Vec::with_capacity(1024*768*3);
     unsafe { vgabuf.set_len(1024*768*3); }
+    let scale = args.scale.unwrap_or(2);
     let mut mode_w = 640;
     let mut mode_h = 480;
     let mut audio_buf: Vec<u8> = Vec::with_capacity(AUDIO_BUFLEN);
     unsafe { audio_buf.set_len(AUDIO_BUFLEN); }
 
-    // doesn't seem to work...
-    sdl2::hint::set("SDL_HINT_RENDER_SCALE_QUALITY", "2");
-
     'running: loop {
 
-        let mut window = video_subsystem.window("Fab Agon Emulator", 1024, 768)
+        let mut window = video_subsystem.window("Fab Agon Emulator", mode_w * scale, mode_h * scale)
             .resizable()
             .position_centered()
             .build()

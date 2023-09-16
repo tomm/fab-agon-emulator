@@ -9,6 +9,7 @@ OPTIONS:
   -f, --fullscreen      Start in fullscreen mode
   -h, --help            Prints help information
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
+  --scale               Set window scaling factor (default is 2)
   --firmware 1.03       Use 1.03 firmware (default is 1.04)
   --sdcard PATH         Sets the path of the emulated SDCard
 
@@ -30,6 +31,7 @@ pub struct AppArgs {
     pub debugger: bool,
     pub unlimited_cpu: bool,
     pub fullscreen: bool,
+    pub scale: Option<u32>,
     pub mos_bin: Option<std::path::PathBuf>,
     pub vdp_dll: Option<std::path::PathBuf>,
     pub firmware: FirmwareVer,
@@ -50,6 +52,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         debugger: pargs.contains(["-d", "--debugger"]),
         unlimited_cpu: pargs.contains(["-u", "--unlimited_cpu"]),
         fullscreen: pargs.contains(["-f", "--fullscreen"]),
+        scale: pargs.opt_value_from_str("--scale")?,
         mos_bin: pargs.opt_value_from_str("--mos")?,
         vdp_dll: pargs.opt_value_from_str("--vdp")?,
         firmware: if let Some(ver) = firmware_ver {
