@@ -222,7 +222,11 @@ pub fn main() -> Result<(), pico_args::Error> {
                 }).unwrap();
             }
 
-            canvas.copy(&texture, None, None).unwrap();
+            /* Keep rendered output to 4:3 aspect ratio */
+            let dst = Some(calc_4_3_output_rect(&canvas));
+
+            canvas.clear();
+            canvas.copy(&texture, None, dst).unwrap();
             canvas.present();
         }
     }
@@ -231,4 +235,21 @@ pub fn main() -> Result<(), pico_args::Error> {
     std::thread::sleep(std::time::Duration::from_millis(200));
 
     Ok(())
+}
+
+fn calc_4_3_output_rect<T: sdl2::render::RenderTarget>(canvas: &sdl2::render::Canvas<T>) -> sdl2::rect::Rect {
+    let (wx, wy) = canvas.output_size().unwrap();
+    if wx > 4*wy/3 {
+        sdl2::rect::Rect::new(
+            (wx as i32 - 4*wy as i32/3) >> 1,
+            0,
+            4*wy/3, wy
+        )
+    } else {
+        sdl2::rect::Rect::new(
+            0,
+            (wy as i32 - 3*wx as i32/4) >> 1,
+            wx, 3*wx/4
+        )
+    }
 }
