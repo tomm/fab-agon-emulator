@@ -90,6 +90,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     });
 
     let sdl_context = sdl2::init().unwrap();
+    let native_resolution = sdl_context.video().unwrap().current_display_mode(0).unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let audio_subsystem = sdl_context.audio().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -107,17 +108,35 @@ pub fn main() -> Result<(), pico_args::Error> {
     // large enough for any agon video mode
     let mut vgabuf: Vec<u8> = Vec::with_capacity(1024*768*3);
     unsafe { vgabuf.set_len(1024*768*3); }
-    let mut mode_w = 640;
-    let mut mode_h = 480;
+    let mut mode_w: u32 = 640;
+    let mut mode_h: u32 = 480;
     let mut audio_buf: Vec<u8> = Vec::with_capacity(AUDIO_BUFLEN);
     unsafe { audio_buf.set_len(AUDIO_BUFLEN); }
 
-    // doesn't seem to work...
-    sdl2::hint::set("SDL_HINT_RENDER_SCALE_QUALITY", "2");
-
     'running: loop {
 
-        let mut window = video_subsystem.window("Fab Agon Emulator", 1024, 768)
+        let (wx, wy): (u32, u32) = {
+            if is_fullscreen {
+                (native_resolution.w as u32, native_resolution.h as u32)
+            } else if args.perfect_scale {
+                let scale = native_resolution.h as u32 / mode_h;
+                // deal with weird aspect ratios
+                match 10*mode_w / mode_h {
+                    // 2.66 (640x240)
+                    26 => 
+                        // scale & !1 keeps the scale divisible by 2, needed for the width scaling
+                        ((mode_w * (scale & !1)) >> 1, mode_h * (scale & !1)),
+                    // 1.6 (320x200)
+                    16 => (10 * mode_w * scale / 12, mode_h * scale),
+                    // 1.33
+                    13 | _ => (mode_w * scale, mode_h * scale)
+                }
+            } else {
+                (640, 480)
+            }
+        };
+
+        let mut window = video_subsystem.window("Fab Agon Emulator", wx, wy)
             .resizable()
             .position_centered()
             .build()
@@ -213,6 +232,10 @@ pub fn main() -> Result<(), pico_args::Error> {
                     mode_w = w;
                     mode_h = h;
                     texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
+                    // may need to resize the window
+                    if args.perfect_scale && !is_fullscreen {
+                        break 'inner;
+                    }
                 }
 
                 texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, _pitch| {

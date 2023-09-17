@@ -15,6 +15,7 @@ OPTIONS:
 ADVANCED:
   --mos PATH            Use a different MOS.bin firmware
   --vdp PATH            Use a different VDP dll/so firmware
+  -ps, --perfect-scale  Use perfect (integer) video mode scaling
 ";
 
 #[derive(Debug)]
@@ -33,6 +34,7 @@ pub struct AppArgs {
     pub mos_bin: Option<std::path::PathBuf>,
     pub vdp_dll: Option<std::path::PathBuf>,
     pub firmware: FirmwareVer,
+    pub perfect_scale: bool,
 }
 
 pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
@@ -50,6 +52,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         debugger: pargs.contains(["-d", "--debugger"]),
         unlimited_cpu: pargs.contains(["-u", "--unlimited_cpu"]),
         fullscreen: pargs.contains(["-f", "--fullscreen"]),
+        perfect_scale: pargs.contains(["-ps", "--perfect-scale"]),
         mos_bin: pargs.opt_value_from_str("--mos")?,
         vdp_dll: pargs.opt_value_from_str("--vdp")?,
         firmware: if let Some(ver) = firmware_ver {
