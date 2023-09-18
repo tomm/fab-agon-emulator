@@ -95,6 +95,8 @@ pub fn main() -> Result<(), pico_args::Error> {
     let audio_subsystem = sdl_context.audio().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
 
+    //println!("Detected {}x{} native resolution", native_resolution.w, native_resolution.h);
+
     let desired_spec = sdl2::audio::AudioSpecDesired {
         freq: Some(16384), // real VDP uses 16384Hz
         channels: Some(1),
@@ -118,8 +120,8 @@ pub fn main() -> Result<(), pico_args::Error> {
         let (wx, wy): (u32, u32) = {
             if is_fullscreen {
                 (native_resolution.w as u32, native_resolution.h as u32)
-            } else if args.perfect_scale {
-                let scale = native_resolution.h as u32 / mode_h;
+            } else if let Some(max_height) = args.perfect_scale {
+                let scale = u32::max(1, max_height as u32 / mode_h);
                 // deal with weird aspect ratios
                 match 10*mode_w / mode_h {
                     // 2.66 (640x240)
@@ -132,6 +134,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                     13 | _ => (mode_w * scale, mode_h * scale)
                 }
             } else {
+                // only reached on startup
                 (640, 480)
             }
         };
@@ -233,7 +236,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                     mode_h = h;
                     texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
                     // may need to resize the window
-                    if args.perfect_scale && !is_fullscreen {
+                    if args.perfect_scale.is_some() && !is_fullscreen {
                         break 'inner;
                     }
                 }
