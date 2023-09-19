@@ -20,7 +20,7 @@
 # Once this is all done, running this script should build a Windows binary zip.
 
 cd userspace-vdp
-CXX=x86_64-w64-mingw32 make -f Makefile-mingw
+CXX=x86_64-w64-mingw32-g++-posix make
 cp *.so ..
 cd ..
 cargo build -r --target=x86_64-pc-windows-gnu
