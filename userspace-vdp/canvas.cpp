@@ -396,7 +396,7 @@ void Canvas::selectFont(FontInfo const * fontInfo)
 
 void Canvas::drawChar(int X, int Y, char c)
 {
-  drawGlyph(X, Y, m_fontInfo->width, m_fontInfo->height, m_fontInfo->data, (unsigned)c);
+  drawGlyph(X, Y, m_fontInfo->width, m_fontInfo->height, m_fontInfo->data, (unsigned char)c);
 }
 
 
