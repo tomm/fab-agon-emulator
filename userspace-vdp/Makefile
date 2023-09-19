@@ -1,6 +1,6 @@
 # This makefile is for a pure c++ vdp build, for testing purposes.
 # Use cargo build for the real thing
-CXX = g++
+CXX ?= g++
 CFLAGS = -Wall -O2 -fmax-errors=1 -g -I. -I./dispdrivers
 OPTIONS = 
 

@@ -48,8 +48,10 @@ Read about other command-line options with:
 
 ## Compiling for Windows
 
-WIP
+### To cross-compile on a Linux machine
 
-apt install mingw-w64
-rustup target add x86_64-pc-windows-gnu
+Read [make_win64_dist.sh](./make_win64_dist.sh).
 
+### To build on Windows
+
+TODO
