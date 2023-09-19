@@ -20,7 +20,7 @@
 # Once this is all done, running this script should build a Windows binary zip.
 
 cd userspace-vdp
-CXX=x86_64-w64-mingw32 make -f Makefile-mingw
+CXX=x86_64-w64-mingw32-g++-posix make
 cp *.so ..
 cd ..
 cargo build -r --target=x86_64-pc-windows-gnu
@@ -37,6 +37,7 @@ DIST_DIR=fab-agon-emulator-$GIT_TAG
 rm -rf $DIST_DIR
 mkdir $DIST_DIR
 cp ./target/x86_64-pc-windows-gnu/release/fab-agon-emulator.exe $DIST_DIR
+cp SDL2.dll $DIST_DIR
 cp libgcc_s_seh-1.dll $DIST_DIR
 cp libstdc++-6.dll $DIST_DIR
 cp libwinpthread-1.dll $DIST_DIR
