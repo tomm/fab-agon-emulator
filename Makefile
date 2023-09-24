@@ -1,6 +1,7 @@
 all:
 	$(MAKE) -C userspace-vdp
-	cp userspace-vdp/*.so .
+	mkdir -p firmware
+	cp userspace-vdp/*.so firmware/
 
 clean:
 	$(MAKE) -C userspace-vdp clean

@@ -13,7 +13,7 @@ const AUDIO_BUFLEN: usize = 2000;
 
 pub fn main() -> Result<(), pico_args::Error> {
     let args = parse_args()?;
-    let vdp_interface = vdp_interface::init(&format!("vdp_{:?}.so", args.firmware), &args);
+    let vdp_interface = vdp_interface::init(&format!("firmware/vdp_{:?}.so", args.firmware), &args);
 
     // Set up various comms channels
     let (tx_vdp_to_ez80, rx_vdp_to_ez80): (Sender<u8>, Receiver<u8>) = mpsc::channel();
@@ -45,7 +45,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             mos_bin: if let Some(mos_bin) = args.mos_bin {
                 mos_bin
             } else {
-                std::path::PathBuf::from(format!("mos_{:?}.bin", args.firmware))
+                std::path::PathBuf::from(format!("firmware/mos_{:?}.bin", args.firmware))
             },
         });
         machine.set_sdcard_directory(std::path::PathBuf::from(args.sdcard.unwrap_or("sdcard".to_string())));
