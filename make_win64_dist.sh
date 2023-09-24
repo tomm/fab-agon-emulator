@@ -32,7 +32,7 @@ if [[ -z "$GIT_TAG" ]]; then
 	exit -1
 fi
 
-DIST_DIR=fab-agon-emulator-$GIT_TAG
+DIST_DIR=fab-agon-emulator-$GIT_TAG-windows
 
 rm -rf $DIST_DIR
 mkdir $DIST_DIR
