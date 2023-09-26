@@ -8,8 +8,9 @@ use crate::parse_args::parse_args;
 mod sdl2ps2;
 mod parse_args;
 mod vdp_interface;
+mod audio;
 
-const AUDIO_BUFLEN: usize = 2000;
+const AUDIO_BUFLEN: u16 = 256;
 
 pub fn main() -> Result<(), pico_args::Error> {
     let args = parse_args()?;
@@ -100,11 +101,17 @@ pub fn main() -> Result<(), pico_args::Error> {
     let desired_spec = sdl2::audio::AudioSpecDesired {
         freq: Some(16384), // real VDP uses 16384Hz
         channels: Some(1),
-        samples: None,
+        samples: Some(AUDIO_BUFLEN),
     };
 
-    let device: sdl2::audio::AudioQueue<u8> = audio_subsystem.open_queue(None, &desired_spec).unwrap();
-    device.resume();
+    let audio_device = audio_subsystem.open_playback(None, &desired_spec, |_spec| {
+        audio::VdpAudioStream {
+            getAudioSamples: vdp_interface.getAudioSamples
+        }
+    }).unwrap();
+
+    // start playback
+    audio_device.resume();
 
     let mut is_fullscreen = args.fullscreen;
     // large enough for any agon video mode
@@ -112,8 +119,6 @@ pub fn main() -> Result<(), pico_args::Error> {
     unsafe { vgabuf.set_len(1024*768*3); }
     let mut mode_w: u32 = 640;
     let mut mode_h: u32 = 480;
-    let mut audio_buf: Vec<u8> = Vec::with_capacity(AUDIO_BUFLEN);
-    unsafe { audio_buf.set_len(AUDIO_BUFLEN); }
 
     'running: loop {
 
@@ -169,14 +174,6 @@ pub fn main() -> Result<(), pico_args::Error> {
             else if elapsed_since_last_frame > std::time::Duration::from_millis(100) {
                 // don't let lots of frames queue up, due to system lag or whatever
                 last_frame_time = std::time::Instant::now();
-            }
-
-            // fill audio buffer
-            if device.size() < AUDIO_BUFLEN as u32 {
-                unsafe {
-                    (*vdp_interface.getAudioSamples)(&mut audio_buf[0] as *mut u8, AUDIO_BUFLEN as u32);
-                };
-                device.queue_audio(&audio_buf).unwrap();
             }
 
             // Present a frame
