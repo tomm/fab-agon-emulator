@@ -1,6 +1,6 @@
 [package]
 name = "fab-agon-emulator"
-version = "0.7.4"
+version = "0.7.5"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"
