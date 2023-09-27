@@ -11,8 +11,8 @@ repository = "https://github.com/tomm/fab-agon-emulator"
 [dependencies]
 sdl2 = "0.35.2"
 pico-args = "0.5.0"
-agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="836a74b87a0750d0ffbfa8a0aa4b9e07aab45dd2"}
-agon-light-emulator-debugger = { git = "https://github.com/tomm/agon-light-emulator-debugger.git", rev="43c2dde09d193800d938f4ec1f62fa813fdbddb7"}
+agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="cf8cdbc472d8e60352fb5a8500a9b3229ae038bb"}
+agon-light-emulator-debugger = { git = "https://github.com/tomm/agon-light-emulator-debugger.git", rev="275880c9c567e13cc880d76bb0b3c7b145a0f5e4"}
 libloading = "0.8.0"
 
 #agon-cpu-emulator = { path = "../agon-cpu-emulator" }
