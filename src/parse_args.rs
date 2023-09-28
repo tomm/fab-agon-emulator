@@ -6,6 +6,8 @@ USAGE:
 
 OPTIONS:
   -d, --debugger        Enable the eZ80 debugger
+  -b, --breakpoint      Set a breakpoint before starting
+  -z, --zero            Initialize ram with zeroes instead of random values
   -f, --fullscreen      Start in fullscreen mode
   -h, --help            Prints help information
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
@@ -30,8 +32,10 @@ pub enum FirmwareVer {
 pub struct AppArgs {
     pub sdcard: Option<String>,
     pub debugger: bool,
+    pub breakpoint: Option<String>,
     pub unlimited_cpu: bool,
     pub fullscreen: bool,
+    pub zero: bool,
     pub mos_bin: Option<std::path::PathBuf>,
     pub vdp_dll: Option<std::path::PathBuf>,
     pub firmware: FirmwareVer,
@@ -51,8 +55,10 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
     let args = AppArgs {
         sdcard: pargs.opt_value_from_str("--sdcard")?,
         debugger: pargs.contains(["-d", "--debugger"]),
+        breakpoint: pargs.opt_value_from_str(["-b", "--breakpoint"])?,
         unlimited_cpu: pargs.contains(["-u", "--unlimited_cpu"]),
         fullscreen: pargs.contains(["-f", "--fullscreen"]),
+        zero: pargs.contains(["-z", "--zero"]),
         perfect_scale: pargs.opt_value_from_str("--scale")?,
         mos_bin: pargs.opt_value_from_str("--mos")?,
         vdp_dll: pargs.opt_value_from_str("--vdp")?,
