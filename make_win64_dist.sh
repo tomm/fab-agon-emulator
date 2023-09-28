@@ -20,10 +20,11 @@
 # Once this is all done, running this script should build a Windows binary zip.
 
 make clean
-cd userspace-vdp
+cd src/vdp
 CXX=x86_64-w64-mingw32-g++-posix make
-cp *.so ../firmware
-cd ..
+cp *.so ../../firmware
+cd ../..
+
 cargo build -r --target=x86_64-pc-windows-gnu
 
 GIT_TAG=`git tag --points-at HEAD`

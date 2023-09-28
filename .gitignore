@@ -1,4 +1,5 @@
 /target
-userspace-vdp/userspace-vdp
+src/vdp/*.o
+src/vdp/*.so
 .DS_Store
-firmware
+firmware/vdp_*.so

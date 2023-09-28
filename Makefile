@@ -1,10 +1,10 @@
 all:
-	$(MAKE) -C userspace-vdp
+	$(MAKE) -C src/vdp
 	mkdir -p firmware
-	cp userspace-vdp/*.so firmware/
+	cp src/vdp/*.so firmware/
 
 clean:
-	$(MAKE) -C userspace-vdp clean
+	$(MAKE) -C src/vdp clean
 
 depends:
-	$(MAKE) -C userspace-vdp depends
+	$(MAKE) -C src/vdp depends
