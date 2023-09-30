@@ -45,6 +45,7 @@ cp libgcc_s_seh-1.dll $DIST_DIR
 cp libstdc++-6.dll $DIST_DIR
 cp libwinpthread-1.dll $DIST_DIR
 cp LICENSE README.md $DIST_DIR
-cp -r sdcard $DIST_DIR
+mkdir $DIST_DIR/sdcard
+cp -r sdcard/* $DIST_DIR/sdcard/
 zip -r $DIST_DIR.zip $DIST_DIR
 
