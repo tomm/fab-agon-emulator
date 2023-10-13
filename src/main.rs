@@ -189,7 +189,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                     },
                     Event::KeyDown { keycode, scancode, keymod, .. } => {
                         // handle emulator shortcut keys
-                        if keymod.contains(sdl2::keyboard::Mod::RALTMOD) {
+                        let consumed = if keymod.contains(sdl2::keyboard::Mod::RALTMOD) {
                             match keycode {
                                 Some(sdl2::keyboard::Keycode::F) => {
                                     is_fullscreen = !is_fullscreen;
@@ -198,13 +198,25 @@ pub fn main() -> Result<(), pico_args::Error> {
                                 Some(sdl2::keyboard::Keycode::Q) => {
                                     break 'running;
                                 }
-                                _ => {}
+                                Some(sdl2::keyboard::Keycode::C) => {
+                                    // caps-lock
+                                    unsafe {
+                                        (*vdp_interface.sendHostKbEventToFabgl)(0x58, 1);
+                                        (*vdp_interface.sendHostKbEventToFabgl)(0x58, 0);
+                                    }
+                                    true
+                                }
+                                _ => false
                             }
-                        }
-                        let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
-                        if ps2scancode > 0 {
-                            unsafe {
-                                (*vdp_interface.sendHostKbEventToFabgl)(ps2scancode, 1);
+                        } else {
+                            false
+                        };
+                        if !consumed {
+                            let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
+                            if ps2scancode > 0 {
+                                unsafe {
+                                    (*vdp_interface.sendHostKbEventToFabgl)(ps2scancode, 1);
+                                }
                             }
                         }
                     }

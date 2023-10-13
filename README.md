@@ -6,6 +6,7 @@ An emulator for the Agon Light, Agon Light 2, and Agon Console8 8-bit computers.
 
 Emulator shortcuts are accessed with the *right alt* key (AltGr on some keyboards).
 
+ * RightAlt-C - Toggle caps-lock
  * RightAlt-F - Toggle fullscreen mode
  * RightAlt-Q - Quit
 
