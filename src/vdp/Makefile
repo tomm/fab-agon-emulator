@@ -9,21 +9,21 @@ OBJS = $(SRCS:.cpp=.o)
 .cpp.o:
 	$(CXX) $(CFLAGS) $(OPTIONS) -fPIC -c $< -o $@
 
-all: vdp_gl vdp_console8.so vdp_quark103.so vdp_quark104.so test_main
+all: userspace-vdp-gl/vdp_gl.a vdp_console8.so vdp_quark103.so vdp_quark104.so test_main
 
-vdp_gl:
+userspace-vdp-gl/vdp_gl.a:
 	$(MAKE) -C userspace-vdp-gl/src
 
-test_main: $(OBJS) vdp_quark104.o test_main.o
+test_main: $(OBJS) userspace-vdp-gl/vdp_gl.a vdp_quark104.o test_main.o
 	$(CXX) $(OBJS) test_main.o vdp_quark104.o userspace-vdp-gl/src/vdp-gl.a -o test_main
 
-vdp_console8.so: $(OBJS) vdp-console8.o
+vdp_console8.so: $(OBJS) userspace-vdp-gl/vdp_gl.a vdp-console8.o
 	$(CXX) -shared $(OBJS) vdp-console8.o userspace-vdp-gl/src/vdp-gl.a -o vdp_console8.so
 
-vdp_quark103.so: $(OBJS) vdp-1.03.o
+vdp_quark103.so: $(OBJS) userspace-vdp-gl/vdp_gl.a vdp-1.03.o
 	$(CXX) -shared $(OBJS) vdp-1.03.o userspace-vdp-gl/src/vdp-gl.a -o vdp_quark103.so
 
-vdp_quark104.so: $(OBJS) vdp_quark104.o
+vdp_quark104.so: $(OBJS) userspace-vdp-gl/vdp_gl.a vdp_quark104.o
 	$(CXX) -shared $(OBJS) vdp_quark104.o userspace-vdp-gl/src/vdp-gl.a -o vdp_quark104.so
 
 clean:
