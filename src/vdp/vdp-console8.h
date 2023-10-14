@@ -50,4 +50,3 @@ extern word play_note(byte, byte, word, word);
 extern void printFmt(const char *format, ...);
 
 extern fabgl::SoundGenerator		SoundGenerator;		// The audio class
-extern fabgl::VGABaseController *	_VGAController;		// Pointer to the current VGA controller class (one of the above)

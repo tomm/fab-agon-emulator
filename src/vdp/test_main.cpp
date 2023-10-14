@@ -1,11 +1,13 @@
 #include "fabgl.h"
 #include "dispdrivers/vga16controller.h"
+#include "userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h"
 #include "vdp.h"
 
 /* Buffer must be big enough for any screen resolution - up to 1024x768x3 bytes :) */
 static void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 {
-	auto vga = getVDPVGAController();
+	auto lock = fabgl::VGABaseController::acquireLock();
+	auto vga = fabgl::VGABaseController::activeController;
 	const int w = vga->getScreenWidth();
 	const int h = vga->getScreenHeight();
 	*outHeight = h;
@@ -25,7 +27,6 @@ int main() {
 	z80_send_to_vdp(0x80);
 	z80_send_to_vdp(1);
 	setup();
-	auto vga = fabgl::VGA16Controller::instance();
 	int h, w;
 	copyVgaFramebuffer(&w, &h, buf);
 	printf("Screen dimensions: %d x %d\n", w, h);

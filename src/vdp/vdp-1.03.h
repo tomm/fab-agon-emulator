@@ -51,4 +51,3 @@ extern void set_mode(int mode);
 extern void init_audio_channel(int channel);
 
 extern fabgl::SoundGenerator		SoundGenerator;		// The audio class
-extern fabgl::VGABaseController *	VGAController;		// Pointer to the current VGA controller class (one of the above)

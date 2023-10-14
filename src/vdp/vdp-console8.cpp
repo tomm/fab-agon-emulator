@@ -5,9 +5,6 @@
 #include "vdp-console8.h"
 
 // VDP version-agnostic getters :)
-fabgl::VGABaseController *getVDPVGAController() {
-	return _VGAController;
-}
 fabgl::SoundGenerator *getVDPSoundGenerator() {
 	return &SoundGenerator;
 }

@@ -47,4 +47,3 @@ extern uint8_t play_note(uint8_t channel, uint8_t volume, uint16_t frequency, ui
 extern void printFmt(const char *format, ...);
 
 extern fabgl::SoundGenerator		SoundGenerator;		// The audio class
-extern std::unique_ptr<fabgl::VGABaseController>	_VGAController;		// Pointer to the current VGA controller class (one of the above)

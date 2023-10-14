@@ -1,6 +1,7 @@
 #include "fabutils.h"
 #include "fake_fabgl.h"
 #include "fabgl.h"
+#include "userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h"
 #include "vdp.h"
 #include "dispdrivers/vga16controller.h"
 #include "dispdrivers/vgabasecontroller.h"
@@ -12,9 +13,9 @@ extern void delay(int ms);
 /* ps2scancode is the set2 'make' code */
 extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 {
-	// get the VGA controller, since if it's initialized we know the keyboard is ready
-	fabgl::VGABaseController *vga = getVDPVGAController();
-	if (vga) {
+	auto lock = fabgl::VGABaseController::acquireLock();
+	// if the VGA controller is initialized we know the keyboard is ready
+	if (fabgl::VGABaseController::activeController != nullptr) {
 		fabgl::PS2Controller::keyboard()->injectScancode(ps2scancode, isDown);
 	}
 }
@@ -22,7 +23,8 @@ extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 /* Buffer must be big enough for any screen resolution - up to 1024x768x3 bytes :) */
 extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 {
-	fabgl::VGABaseController *vga = getVDPVGAController();
+	auto lock = fabgl::VGABaseController::acquireLock();
+	fabgl::VGABaseController *vga = fabgl::VGABaseController::activeController;
 
 	// the VGA controller may not have been initialized yet -- the rust render 
 	// loop may be quicker to start than the VDP setup() function, or the 
@@ -35,8 +37,6 @@ extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 		return;
 	}
 
-	auto lock = vga->lock();
-	/*
 	if (!vga->is_started()) {
 		// this can arise as a race condition, as the lock in 
 		// setResolution is dropped briefly between end() and the rest of the function.
@@ -45,7 +45,6 @@ extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 		memset(buffer, 0, 640*480*3);
 		return;
 	}
-	*/
 	const int w = vga->getScreenWidth();
 	const int h = vga->getScreenHeight();
 	*outHeight = h;
