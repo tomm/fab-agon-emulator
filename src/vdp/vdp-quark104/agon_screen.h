@@ -77,7 +77,7 @@ bool updateVGAController(uint8_t colours) {
 	_VGAColourDepth = colours;
 	if (_VGAController) {						// If there is an existing controller running then
 		_VGAController->end();					// end it
-		_VGAController.reset();					// Delete it
+		_VGAController.release();					// -TM- leak it. emulator is peeking at this object
 	}
 	_VGAController = std::move(controller);		// Switch to the new controller
 	_VGAController->begin();					// And spin it up
