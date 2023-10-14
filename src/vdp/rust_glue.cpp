@@ -36,6 +36,7 @@ extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 	}
 
 	auto lock = vga->lock();
+	/*
 	if (!vga->is_started()) {
 		// this can arise as a race condition, as the lock in 
 		// setResolution is dropped briefly between end() and the rest of the function.
@@ -44,6 +45,7 @@ extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 		memset(buffer, 0, 640*480*3);
 		return;
 	}
+	*/
 	const int w = vga->getScreenWidth();
 	const int h = vga->getScreenHeight();
 	*outHeight = h;
