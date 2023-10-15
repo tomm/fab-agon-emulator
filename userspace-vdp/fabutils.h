@@ -1368,6 +1368,9 @@ enum VirtualKey {
   VK_HANKAKU_ZENKAKU_KANJI,
   VK_SHIFT_0,
 
+  // Brazilian Portuguese layout support
+  VK_INTERNATIONAL1,  /** Forward slash next to right shift */
+  
   VK_ASCII,           /**< Specifies an ASCII code - used when virtual key is embedded in VirtualKeyItem structure and VirtualKeyItem.ASCII is valid */
   VK_LAST,            // marks the last virtual key
 

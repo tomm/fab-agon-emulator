@@ -120,11 +120,13 @@ extern const KeyboardLayout NorwegianLayout;
 /** @brief Japanese keyboard layout */
 extern const KeyboardLayout JapaneseLayout;
 
+/** @brief Brazilian Portuguese keyboard layout */
+extern const KeyboardLayout BrazilianPortugueseLayout;
 
 
 struct SupportedLayouts {
 
-  static constexpr int LAYOUTSCOUNT = 9;
+  static constexpr int LAYOUTSCOUNT = 10;
 
   static int count()               { return LAYOUTSCOUNT; }
 
@@ -139,6 +141,7 @@ struct SupportedLayouts {
         BelgianLayout.desc,
         NorwegianLayout.desc,
         JapaneseLayout.desc,
+        BrazilianPortugueseLayout.desc,
     };
     return NAMES;
   }
@@ -154,6 +157,7 @@ struct SupportedLayouts {
         BelgianLayout.name,
         NorwegianLayout.name,
         JapaneseLayout.name,
+        BrazilianPortugueseLayout.name,
     };
     return SNAMES;
   }
@@ -169,6 +173,7 @@ struct SupportedLayouts {
         &BelgianLayout,
         &NorwegianLayout,
         &JapaneseLayout,
+        &BrazilianPortugueseLayout,
     };
     return LAYOUTS;
   }

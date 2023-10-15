@@ -1294,6 +1294,7 @@ void vdu_sys_video_kblayout() {
 		case 6:	PS2Controller.keyboard()->setLayout(&fabgl::BelgianLayout); break;
 		case 7:	PS2Controller.keyboard()->setLayout(&fabgl::NorwegianLayout); break;
 		case 8:	PS2Controller.keyboard()->setLayout(&fabgl::JapaneseLayout);break;
+		case 9:	PS2Controller.keyboard()->setLayout(&fabgl::BrazilianPortugueseLayout); break;
 		default:
 			PS2Controller.keyboard()->setLayout(&fabgl::UKLayout);
 			break;

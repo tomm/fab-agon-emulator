@@ -105,6 +105,7 @@ pub fn sdl2ps2(scancode: sdl2::keyboard::Scancode) -> u16 {
         // pause break
         sdl2::keyboard::Scancode::Backslash => 0x5d,
         sdl2::keyboard::Scancode::NonUsBackslash => 0x61,
+        sdl2::keyboard::Scancode::International1 => 0x87,
         _ => 0
     }
 }
