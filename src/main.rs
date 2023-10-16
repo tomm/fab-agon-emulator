@@ -1,5 +1,5 @@
 use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit };
-use agon_cpu_emulator::debugger::{ DebugCmd, DebugResp, DebuggerConnection };
+use agon_cpu_emulator::debugger::{ DebugCmd, DebugResp, DebuggerConnection, Trigger };
 use sdl2::event::Event;
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
@@ -23,6 +23,21 @@ pub fn main() -> Result<(), pico_args::Error> {
     let (tx_cmd_debugger, rx_cmd_debugger): (Sender<DebugCmd>, Receiver<DebugCmd>) = mpsc::channel();
     let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) = mpsc::channel();
 
+    if let Some(breakpoint) = args.breakpoint {
+        if let Ok(breakpoint) = u32::from_str_radix(&breakpoint, 16) {
+            let trigger = Trigger{
+                    address: breakpoint,
+                    once: false,
+                    actions: vec![DebugCmd::Pause, DebugCmd::Message("CPU paused at initial breakpoint".to_owned()), DebugCmd::GetState],
+                };
+            let debug_cmd = DebugCmd::AddTrigger(trigger);
+            _  = tx_cmd_debugger.send(debug_cmd);
+            _  = tx_cmd_debugger.send(DebugCmd::Continue);
+        } else {
+            println!("Cannot parse breakpoint as hexadecimal. Ignoring.")
+        }
+    }
+
     let vsync_counter_vdp = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
     let vsync_counter_ez80 = vsync_counter_vdp.clone();
 
@@ -30,7 +45,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         let _debugger_thread = thread::spawn(move || {
             agon_light_emulator_debugger::start(tx_cmd_debugger, rx_resp_debugger);
         });
-        Some(DebuggerConnection { tx: tx_resp_debugger, rx: rx_cmd_debugger })
+        Some(DebuggerConnection { tx: tx_resp_debugger, rx: rx_cmd_debugger})
     } else {
         None
     };
@@ -38,7 +53,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     let _cpu_thread = thread::spawn(move || {
         // Prepare the device
         let mut machine = AgonMachine::new(AgonMachineConfig {
-            ram_init: RamInit::Random,
+            ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
             to_vdp: tx_ez80_to_vdp,
             from_vdp: rx_vdp_to_ez80,
             vsync_counter: vsync_counter_ez80,
@@ -130,7 +145,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                 // deal with weird aspect ratios
                 match 10*mode_w / mode_h {
                     // 2.66 (640x240)
-                    26 => 
+                    26 =>
                         // scale & !1 keeps the scale divisible by 2, needed for the width scaling
                         ((mode_w * (scale & !1)) >> 1, mode_h * (scale & !1)),
                     // 1.6 (320x200)
