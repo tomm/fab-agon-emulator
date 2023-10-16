@@ -15,6 +15,7 @@ Emulator shortcuts are accessed with the *right alt* key (AltGr on some keyboard
 To make an optimised release build, run:
 
 ```
+git submodule update --init
 cargo build -r
 ```
 
