@@ -159,7 +159,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             }
         };
 
-        let mut window = video_subsystem.window("Fab Agon Emulator", wx, wy)
+        let mut window = video_subsystem.window(&format!("Fab Agon Emulator {}", env!("CARGO_PKG_VERSION")), wx, wy)
             .resizable()
             .position_centered()
             .build()
