@@ -2,6 +2,7 @@
 #include "fake_fabgl.h"
 #include "fabgl.h"
 #include "userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h"
+#include "userspace-vdp-gl/src/userspace-platform/fake_fabgl.h"
 #include "vdp.h"
 #include "dispdrivers/vga16controller.h"
 #include "dispdrivers/vgabasecontroller.h"
@@ -63,6 +64,7 @@ extern "C" void getAudioSamples(uint8_t *buffer, uint32_t length)
 }
 
 extern "C" void vdp_setup() {
+	init_userspace_fabgl();
 	setup();
 }
 
@@ -72,4 +74,8 @@ extern "C" void vdp_loop() {
 
 extern "C" void vdp_shutdown() {
 	is_fabgl_terminating = true;
+}
+
+extern "C" void dump_vdp_mem_stats() {
+	malloc_wrapper_dump_stats();	
 }

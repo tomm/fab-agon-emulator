@@ -8,6 +8,7 @@ Emulator shortcuts are accessed with the *right alt* key (AltGr on some keyboard
 
  * RightAlt-C - Toggle caps-lock
  * RightAlt-F - Toggle fullscreen mode
+ * RightAlt-M - Print ESP32 memory stats to the console
  * RightAlt-Q - Quit
 
 ## Compiling the Fab Agon Emulator (on Linux)

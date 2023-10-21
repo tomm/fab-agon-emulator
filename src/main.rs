@@ -213,6 +213,12 @@ pub fn main() -> Result<(), pico_args::Error> {
                                 Some(sdl2::keyboard::Keycode::Q) => {
                                     break 'running;
                                 }
+                                Some(sdl2::keyboard::Keycode::M) => {
+                                    unsafe {
+                                        (*vdp_interface.dump_vdp_mem_stats)();
+                                    }
+                                    true
+                                }
                                 Some(sdl2::keyboard::Keycode::C) => {
                                     // caps-lock
                                     unsafe {
@@ -255,7 +261,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                 }
 
                 if w != mode_w || h != mode_h {
-                    println!("Mode change to {} x {}", w, h);
+                    //println!("Mode change to {} x {}", w, h);
                     mode_w = w;
                     mode_h = h;
                     texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
