@@ -25,16 +25,10 @@ CXX=x86_64-w64-mingw32-g++-posix make
 cp *.so ../../firmware
 cd ../..
 
-cargo build -r --target=x86_64-pc-windows-gnu
+FORCE=1 cargo build -r --target=x86_64-pc-windows-gnu
 
-GIT_TAG=`git tag --points-at HEAD`
-
-if [[ -z "$GIT_TAG" ]]; then
-	echo "No git tag for HEAD. I won't build a distribution zip!"
-	exit -1
-fi
-
-DIST_DIR=fab-agon-emulator-$GIT_TAG-windows
+VERSION=`cargo tree --depth 0 | awk '{print $2;}'`
+DIST_DIR=fab-agon-emulator-$VERSION-windows
 
 rm -rf $DIST_DIR
 mkdir $DIST_DIR

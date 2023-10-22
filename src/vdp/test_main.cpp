@@ -1,6 +1,8 @@
 #include "fabgl.h"
+#include "fake_fabgl.h"
 #include "dispdrivers/vga16controller.h"
 #include "userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h"
+#include "userspace-vdp-gl/src/userspace-platform/fake_fabgl.h"
 #include "vdp.h"
 
 /* Buffer must be big enough for any screen resolution - up to 1024x768x3 bytes :) */
@@ -21,6 +23,7 @@ static fabgl::RGB888 buf[1024*768];
 
 int main() {
 	printf("Starting the userspace fabgl+VDP...\n");
+	init_userspace_fabgl();
 	// VDP_GP to get past wait_ez80
 	z80_send_to_vdp(23);
 	z80_send_to_vdp(0);

@@ -17,19 +17,13 @@ To make an optimised release build, run:
 
 ```
 git submodule update --init
-cargo build -r
+make
 ```
 
-Then you can run the emulator with either:
+Then you can run the emulator with:
 
 ```
-cargo run -r
-```
-
-or
-
-```
-./target/release/fab-agon-emulator
+./fab-agon-emulator
 ```
 
 ## Changing VDP version
