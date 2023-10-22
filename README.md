@@ -45,10 +45,6 @@ Read about other command-line options with:
 
 ## Compiling for Windows
 
-### To cross-compile on a Linux machine
-
-Read [make_win64_dist.sh](./make_win64_dist.sh).
-
 ### To build on Windows (mingw)
 
 * Install rustup from https://rustup.rs/
