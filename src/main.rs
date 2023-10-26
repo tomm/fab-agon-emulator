@@ -38,36 +38,47 @@ pub fn main() -> Result<(), pico_args::Error> {
         }
     }
 
-    let vsync_counter_vdp = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
-    let vsync_counter_ez80 = vsync_counter_vdp.clone();
+    // Atomics for various state communication
+    let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let vsync_counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+
+    // Preserve stdin state, as debugger can leave stdin in raw mode
+    let _tty = raw_tty::TtyWithGuard::new(std::io::stdin()).unwrap();
 
     let debugger_con = if args.debugger {
+        let _emulator_shutdown = emulator_shutdown.clone();
         let _debugger_thread = thread::spawn(move || {
-            agon_light_emulator_debugger::start(tx_cmd_debugger, rx_resp_debugger);
+            agon_light_emulator_debugger::start(tx_cmd_debugger, rx_resp_debugger, _emulator_shutdown);
         });
         Some(DebuggerConnection { tx: tx_resp_debugger, rx: rx_cmd_debugger})
     } else {
         None
     };
 
-    let _cpu_thread = thread::spawn(move || {
-        // Prepare the device
-        let mut machine = AgonMachine::new(AgonMachineConfig {
-            ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
-            to_vdp: tx_ez80_to_vdp,
-            from_vdp: rx_vdp_to_ez80,
-            vsync_counter: vsync_counter_ez80,
-            clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },
-            mos_bin: if let Some(mos_bin) = args.mos_bin {
-                mos_bin
-            } else {
-                std::path::PathBuf::from(format!("firmware/mos_{:?}.bin", args.firmware))
-            },
-        });
-        machine.set_sdcard_directory(std::path::PathBuf::from(args.sdcard.unwrap_or("sdcard".to_string())));
-        machine.start(debugger_con);
-        panic!("ez80 cpu thread terminated");
-    });
+    let _cpu_thread = {
+        let soft_reset_ez80 = soft_reset.clone();
+        let vsync_counter_ez80 = vsync_counter.clone();
+        thread::spawn(move || {
+            // Prepare the device
+            let mut machine = AgonMachine::new(AgonMachineConfig {
+                ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
+                to_vdp: tx_ez80_to_vdp,
+                from_vdp: rx_vdp_to_ez80,
+                vsync_counter: vsync_counter_ez80,
+                soft_reset: soft_reset_ez80,
+                clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },
+                mos_bin: if let Some(mos_bin) = args.mos_bin {
+                    mos_bin
+                } else {
+                    std::path::PathBuf::from(format!("firmware/mos_{:?}.bin", args.firmware))
+                },
+            });
+            machine.set_sdcard_directory(std::path::PathBuf::from(args.sdcard.unwrap_or("sdcard".to_string())));
+            machine.start(debugger_con);
+            panic!("ez80 cpu thread terminated");
+        })
+    };
 
     let _comms_thread = thread::spawn(move || {
         loop {
@@ -195,7 +206,12 @@ pub fn main() -> Result<(), pico_args::Error> {
             last_frame_time = last_frame_time.checked_add(frame_duration).unwrap_or(std::time::Instant::now());
 
             // signal the vsync to the ez80
-            vsync_counter_vdp.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            vsync_counter.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+            // shutdown if requested (atomic could be set from the debugger)
+            if emulator_shutdown.load(std::sync::atomic::Ordering::Relaxed) {
+                break 'running;
+            }
 
             for event in event_pump.poll_iter() {
                 match event {
@@ -206,12 +222,17 @@ pub fn main() -> Result<(), pico_args::Error> {
                         // handle emulator shortcut keys
                         let consumed = if keymod.contains(sdl2::keyboard::Mod::RALTMOD) {
                             match keycode {
+                                Some(sdl2::keyboard::Keycode::C) => {
+                                    // caps-lock
+                                    unsafe {
+                                        (*vdp_interface.sendHostKbEventToFabgl)(0x58, 1);
+                                        (*vdp_interface.sendHostKbEventToFabgl)(0x58, 0);
+                                    }
+                                    true
+                                }
                                 Some(sdl2::keyboard::Keycode::F) => {
                                     is_fullscreen = !is_fullscreen;
                                     break 'inner;
-                                }
-                                Some(sdl2::keyboard::Keycode::Q) => {
-                                    break 'running;
                                 }
                                 Some(sdl2::keyboard::Keycode::M) => {
                                     unsafe {
@@ -219,12 +240,11 @@ pub fn main() -> Result<(), pico_args::Error> {
                                     }
                                     true
                                 }
-                                Some(sdl2::keyboard::Keycode::C) => {
-                                    // caps-lock
-                                    unsafe {
-                                        (*vdp_interface.sendHostKbEventToFabgl)(0x58, 1);
-                                        (*vdp_interface.sendHostKbEventToFabgl)(0x58, 0);
-                                    }
+                                Some(sdl2::keyboard::Keycode::Q) => {
+                                    break 'running;
+                                }
+                                Some(sdl2::keyboard::Keycode::R) => {
+                                    soft_reset.store(true, std::sync::atomic::Ordering::Relaxed);
                                     true
                                 }
                                 _ => false
@@ -286,7 +306,11 @@ pub fn main() -> Result<(), pico_args::Error> {
             canvas.present();
         }
     }
-    println!("Shutting down fabgl+vdp...");
+
+    // signal the shutdown to any other listeners
+    emulator_shutdown.store(true, std::sync::atomic::Ordering::Relaxed);
+
+    // give vdp some time to shutdown
     unsafe { (*vdp_interface.vdp_shutdown)(); }
     std::thread::sleep(std::time::Duration::from_millis(200));
 
