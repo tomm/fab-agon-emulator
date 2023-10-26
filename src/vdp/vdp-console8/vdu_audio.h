@@ -78,8 +78,8 @@ void init_audio() {
 //
 void sendAudioStatus(int channel, int status) {
 	byte packet[] = {
-		channel,
-		status,
+		static_cast<byte>(channel),
+		static_cast<byte>(status),
 	};
 	send_packet(PACKET_AUDIO, sizeof packet, packet);
 }

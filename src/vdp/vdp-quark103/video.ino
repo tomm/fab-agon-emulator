@@ -311,8 +311,8 @@ void wait_eZ80() {
 //
 void sendCursorPosition() {
 	byte packet[] = {
-		charX / Canvas->getFontInfo()->width,
-		charY / Canvas->getFontInfo()->height,
+		static_cast<byte>(charX / Canvas->getFontInfo()->width),
+		static_cast<byte>(charY / Canvas->getFontInfo()->height),
 	};
 	send_packet(PACKET_CURSOR, sizeof packet, packet);	
 }
@@ -324,7 +324,7 @@ void sendScreenChar(int x, int y) {
 	int py = y * Canvas->getFontInfo()->height;
 	char c = get_screen_char(px, py);
 	byte packet[] = {
-		c,
+		static_cast<byte>(c),
 	};
 	send_packet(PACKET_SCRCHAR, sizeof packet, packet);
 }
@@ -348,10 +348,10 @@ void sendScreenPixel(int x, int y) {
 		}
 	}	
 	byte packet[] = {
-		pixel.R,	// Send the colour components
-		pixel.G,
-		pixel.B,
-		pixelIndex,	// And the pixel index in the palette
+		static_cast<byte>(pixel.R),	// Send the colour components
+		static_cast<byte>(pixel.G),
+		static_cast<byte>(pixel.B),
+		static_cast<byte>(pixelIndex),	// And the pixel index in the palette
 	};
 	send_packet(PACKET_SCRPIXEL, sizeof packet, packet);	
 }
@@ -360,8 +360,8 @@ void sendScreenPixel(int x, int y) {
 //
 void sendPlayNote(int channel, int success) {
 	byte packet[] = {
-		channel,
-		success,
+		static_cast<byte>(channel),
+		static_cast<byte>(success),
 	};
 	send_packet(PACKET_AUDIO, sizeof packet, packet);	
 }
@@ -372,13 +372,13 @@ void sendModeInformation() {
 	int w = Canvas->getWidth();
 	int h = Canvas->getHeight();
 	byte packet[] = {
-		w & 0xFF,	 						// Width in pixels (L)
-		(w >> 8) & 0xFF,					// Width in pixels (H)
-		h & 0xFF,							// Height in pixels (L)
-		(h >> 8) & 0xFF,					// Height in pixels (H)
-		w / Canvas->getFontInfo()->width ,	// Width in characters (byte)
-		h / Canvas->getFontInfo()->height ,	// Height in characters (byte)
-		VGAColourDepth,						// Colour depth
+		static_cast<byte>(w & 0xFF),	 						// Width in pixels (L)
+		static_cast<byte>((w >> 8) & 0xFF),					// Width in pixels (H)
+		static_cast<byte>(h & 0xFF),							// Height in pixels (L)
+		static_cast<byte>((h >> 8) & 0xFF),					// Height in pixels (H)
+		static_cast<byte>(w / Canvas->getFontInfo()->width) ,	// Width in characters (byte)
+		static_cast<byte>(h / Canvas->getFontInfo()->height) ,	// Height in characters (byte)
+		static_cast<byte>(VGAColourDepth),						// Colour depth
 	};
 	send_packet(PACKET_MODE, sizeof packet, packet);
 }
@@ -387,14 +387,15 @@ void sendModeInformation() {
 //
 void sendTime() {
 	byte packet[] = {
-		rtc.getYear() - EPOCH_YEAR,			// 0 - 255
-		rtc.getMonth(),						// 0 - 11
-		rtc.getDay(),						// 1 - 31
-		rtc.getDayofYear(),					// 0 - 365
-		rtc.getDayofWeek(),					// 0 - 6
-		rtc.getHour(true),					// 0 - 23
-		rtc.getMinute(),					// 0 - 59
-		rtc.getSecond(),					// 0 - 59
+		static_cast<byte>(rtc.getYear() - EPOCH_YEAR),			// 0 - 255
+		static_cast<byte>(rtc.getMonth()),						// 0 - 11
+		static_cast<byte>(rtc.getDay()),						// 1 - 31
+		static_cast<byte>(rtc.getDayofYear() & 0xff),					// 0 - 365
+		static_cast<byte>(rtc.getDayofYear() >> 8),					// 0 - 365
+		static_cast<byte>(rtc.getDayofWeek()),					// 0 - 6
+		static_cast<byte>(rtc.getHour(true)),					// 0 - 23
+		static_cast<byte>(rtc.getMinute()),					// 0 - 59
+		static_cast<byte>(rtc.getSecond()),					// 0 - 59
 	};
 	send_packet(PACKET_RTC, sizeof packet, packet);
 }
@@ -407,11 +408,11 @@ void sendKeyboardState() {
 	bool scrollLock;
 	PS2Controller.keyboard()->getLEDs(&numLock, &capsLock, &scrollLock);
 	byte packet[] = {
-		kbRepeatDelay & 0xFF,
-		(kbRepeatDelay >> 8) & 0xFF,
-		kbRepeatRate & 0xFF,
-		(kbRepeatRate >> 8) & 0xFF,
-		scrollLock | (capsLock << 1) | (numLock << 2)
+		static_cast<byte>(kbRepeatDelay & 0xFF),
+		static_cast<byte>((kbRepeatDelay >> 8) & 0xFF),
+		static_cast<byte>(kbRepeatRate & 0xFF),
+		static_cast<byte>((kbRepeatRate >> 8) & 0xFF),
+		static_cast<byte>(scrollLock | (capsLock << 1) | (numLock << 2))
 	};
 	send_packet(PACKET_KEYSTATE, sizeof packet, packet);
 }
@@ -735,7 +736,7 @@ void wait_shiftkey() {
 			byte packet[] = {
 				item.ASCII,
 				0,
-				item.vk,
+				static_cast<byte>(item.vk),
 				item.down,
 			};
 			send_packet(PACKET_KEYCODE, sizeof packet, packet);
@@ -810,7 +811,7 @@ void do_keyboard() {
 		byte packet[] = {
 			keycode,
 			modifiers,
-			item.vk,
+			static_cast<byte>(item.vk),
 			item.down,
 		};
 		send_packet(PACKET_KEYCODE, sizeof packet, packet);

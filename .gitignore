@@ -1,4 +1,5 @@
 /target
+fab-agon-emulator
 src/vdp/*.o
 src/vdp/*.so
 .DS_Store

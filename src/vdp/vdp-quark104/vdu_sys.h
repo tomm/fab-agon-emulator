@@ -195,7 +195,7 @@ void VDUStreamProcessor::sendScreenChar(uint16_t x, uint16_t y) {
 	uint16_t py = y * fontH;
 	char c = getScreenChar(px, py);
 	uint8_t packet[] = {
-		c,
+		static_cast<byte>(c),
 	};
 	send_packet(PACKET_SCRCHAR, sizeof packet, packet);
 }

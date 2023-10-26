@@ -28,14 +28,14 @@ uint8_t			palette[64];					// Storage for the palette
 //
 void sendModeInformation() {
 	byte packet[] = {
-		canvasW & 0xFF,						// Width in pixels (L)
-		(canvasW >> 8) & 0xFF,				// Width in pixels (H)
-		canvasH & 0xFF,						// Height in pixels (L)
-		(canvasH >> 8) & 0xFF,				// Height in pixels (H)
-		canvasW / fontW,					// Width in characters (byte)
-		canvasH / fontH,					// Height in characters (byte)
-		getVGAColourDepth(),				// Colour depth
-		videoMode,							// The video mode number
+		static_cast<byte>(canvasW & 0xFF),						// Width in pixels (L)
+		static_cast<byte>((canvasW >> 8) & 0xFF),				// Width in pixels (H)
+		static_cast<byte>(canvasH & 0xFF),						// Height in pixels (L)
+		static_cast<byte>((canvasH >> 8) & 0xFF),				// Height in pixels (H)
+		static_cast<byte>(canvasW / fontW),					// Width in characters (byte)
+		static_cast<byte>(canvasH / fontH),					// Height in characters (byte)
+		static_cast<byte>(getVGAColourDepth()),				// Colour depth
+		static_cast<byte>(videoMode),							// The video mode number
 	};
 	send_packet(PACKET_MODE, sizeof packet, packet);
 }

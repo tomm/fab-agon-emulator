@@ -41,8 +41,8 @@ void vdu_sys_video_kblayout() {
 //
 void sendCursorPosition() {
 	byte packet[] = {
-		textCursor.X / fontW,
-		textCursor.Y / fontH,
+		static_cast<byte>(textCursor.X / fontW),
+		static_cast<byte>(textCursor.Y / fontH),
 	};
 	send_packet(PACKET_CURSOR, sizeof packet, packet);	
 }
@@ -54,7 +54,7 @@ void sendScreenChar(int x, int y) {
 	int py = y * fontH;
 	char c = getScreenChar(px, py);
 	byte packet[] = {
-		c,
+		static_cast<byte>(c),
 	};
 	send_packet(PACKET_SCRCHAR, sizeof packet, packet);
 }
@@ -77,14 +77,15 @@ void sendScreenPixel(int x, int y) {
 //
 void sendTime() {
 	byte packet[] = {
-		rtc.getYear() - EPOCH_YEAR,			// 0 - 255
-		rtc.getMonth(),						// 0 - 11
-		rtc.getDay(),						// 1 - 31
-		rtc.getDayofYear(),					// 0 - 365
-		rtc.getDayofWeek(),					// 0 - 6
-		rtc.getHour(true),					// 0 - 23
-		rtc.getMinute(),					// 0 - 59
-		rtc.getSecond(),					// 0 - 59
+		static_cast<byte>(rtc.getYear() - EPOCH_YEAR),			// 0 - 255
+		static_cast<byte>(rtc.getMonth()),				// 0 - 11
+		static_cast<byte>(rtc.getDay()),				// 1 - 31
+		static_cast<byte>(rtc.getDayofYear()&0xff),				// 0 - 365
+		static_cast<byte>(rtc.getDayofYear()>>8),				// 0 - 365
+		static_cast<byte>(rtc.getDayofWeek()),				// 0 - 6
+		static_cast<byte>(rtc.getHour(true)),				// 0 - 23
+		static_cast<byte>(rtc.getMinute()),				// 0 - 59
+		static_cast<byte>(rtc.getSecond()),				// 0 - 59
 	};
 	send_packet(PACKET_RTC, sizeof packet, packet);
 }
@@ -121,11 +122,11 @@ void sendKeyboardState() {
 	byte ledState;
 	getKeyboardState(&delay, &rate, &ledState);
 	byte packet[] = {
-		delay & 0xFF,
-		(delay >> 8) & 0xFF,
-		rate & 0xFF,
-		(rate >> 8) & 0xFF,
-		ledState
+		static_cast<byte>(delay & 0xFF),
+		static_cast<byte>((delay >> 8) & 0xFF),
+		static_cast<byte>(rate & 0xFF),
+		static_cast<byte>((rate >> 8) & 0xFF),
+		static_cast<byte>(ledState)
 	};
 	send_packet(PACKET_KEYSTATE, sizeof packet, packet);
 }
