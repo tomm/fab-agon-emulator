@@ -44,6 +44,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     let vsync_counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
 
     // Preserve stdin state, as debugger can leave stdin in raw mode
+    #[cfg(target_os = "linux")]
     let _tty = raw_tty::TtyWithGuard::new(std::io::stdin()).unwrap();
 
     let debugger_con = if args.debugger {

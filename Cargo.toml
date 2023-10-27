@@ -17,4 +17,6 @@ libloading = "0.8.0"
 
 #agon-cpu-emulator = { path = "../agon-cpu-emulator" }
 #agon-light-emulator-debugger = { path = "../agon-light-emulator-debugger" }
+
+[target.'cfg(target_os = "linux")'.dependencies]
 raw_tty = "0.1.0"
