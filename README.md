@@ -33,7 +33,7 @@ By default, Fab Agon Emulator boots with 1.04 firmware. To start up
 with 1.03 firmware, run:
 
 ```
-./target/release/fab-agon-emulator --firmware 1.03
+./fab-agon-emulator --firmware 1.03
 ```
 
 ## Other command-line options
@@ -41,7 +41,7 @@ with 1.03 firmware, run:
 Read about other command-line options with:
 
 ```
-./target/release/fab-agon-emulator --help
+./fab-agon-emulator --help
 ```
 
 ## Compiling for Windows
@@ -58,6 +58,6 @@ Read about other command-line options with:
 * get SDL2 from https://github.com/libsdl-org/SDL/releases/download/release-2.28.3/SDL2-devel-2.28.3-mingw.zip
 * extract to C:\Users\<user>\.rustup\toolchains\stable-x86_64-pc-windows-gnu
 * copy SDL2.dll to the root of the project
-* run `cargo build --release` in the root of the project
+* run `make` in the root of the project
 * manually copy built vdp*.so files from userspace-vdp to the root of the project
 * run `cargo run --release` in the root of the project
