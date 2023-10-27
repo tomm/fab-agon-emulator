@@ -3,3 +3,4 @@ src/vdp/*.o
 src/vdp/*.so
 .DS_Store
 firmware/vdp_*.so
+fab-agon-emulator
