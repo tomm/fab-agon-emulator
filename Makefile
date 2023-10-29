@@ -5,8 +5,7 @@ check:
 
 vdp:
 ifeq ($(PLATFORM),mac)
-	echo "ON MAC!"
-	EXTRA_FLAGS=-Wc++11-narrowing $(MAKE) -C src/vdp
+	EXTRA_FLAGS=-Wno-c++11-narrowing $(MAKE) -C src/vdp
 else
 	$(MAKE) -C src/vdp
 endif
