@@ -9,4 +9,4 @@ fabgl::SoundGenerator *getVDPSoundGenerator() {
 	return &SoundGenerator;
 }
 
-#include "vdp-console8/video.ino"
+#include "vdp-console8/video/video.ino"
