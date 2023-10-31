@@ -8,6 +8,13 @@ keywords = ["Agon Light", "Agon Console8", "emulator"]
 homepage = "https://github.com/tomm/fab-agon-emulator"
 repository = "https://github.com/tomm/fab-agon-emulator"
 
+[build-dependencies]
+# system-deps does platform searches for dependencies and sets -L and -l appropriately
+system-deps = "2.0"
+
+[package.metadata.system-deps]
+sdl2 = "0.35.2"
+
 [dependencies]
 sdl2 = "0.35.2"
 pico-args = "0.5.0"

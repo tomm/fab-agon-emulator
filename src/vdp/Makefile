@@ -1,5 +1,5 @@
 CXX ?= g++
-CFLAGS = -Wall -O2 -fmax-errors=1 -std=c++11 -g -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers
+CFLAGS = -Wall -O2 -fmax-errors=1 -std=c++11 $(EXTRA_FLAGS) -g -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers
 OPTIONS = 
 
 SRCS = rust_glue.cpp
