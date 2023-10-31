@@ -11,7 +11,7 @@ OPTIONS:
   -f, --fullscreen      Start in fullscreen mode
   -h, --help            Prints help information
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
-  --firmware 1.03       Use 1.03 firmware (default is 1.04)
+  --firmware 1.03       Use quark 1.03 firmware (default is console8)
   --sdcard <path>       Sets the path of the emulated SDCard
   --scale <max-height>  Use perfect (integer) video mode scaling, up to
                         a maximum window height of <max-height>
@@ -75,7 +75,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
             std::process::exit(0);
           }
         } else {
-          FirmwareVer::quark104
+          FirmwareVer::console8
         }
     };
 

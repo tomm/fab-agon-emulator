@@ -4,7 +4,7 @@ Copyright (C) 1999-2008 Zilog, Inc. All Rights Reserved
 
 LINK MAP:
 
-DATE:      Sun Oct 29 23:38:05 2023
+DATE:      Tue Oct 31 21:09:21 2023
 PROCESSOR: assembler
 FILES:     .\main.obj             .\globals.obj          .\mos.obj              
            .\mos_editor.obj
@@ -112,10 +112,10 @@ SPACE ALLOCATION:
 
 Space                     Base         Top      Size      Used    Unused
 ------------------ ----------- ----------- --------- --------- ---------
-RAM                   D:0BC000    D:0BCA67     4000H      A68H     3598H
-                                          (    16384      2664     13720)
-ROM                   C:000000    C:00D148    20000H     D0B4H    12F4CH
-                                          (   131072     53428     77644)
+RAM                   D:0BC000    D:0BD969     4000H     196AH     2696H
+                                          (    16384      6506      9878)
+ROM                   C:000000    C:00D3D5    20000H     D341H    12CBFH
+                                          (   131072     54081     76991)
 
 
 SEGMENTS WITHIN SPACE:
@@ -123,9 +123,9 @@ SEGMENTS WITHIN SPACE:
 
 RAM                               Type        Base         Top      Size
 ------------------ ------------------- ----------- ----------- ---------
-BSS                normal data            D:0BC290    D:0BC9A7      718h
+BSS                normal data            D:0BC290    D:0BD8A9     161ah
 DATA               normal data            D:0BC000    D:0BC28F      290h
-IVJMPTBL           normal data            D:0BC9A8    D:0BCA67       c0h
+IVJMPTBL           normal data            D:0BD8AA    D:0BD969       c0h
 
 
 ROM                               Type        Base         Top      Size
@@ -133,352 +133,352 @@ ROM                               Type        Base         Top      Size
 .IVECTS            normal data            C:000100    C:00021F      120h
 .RESET             normal data            C:000000    C:00006A       6bh
 .STARTUP           normal data            C:000220    C:001111      ef2h
-CODE               normal data            C:001112    C:00BEBF     adaeh
-DATA               * segment copy *       C:00CEB9    C:00D148      290h
-STRSECT            normal data            C:00C32B    C:00CEB8      b8eh
-TEXT               normal data            C:00BEC0    C:00C32A      46bh
+CODE               normal data            C:001112    C:00C153     b042h
+DATA               * segment copy *       C:00D146    C:00D3D5      290h
+STRSECT            normal data            C:00C5BF    C:00D145      b87h
+TEXT               normal data            C:00C154    C:00C5BE      46bh
 
 SEGMENTS WITHIN MODULES:
 ========================
 
-Module: ..\main.c (File: main.obj) Version: 1:0 10/29/2023 23:37:57
+Module: ..\main.c (File: main.obj) Version: 1:0 10/31/2023 21:09:13
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:001112    C:0013DF      2ceh
-    Segment: STRSECT                           C:00C32B    C:00C369       3fh
+    Segment: CODE                              C:001112    C:0013BC      2abh
+    Segment: STRSECT                           C:00C5BF    C:00C5F6       38h
 
 
 Module: ..\src\boot\common\zsldevinitdummy.asm (File: zsldevinitdummy.obj) Version: 1:0 10/11/2019 10:10:12
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00AECF    C:00AECF        1h
+    Segment: CODE                              C:00B163    C:00B163        1h
 
 
-Module: ..\src\clock.c (File: clock.obj) Version: 1:0 10/29/2023 23:37:59
+Module: ..\src\clock.c (File: clock.obj) Version: 1:0 10/31/2023 21:09:15
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:003208    C:003485      27eh
+    Segment: CODE                              C:00349C    C:003719      27eh
     Segment: DATA                              D:0BC19B    D:0BC20C       72h
-    Segment: STRSECT                           C:00CDC2    C:00CE9F       deh
+    Segment: STRSECT                           C:00D04F    C:00D12C       deh
 
 
-Module: ..\src\mos.c (File: mos.obj) Version: 1:0 10/29/2023 23:37:58
+Module: ..\src\mos.c (File: mos.obj) Version: 1:0 10/31/2023 21:09:14
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: BSS                               D:0BC2FF    D:0BC875      577h
-    Segment: CODE                              C:0013E0    C:002BA3     17c4h
+    Segment: BSS                               D:0BC301    D:0BC877      577h
+    Segment: CODE                              C:0013BD    C:002B80     17c4h
     Segment: DATA                              D:0BC000    D:0BC19A      19bh
-    Segment: STRSECT                           C:00C36A    C:00CDC1      a58h
+    Segment: STRSECT                           C:00C5F7    C:00D04E      a58h
 
 
-Module: ..\src\mos_editor.c (File: mos_editor.obj) Version: 1:0 10/29/2023 23:37:58
-
-    Name                                           Base         Top      Size
-    --------------------------------------- ----------- ----------- ---------
-    Segment: BSS                               D:0BC876    D:0BC975      100h
-    Segment: CODE                              C:002BA4    C:003207      664h
-
-
-Module: ..\src\strings.c (File: strings.obj) Version: 1:0 10/29/2023 23:38:04
+Module: ..\src\mos_editor.c (File: mos_editor.obj) Version: 1:0 10/31/2023 21:09:14
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00AE42    C:00AECE       8dh
+    Segment: BSS                               D:0BC878    D:0BD877     1000h
+    Segment: CODE                              C:002B81    C:00349B      91bh
 
 
-Module: ..\src\timer.c (File: timer.obj) Version: 1:0 10/29/2023 23:38:00
-
-    Name                                           Base         Top      Size
-    --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:003486    C:0035D1      14ch
-
-
-Module: ..\src\uart.c (File: uart.obj) Version: 1:0 10/29/2023 23:38:03
+Module: ..\src\strings.c (File: strings.obj) Version: 1:0 10/31/2023 21:09:20
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00AC39    C:00AE41      209h
+    Segment: CODE                              C:00B0D6    C:00B162       8dh
 
 
-Module: ..\src_fatfs\diskio.c (File: diskio.obj) Version: 1:0 10/29/2023 23:38:00
-
-    Name                                           Base         Top      Size
-    --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:0039F3    C:003B72      180h
-
-
-Module: ..\src_fatfs\ff.c (File: ff.obj) Version: 1:0 10/29/2023 23:38:02
+Module: ..\src\timer.c (File: timer.obj) Version: 1:0 10/31/2023 21:09:16
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: BSS                               D:0BC97C    D:0BC981        6h
-    Segment: CODE                              C:003B73    C:00A91E     6dach
-    Segment: STRSECT                           C:00CEA0    C:00CEB8       19h
-    Segment: TEXT                              C:00BEDE    C:00BF7C       9fh
+    Segment: CODE                              C:00371A    C:003865      14ch
 
 
-Module: ..\src_fatfs\ffunicode.c (File: ffunicode.obj) Version: 1:0 10/29/2023 23:38:03
+Module: ..\src\uart.c (File: uart.obj) Version: 1:0 10/31/2023 21:09:19
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00A91F    C:00AC38      31ah
-    Segment: TEXT                              C:00BF7D    C:00C32A      3aeh
+    Segment: CODE                              C:00AECD    C:00B0D5      209h
+
+
+Module: ..\src_fatfs\diskio.c (File: diskio.obj) Version: 1:0 10/31/2023 21:09:16
+
+    Name                                           Base         Top      Size
+    --------------------------------------- ----------- ----------- ---------
+    Segment: CODE                              C:003C87    C:003E06      180h
+
+
+Module: ..\src_fatfs\ff.c (File: ff.obj) Version: 1:0 10/31/2023 21:09:18
+
+    Name                                           Base         Top      Size
+    --------------------------------------- ----------- ----------- ---------
+    Segment: BSS                               D:0BD87E    D:0BD883        6h
+    Segment: CODE                              C:003E07    C:00ABB2     6dach
+    Segment: STRSECT                           C:00D12D    C:00D145       19h
+    Segment: TEXT                              C:00C172    C:00C210       9fh
+
+
+Module: ..\src_fatfs\ffunicode.c (File: ffunicode.obj) Version: 1:0 10/31/2023 21:09:19
+
+    Name                                           Base         Top      Size
+    --------------------------------------- ----------- ----------- ---------
+    Segment: CODE                              C:00ABB3    C:00AECC      31ah
+    Segment: TEXT                              C:00C211    C:00C5BE      3aeh
 
 
 Module: .\rtl\common\abs.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:47
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B35B    C:00B37E       24h
+    Segment: CODE                              C:00B5EF    C:00B612       24h
 
 
 Module: .\rtl\common\bshl.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:40
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BEB7    C:00BEBF        9h
+    Segment: CODE                              C:00C14B    C:00C153        9h
 
 
 Module: .\rtl\common\case8.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B702    C:00B738       37h
+    Segment: CODE                              C:00B996    C:00B9CC       37h
 
 
 Module: .\rtl\common\frameset.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:44
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B783    C:00B792       10h
+    Segment: CODE                              C:00BA17    C:00BA26       10h
 
 
 Module: .\rtl\common\frameset0.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:44
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B448    C:00B454        dh
+    Segment: CODE                              C:00B6DC    C:00B6E8        dh
 
 
 Module: .\rtl\common\iand.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:40
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BB34    C:00BB4E       1bh
+    Segment: CODE                              C:00BDC8    C:00BDE2       1bh
 
 
 Module: .\rtl\common\icmpzero.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:44
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B7BD    C:00B7C8        ch
+    Segment: CODE                              C:00BA51    C:00BA5C        ch
 
 
 Module: .\rtl\common\idivu.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BA79    C:00BA99       21h
+    Segment: CODE                              C:00BD0D    C:00BD2D       21h
 
 
 Module: .\rtl\common\imulu.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BC57    C:00BC9E       48h
+    Segment: CODE                              C:00BEEB    C:00BF32       48h
 
 
 Module: .\rtl\common\indcall.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BAB9    C:00BABA        2h
+    Segment: CODE                              C:00BD4D    C:00BD4E        2h
 
 
 Module: .\rtl\common\ineg.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BAB0    C:00BAB8        9h
+    Segment: CODE                              C:00BD44    C:00BD4C        9h
 
 
 Module: .\rtl\common\inot.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BC11    C:00BC1A        ah
+    Segment: CODE                              C:00BEA5    C:00BEAE        ah
 
 
 Module: .\rtl\common\ior.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B322    C:00B33C       1bh
+    Segment: CODE                              C:00B5B6    C:00B5D0       1bh
 
 
 Module: .\rtl\common\ishl.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BC3C    C:00BC4D       12h
+    Segment: CODE                              C:00BEAF    C:00BEC0       12h
 
 
 Module: .\rtl\common\ishrs.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00AEE5    C:00AF09       25h
+    Segment: CODE                              C:00B179    C:00B19D       25h
 
 
 Module: .\rtl\common\ishru.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BA4D    C:00BA71       25h
+    Segment: CODE                              C:00BCE1    C:00BD05       25h
 
 
 Module: .\rtl\common\islower.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:50
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BB10    C:00BB33       24h
+    Segment: CODE                              C:00BDA4    C:00BDC7       24h
 
 
 Module: .\rtl\common\isspace.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:51
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B81C    C:00B83F       24h
+    Segment: CODE                              C:00BAB0    C:00BAD3       24h
 
 
 Module: .\rtl\common\isupper.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:51
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BBBA    C:00BBDD       24h
+    Segment: CODE                              C:00BE4E    C:00BE71       24h
 
 
 Module: .\rtl\common\itol.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BA72    C:00BA78        7h
+    Segment: CODE                              C:00BD06    C:00BD0C        7h
 
 
 Module: .\rtl\common\ixor.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B7E4    C:00B7FE       1bh
+    Segment: CODE                              C:00BA78    C:00BA92       1bh
 
 
 Module: .\rtl\common\ladd.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00AED0    C:00AEE4       15h
+    Segment: CODE                              C:00B164    C:00B178       15h
 
 
 Module: .\rtl\common\land.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BEAE    C:00BEB6        9h
+    Segment: CODE                              C:00C142    C:00C14A        9h
 
 
 Module: .\rtl\common\lcmpu.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BA9A    C:00BAAF       16h
+    Segment: CODE                              C:00BD2E    C:00BD43       16h
 
 
 Module: .\rtl\common\lcmpzero.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:44
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B6EE    C:00B701       14h
+    Segment: CODE                              C:00B982    C:00B995       14h
 
 
 Module: .\rtl\common\ldivs.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B3E3    C:00B411       2fh
+    Segment: CODE                              C:00B677    C:00B6A5       2fh
 
 
 Module: .\rtl\common\ldivu.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B412    C:00B447       36h
+    Segment: CODE                              C:00B6A6    C:00B6DB       36h
 
 
 Module: .\rtl\common\lmulu.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BE2C    C:00BE98       6dh
+    Segment: CODE                              C:00C0C0    C:00C12C       6dh
 
 
 Module: .\rtl\common\lneg.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B2A0    C:00B2AC        dh
+    Segment: CODE                              C:00B534    C:00B540        dh
 
 
 Module: .\rtl\common\lnot.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BC07    C:00BC10        ah
+    Segment: CODE                              C:00BE9B    C:00BEA4        ah
 
 
 Module: .\rtl\common\lor.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B7D2    C:00B7DA        9h
+    Segment: CODE                              C:00BA66    C:00BA6E        9h
 
 
 Module: .\rtl\common\lremu.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BBDE    C:00BBED       10h
+    Segment: CODE                              C:00BE72    C:00BE81       10h
 
 
 Module: .\rtl\common\lshl.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BB4F    C:00BB5D        fh
+    Segment: CODE                              C:00BDE3    C:00BDF1        fh
 
 
 Module: .\rtl\common\lshru.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B761    C:00B782       22h
+    Segment: CODE                              C:00B9F5    C:00BA16       22h
 
 
 Module: .\rtl\common\lsub.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B755    C:00B760        ch
+    Segment: CODE                              C:00B9E9    C:00B9F4        ch
 
 
 Module: .\rtl\common\lxor.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B7DB    C:00B7E3        9h
+    Segment: CODE                              C:00BA6F    C:00BA77        9h
 
 
 Module: .\rtl\common\maptab.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:51
@@ -492,28 +492,28 @@ Module: .\rtl\common\memcmp.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B793    C:00B7BC       2ah
+    Segment: CODE                              C:00BA27    C:00BA50       2ah
 
 
 Module: .\rtl\common\memcpy.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08:56
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B739    C:00B754       1ch
+    Segment: CODE                              C:00B9CD    C:00B9E8       1ch
 
 
 Module: .\rtl\common\memset.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08:56
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BC1B    C:00BC3B       21h
+    Segment: CODE                              C:00BEC1    C:00BEE1       21h
 
 
 Module: .\rtl\common\print_globals.c (Library: crtS.lib) Version: 1:0 10/11/2019 10:09:07
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: BSS                               D:0BC982    D:0BC9A7       26h
+    Segment: BSS                               D:0BD884    D:0BD8A9       26h
     Segment: DATA                              D:0BC20D    D:0BC20F        3h
 
 
@@ -521,278 +521,278 @@ Module: .\rtl\common\print_putch.c (Library: crtS.lib) Version: 1:0 10/11/2019 1
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BBEE    C:00BC06       19h
+    Segment: CODE                              C:00BE82    C:00BE9A       19h
 
 
 Module: .\rtl\common\print_putstring.c (Library: crtS.lib) Version: 1:0 10/11/2019 10:09:07
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B143    C:00B29F      15dh
+    Segment: CODE                              C:00B3D7    C:00B533      15dh
 
 
 Module: .\rtl\common\print_send.c (Library: crtS.lib) Version: 1:0 10/11/2019 10:09:08
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B840    C:00B9DE      19fh
+    Segment: CODE                              C:00BAD4    C:00BC72      19fh
 
 
 Module: .\rtl\common\print_sputch.c (Library: crtS.lib) Version: 1:0 10/11/2019 10:09:07
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B3C4    C:00B3E2       1fh
+    Segment: CODE                              C:00B658    C:00B676       1fh
 
 
 Module: .\rtl\common\print_uputch.c (Library: crtS.lib) Version: 1:0 10/11/2019 10:09:07
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B343    C:00B35A       18h
+    Segment: CODE                              C:00B5D7    C:00B5EE       18h
 
 
 Module: .\rtl\common\putchar.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:52
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BAE2    C:00BB0F       2eh
+    Segment: CODE                              C:00BD76    C:00BDA3       2eh
 
 
 Module: .\rtl\common\sand.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:42
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B7C9    C:00B7D1        9h
+    Segment: CODE                              C:00BA5D    C:00BA65        9h
 
 
 Module: .\rtl\common\setflag.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:44
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B134    C:00B142        fh
+    Segment: CODE                              C:00B3C8    C:00B3D6        fh
 
 
 Module: .\rtl\common\smulu.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:43
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BE99    C:00BEAD       15h
+    Segment: CODE                              C:00C12D    C:00C141       15h
 
 
 Module: .\rtl\common\sor.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:43
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BC4E    C:00BC56        9h
+    Segment: CODE                              C:00BEE2    C:00BEEA        9h
 
 
 Module: .\rtl\common\sshru.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:43
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B30D    C:00B321       15h
+    Segment: CODE                              C:00B5A1    C:00B5B5       15h
 
 
 Module: .\rtl\common\stoiu.asm (Library: chelp.lib) Version: 1:0 10/11/2019 10:09:43
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B33D    C:00B342        6h
+    Segment: CODE                              C:00B5D1    C:00B5D6        6h
 
 
 Module: .\rtl\common\strncpy.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08:57
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B2AD    C:00B2EF       43h
+    Segment: CODE                              C:00B541    C:00B583       43h
 
 
 Module: .\rtl\common\strtol.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:54
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00AF0A    C:00B133      22ah
+    Segment: CODE                              C:00B19E    C:00B3C7      22ah
 
 
 Module: .\rtl\common\tolower.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:54
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BB8A    C:00BBB9       30h
+    Segment: CODE                              C:00BE1E    C:00BE4D       30h
 
 
 Module: .\rtl\common\toupper.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:55
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B37F    C:00B3AE       30h
+    Segment: CODE                              C:00B613    C:00B642       30h
 
 
 Module: .\rtl\common\uitoa.c (Library: crtS.lib) Version: 1:0 10/11/2019 10:09:09
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B455    C:00B471       1dh
+    Segment: CODE                              C:00B6E9    C:00B705       1dh
 
 
 Module: .\rtl\common\ultoa.c (Library: crtS.lib) Version: 1:0 10/11/2019 10:09:09
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B472    C:00B6ED      27ch
+    Segment: CODE                              C:00B706    C:00B981      27ch
 
 
 Module: .\rtl\common\ureverse.c (Library: crt.lib) Version: 1:0 10/11/2019 10:08:56
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B9DF    C:00BA4C       6eh
+    Segment: CODE                              C:00BC73    C:00BCE0       6eh
 
 
 Module: .\rtl\common\uultoa.c (Library: crtS.lib) Version: 1:0 10/11/2019 10:09:11
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BC9F    C:00BE2B      18dh
+    Segment: CODE                              C:00BF33    C:00C0BF      18dh
 
 
 Module: .\strchr.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08:57
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B7FF    C:00B81B       1dh
+    Segment: CODE                              C:00BA93    C:00BAAF       1dh
 
 
 Module: .\strcmp.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08:57
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B2F0    C:00B30C       1dh
+    Segment: CODE                              C:00B584    C:00B5A0       1dh
 
 
 Module: .\strcspn.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08:57
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BABB    C:00BAE1       27h
+    Segment: CODE                              C:00BD4F    C:00BD75       27h
 
 
 Module: .\strlen.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08:57
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00B3AF    C:00B3C3       15h
+    Segment: CODE                              C:00B643    C:00B657       15h
 
 
 Module: .\strspn.asm (Library: crt.lib) Version: 1:0 10/11/2019 10:08:57
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:00BB5E    C:00BB89       2ch
+    Segment: CODE                              C:00BDF2    C:00BE1D       2ch
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\gpio.asm (File: gpio.obj) Version: 1:0 10/29/2023 23:38:04
+Module: Z:\home\tom\mycode\agon\agon-mos\src\gpio.asm (File: gpio.obj) Version: 1:0 10/31/2023 21:09:20
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000DCC    C:000F32      167h
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\interrupts.asm (File: interrupts.obj) Version: 1:0 10/29/2023 23:37:59
+Module: Z:\home\tom\mycode\agon\agon-mos\src\interrupts.asm (File: interrupts.obj) Version: 1:0 10/31/2023 21:09:15
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000C91    C:000CD6       46h
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\keyboard.asm (File: keyboard.obj) Version: 1:0 10/29/2023 23:37:59
+Module: Z:\home\tom\mycode\agon\agon-mos\src\keyboard.asm (File: keyboard.obj) Version: 1:0 10/31/2023 21:09:15
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:00068E    C:000AB9      42ch
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\misc.asm (File: misc.obj) Version: 1:0 10/29/2023 23:37:59
+Module: Z:\home\tom\mycode\agon\agon-mos\src\misc.asm (File: misc.obj) Version: 1:0 10/31/2023 21:09:15
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:0005C2    C:00068D       cch
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\mos_api.asm (File: mos_api.obj) Version: 1:0 10/29/2023 23:37:59
+Module: Z:\home\tom\mycode\agon\agon-mos\src\mos_api.asm (File: mos_api.obj) Version: 1:0 10/31/2023 21:09:14
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000220    C:0005C1      3a2h
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\rtc.asm (File: rtc.obj) Version: 1:0 10/29/2023 23:37:59
+Module: Z:\home\tom\mycode\agon\agon-mos\src\rtc.asm (File: rtc.obj) Version: 1:0 10/31/2023 21:09:15
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000CD7    C:000CDF        9h
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\sd.asm (File: sd.obj) Version: 1:0 10/29/2023 23:38:00
+Module: Z:\home\tom\mycode\agon\agon-mos\src\sd.asm (File: sd.obj) Version: 1:0 10/31/2023 21:09:16
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: BSS                               D:0BC976    D:0BC97B        6h
-    Segment: CODE                              C:0035D2    C:0038E4      313h
-    Segment: TEXT                              C:00BEC0    C:00BEDD       1eh
+    Segment: BSS                               D:0BD878    D:0BD87D        6h
+    Segment: CODE                              C:003866    C:003B78      313h
+    Segment: TEXT                              C:00C154    C:00C171       1eh
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\serial.asm (File: serial.obj) Version: 1:0 10/29/2023 23:38:03
+Module: Z:\home\tom\mycode\agon\agon-mos\src\serial.asm (File: serial.obj) Version: 1:0 10/31/2023 21:09:20
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000CE0    C:000DCB       ech
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\spi.asm (File: spi.obj) Version: 1:0 10/29/2023 23:38:00
+Module: Z:\home\tom\mycode\agon\agon-mos\src\spi.asm (File: spi.obj) Version: 1:0 10/31/2023 21:09:16
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: CODE                              C:0038E5    C:0039F2      10eh
+    Segment: CODE                              C:003B79    C:003C86      10eh
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src\vdp_protocol.asm (File: vdp_protocol.obj) Version: 1:0 10/29/2023 23:37:59
+Module: Z:\home\tom\mycode\agon\agon-mos\src\vdp_protocol.asm (File: vdp_protocol.obj) Version: 1:0 10/31/2023 21:09:15
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000ABA    C:000C90      1d7h
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src_startup\cstartup.asm (File: cstartup.obj) Version: 1:0 10/29/2023 23:38:04
+Module: Z:\home\tom\mycode\agon\agon-mos\src_startup\cstartup.asm (File: cstartup.obj) Version: 1:0 10/31/2023 21:09:20
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000F33    C:000F80       4eh
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src_startup\globals.asm (File: globals.obj) Version: 1:0 10/29/2023 23:37:58
+Module: Z:\home\tom\mycode\agon\agon-mos\src_startup\globals.asm (File: globals.obj) Version: 1:0 10/31/2023 21:09:13
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
-    Segment: BSS                               D:0BC290    D:0BC2FE       6fh
+    Segment: BSS                               D:0BC290    D:0BC300       71h
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src_startup\init_params_f92.asm (File: init_params_f92.obj) Version: 1:0 10/29/2023 23:38:04
+Module: Z:\home\tom\mycode\agon\agon-mos\src_startup\init_params_f92.asm (File: init_params_f92.obj) Version: 1:0 10/31/2023 21:09:20
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000F81    C:001073       f3h
 
 
-Module: Z:\home\tom\mycode\agon\agon-mos\src_startup\vectors16.asm (File: vectors16.obj) Version: 1:0 10/29/2023 23:38:04
+Module: Z:\home\tom\mycode\agon\agon-mos\src_startup\vectors16.asm (File: vectors16.obj) Version: 1:0 10/31/2023 21:09:20
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .IVECTS                           C:000100    C:00021F      120h
     Segment: .RESET                            C:000000    C:00006A       6bh
     Segment: .STARTUP                          C:001074    C:001111       9eh
-    Segment: IVJMPTBL                          D:0BC9A8    D:0BCA67       c0h
+    Segment: IVJMPTBL                          D:0BD8AA    D:0BD969       c0h
 
 EXTERNAL DEFINITIONS:
 =====================
@@ -800,23 +800,23 @@ EXTERNAL DEFINITIONS:
 Symbol                               Address Module          Segment
 -------------------------------- ----------- --------------- --------------------------------
 __1st_jump_table                    C:000160 vectors16       .IVECTS                         
-__2nd_jump_table                    D:0BC9A8 vectors16       IVJMPTBL                        
+__2nd_jump_table                    D:0BD8AA vectors16       IVJMPTBL                        
 ___maptab                           D:0BC210 maptab          DATA                            
-___print_buff                       D:0BC982 print_globals   BSS                             
-___print_fmt                        D:0BC990 print_globals   BSS                             
-___print_leading_char               D:0BC9A4 print_globals   BSS                             
-___print_len                        D:0BC9A3 print_globals   BSS                             
-___print_out                        D:0BC9A5 print_globals   BSS                             
-___print_putch                      C:00BBEE print_putch     CODE                            
-___print_send                       C:00B840 print_send      CODE                            
-___print_sendstring                 C:00B143 print_putstring CODE                            
-___print_sputch                     C:00B3C4 print_sputch    CODE                            
-___print_uputch                     C:00B343 print_uputch    CODE                            
+___print_buff                       D:0BD884 print_globals   BSS                             
+___print_fmt                        D:0BD892 print_globals   BSS                             
+___print_leading_char               D:0BD8A6 print_globals   BSS                             
+___print_len                        D:0BD8A5 print_globals   BSS                             
+___print_out                        D:0BD8A7 print_globals   BSS                             
+___print_putch                      C:00BE82 print_putch     CODE                            
+___print_send                       C:00BAD4 print_send      CODE                            
+___print_sendstring                 C:00B3D7 print_putstring CODE                            
+___print_sputch                     C:00B658 print_sputch    CODE                            
+___print_uputch                     C:00B5D7 print_uputch    CODE                            
 ___print_xputch                     D:0BC20D print_globals   DATA                            
-__bshl                              C:00BEB7 bshl            CODE                            
+__bshl                              C:00C14B bshl            CODE                            
 __c_startup                         C:000F33 cstartup        .STARTUP                        
-__case8                             C:00B702 case8           CODE                            
-__close_periphdevice                C:00AECF zsldevinitdummy CODE                            
+__case8                             C:00B996 case8           CODE                            
+__close_periphdevice                C:00B163 zsldevinitdummy CODE                            
 __copy_code_to_ram                  00000000 (User Defined)
 __crtl                              00000001 (User Defined)
 __CS0_BMC_INIT_PARAM                00000001 (User Defined)
@@ -843,152 +843,156 @@ __exec24                            C:0005EC misc            .STARTUP
 __exit                              C:00106E init_params_f92 .STARTUP                        
 __FLASH_ADDR_U_INIT_PARAM           00000000 (User Defined)
 __FLASH_CTL_INIT_PARAM              00000028 (User Defined)
-__frameset                          C:00B783 frameset        CODE                            
-__frameset0                         C:00B448 frameset0       CODE                            
-__heapbot                           000BCA68 (User Defined)
+__frameset                          C:00BA17 frameset        CODE                            
+__frameset0                         C:00B6DC frameset0       CODE                            
+__heapbot                           000BD96A (User Defined)
 __heaptop                           000BFFFF (User Defined)
-__iand                              C:00BB34 iand            CODE                            
-__icmpzero                          C:00B7BD icmpzero        CODE                            
-__idivu                             C:00BA79 idivu           CODE                            
-__idvrmu                            C:00BA83 idivu           CODE                            
-__imul_b                            C:00BC57 imulu           CODE                            
-__imuls                             C:00BC63 imulu           CODE                            
-__imulu                             C:00BC63 imulu           CODE                            
-__indcall                           C:00BAB9 indcall         CODE                            
-__ineg                              C:00BAB0 ineg            CODE                            
+__iand                              C:00BDC8 iand            CODE                            
+__icmpzero                          C:00BA51 icmpzero        CODE                            
+__idivu                             C:00BD0D idivu           CODE                            
+__idvrmu                            C:00BD17 idivu           CODE                            
+__imul_b                            C:00BEEB imulu           CODE                            
+__imuls                             C:00BEF7 imulu           CODE                            
+__imulu                             C:00BEF7 imulu           CODE                            
+__indcall                           C:00BD4D indcall         CODE                            
+__ineg                              C:00BD44 ineg            CODE                            
 __init                              C:000F81 init_params_f92 .STARTUP                        
 __init_default_vectors              C:0010AD vectors16       .STARTUP                        
 __init_rtc                          C:000CD7 rtc             .STARTUP                        
-__inot                              C:00BC11 inot            CODE                            
-__ior                               C:00B322 ior             CODE                            
-__ishl                              C:00BC44 ishl            CODE                            
-__ishl_b                            C:00BC3C ishl            CODE                            
-__ishrs                             C:00AEED ishrs           CODE                            
-__ishrs_b                           C:00AEE5 ishrs           CODE                            
-__ishru                             C:00BA55 ishru           CODE                            
-__ishru_b                           C:00BA4D ishru           CODE                            
-__itol                              C:00BA72 itol            CODE                            
-__ixor                              C:00B7E4 ixor            CODE                            
-__ladd                              C:00AEDF ladd            CODE                            
-__ladd_b                            C:00AED0 ladd            CODE                            
-__land                              C:00BEAE land            CODE                            
-__lcmps                             C:00BA9A lcmpu           CODE                            
-__lcmpu                             C:00BA9A lcmpu           CODE                            
-__lcmpzero                          C:00B6EE lcmpzero        CODE                            
-__ldivs                             C:00B3E3 ldivs           CODE                            
-__ldivu                             C:00B412 ldivu           CODE                            
-__ldvrmu                            C:00B424 ldivu           CODE                            
-__len_bss                           00000718 (User Defined)
-__len_code                          0000ADAE (User Defined)
+__inot                              C:00BEA5 inot            CODE                            
+__ior                               C:00B5B6 ior             CODE                            
+__ishl                              C:00BEB7 ishl            CODE                            
+__ishl_b                            C:00BEAF ishl            CODE                            
+__ishrs                             C:00B181 ishrs           CODE                            
+__ishrs_b                           C:00B179 ishrs           CODE                            
+__ishru                             C:00BCE9 ishru           CODE                            
+__ishru_b                           C:00BCE1 ishru           CODE                            
+__itol                              C:00BD06 itol            CODE                            
+__ixor                              C:00BA78 ixor            CODE                            
+__ladd                              C:00B173 ladd            CODE                            
+__ladd_b                            C:00B164 ladd            CODE                            
+__land                              C:00C142 land            CODE                            
+__lcmps                             C:00BD2E lcmpu           CODE                            
+__lcmpu                             C:00BD2E lcmpu           CODE                            
+__lcmpzero                          C:00B982 lcmpzero        CODE                            
+__ldivs                             C:00B677 ldivs           CODE                            
+__ldivu                             C:00B6A6 ldivu           CODE                            
+__ldvrmu                            C:00B6B8 ldivu           CODE                            
+__len_bss                           0000161A (User Defined)
+__len_code                          0000B042 (User Defined)
 __len_data                          00000290 (User Defined)
-__lmuls                             C:00BE2C lmulu           CODE                            
-__lmulu                             C:00BE2C lmulu           CODE                            
-__lneg                              C:00B2A0 lneg            CODE                            
-__lnot                              C:00BC07 lnot            CODE                            
-__lor                               C:00B7D2 lor             CODE                            
+__lmuls                             C:00C0C0 lmulu           CODE                            
+__lmulu                             C:00C0C0 lmulu           CODE                            
+__lneg                              C:00B534 lneg            CODE                            
+__lnot                              C:00BE9B lnot            CODE                            
+__lor                               C:00BA66 lor             CODE                            
 __low_bss                           000BC290 (User Defined)
 __low_code                          00001112 (User Defined)
 __low_data                          000BC000 (User Defined)
 __low_romcode                       00000000 (User Defined)
-__low_romdata                       0000CEB9 (User Defined)
-__lremu                             C:00BBDE lremu           CODE                            
-__lshl                              C:00BB4F lshl            CODE                            
-__lshru                             C:00B761 lshru           CODE                            
-__lsub                              C:00B755 lsub            CODE                            
-__lxor                              C:00B7DB lxor            CODE                            
+__low_romdata                       0000D146 (User Defined)
+__lremu                             C:00BE72 lremu           CODE                            
+__lshl                              C:00BDE3 lshl            CODE                            
+__lshru                             C:00B9F5 lshru           CODE                            
+__lsub                              C:00B9E9 lsub            CODE                            
+__lxor                              C:00BA6F lxor            CODE                            
 __nvectors                          C:001074 vectors16       .STARTUP                        
-__open_periphdevice                 C:00AECF zsldevinitdummy CODE                            
+__open_periphdevice                 C:00B163 zsldevinitdummy CODE                            
 __RAM_ADDR_U_INIT_PARAM             000000B7 (User Defined)
 __RAM_CTL_INIT_PARAM                00000080 (User Defined)
-__sand                              C:00B7C9 sand            CODE                            
+__sand                              C:00BA5D sand            CODE                            
 __set_vector                        C:0010DC vectors16       .STARTUP                        
-__setflag                           C:00B134 setflag         CODE                            
-__smuls                             C:00BE99 smulu           CODE                            
-__smulu                             C:00BE99 smulu           CODE                            
-__sneg                              C:00BAB0 ineg            CODE                            
-__snot                              C:00BC11 inot            CODE                            
-__sor                               C:00BC4E sor             CODE                            
-__sshru                             C:00B315 sshru           CODE                            
-__sshru_b                           C:00B30D sshru           CODE                            
+__setflag                           C:00B3C8 setflag         CODE                            
+__smuls                             C:00C12D smulu           CODE                            
+__smulu                             C:00C12D smulu           CODE                            
+__sneg                              C:00BD44 ineg            CODE                            
+__snot                              C:00BEA5 inot            CODE                            
+__sor                               C:00BEE2 sor             CODE                            
+__sshru                             C:00B5A9 sshru           CODE                            
+__sshru_b                           C:00B5A1 sshru           CODE                            
 __stack                             000C0000 (User Defined)
-__stoiu                             C:00B33D stoiu           CODE                            
-__u_itoa                            C:00B455 uitoa           CODE                            
-__u_ltoa                            C:00B472 ultoa           CODE                            
-__u_reverse                         C:00B9DF ureverse        CODE                            
-__u_ultoa                           C:00BC9F uultoa          CODE                            
+__stoiu                             C:00B5D1 stoiu           CODE                            
+__u_itoa                            C:00B6E9 uitoa           CODE                            
+__u_ltoa                            C:00B706 ultoa           CODE                            
+__u_reverse                         C:00BC73 ureverse        CODE                            
+__u_ultoa                           C:00BF33 uultoa          CODE                            
 __vector_table                      C:000100 vectors16       .IVECTS                         
 __wait_timer0                       C:00065B misc            .STARTUP                        
 _abort                              C:00106E init_params_f92 .STARTUP                        
-_abs                                C:00B35B abs             CODE                            
+_abs                                C:00B5EF abs             CODE                            
 _audioChannel                       D:0BC29D globals         BSS                             
 _audioSuccess                       D:0BC29E globals         BSS                             
 _callSM                             D:0BC2C9 globals         BSS                             
 _clock                              D:0BC290 globals         BSS                             
-_close_periphdevice                 C:00AECF zsldevinitdummy CODE                            
-_close_UART1                        C:00AE27 uart            CODE                            
-_cmd                                D:0BC2FF mos             BSS                             
+_close_periphdevice                 C:00B163 zsldevinitdummy CODE                            
+_close_UART1                        C:00B0BB uart            CODE                            
+_cmd                                D:0BC301 mos             BSS                             
 _coldBoot                           D:0BC2C6 globals         BSS                             
 _cursorX                            D:0BC297 globals         BSS                             
 _cursorY                            D:0BC298 globals         BSS                             
-_deleteCharacter                    C:002DB0 mos_editor      CODE                            
-_disk_initialize                    C:0039FD diskio          CODE                            
-_disk_ioctl                         C:003A85 diskio          CODE                            
-_disk_read                          C:003A19 diskio          CODE                            
-_disk_status                        C:0039F3 diskio          CODE                            
-_disk_write                         C:003A4F diskio          CODE                            
-_doLeftCursor                       C:002C0A mos_editor      CODE                            
-_doRightCursor                      C:002C64 mos_editor      CODE                            
-_enable_timer0                      C:00353A timer           CODE                            
+_deleteCharacter                    C:002D8D mos_editor      CODE                            
+_disk_initialize                    C:003C91 diskio          CODE                            
+_disk_ioctl                         C:003D19 diskio          CODE                            
+_disk_read                          C:003CAD diskio          CODE                            
+_disk_status                        C:003C87 diskio          CODE                            
+_disk_write                         C:003CE3 diskio          CODE                            
+_doLeftCursor                       C:002BE7 mos_editor      CODE                            
+_doRightCursor                      C:002C41 mos_editor      CODE                            
+_enable_timer0                      C:0037CE timer           CODE                            
 _errno                              D:0BC2C3 globals         BSS                             
 _exec16                             C:000619 misc            .STARTUP                        
 _exec24                             C:0005EC misc            .STARTUP                        
 _exit                               C:00106E init_params_f92 .STARTUP                        
-_f_chdir                            C:008643 ff              CODE                            
-_f_chdrive                          C:00860D ff              CODE                            
-_f_close                            C:0085C1 ff              CODE                            
-_f_closedir                         C:008ED2 ff              CODE                            
-_f_getcwd                           C:0086FB ff              CODE                            
-_f_getfree                          C:00904E ff              CODE                            
-_f_getlabel                         C:009B5D ff              CODE                            
-_f_gets                             C:009FCE ff              CODE                            
-_f_lseek                            C:008993 ff              CODE                            
-_f_mkdir                            C:00964B ff              CODE                            
-_f_mount                            C:0076A8 ff              CODE                            
-_f_open                             C:007738 ff              CODE                            
-_f_opendir                          C:008DD0 ff              CODE                            
-_f_printf                           C:00A232 ff              CODE                            
-_f_putc                             C:00A1B9 ff              CODE                            
-_f_puts                             C:00A1EA ff              CODE                            
-_f_read                             C:007C03 ff              CODE                            
-_f_readdir                          C:008F06 ff              CODE                            
-_f_rename                           C:0098AF ff              CODE                            
-_f_setlabel                         C:009D1D ff              CODE                            
-_f_stat                             C:008FC2 ff              CODE                            
-_f_sync                             C:0084B0 ff              CODE                            
-_f_truncate                         C:0092D9 ff              CODE                            
-_f_unlink                           C:009476 ff              CODE                            
-_f_write                            C:007FB0 ff              CODE                            
-_fat_EOF                            C:002B56 mos             CODE                            
-_ff_oem2uni                         C:00A9C7 ffunicode       CODE                            
-_ff_uni2oem                         C:00A91F ffunicode       CODE                            
-_ff_wtoupper                        C:00AA2C ffunicode       CODE                            
-_get_fattime                        C:003A91 diskio          CODE                            
-_get_timer0                         C:003567 timer           CODE                            
+_f_chdir                            C:0088D7 ff              CODE                            
+_f_chdrive                          C:0088A1 ff              CODE                            
+_f_close                            C:008855 ff              CODE                            
+_f_closedir                         C:009166 ff              CODE                            
+_f_getcwd                           C:00898F ff              CODE                            
+_f_getfree                          C:0092E2 ff              CODE                            
+_f_getlabel                         C:009DF1 ff              CODE                            
+_f_gets                             C:00A262 ff              CODE                            
+_f_lseek                            C:008C27 ff              CODE                            
+_f_mkdir                            C:0098DF ff              CODE                            
+_f_mount                            C:00793C ff              CODE                            
+_f_open                             C:0079CC ff              CODE                            
+_f_opendir                          C:009064 ff              CODE                            
+_f_printf                           C:00A4C6 ff              CODE                            
+_f_putc                             C:00A44D ff              CODE                            
+_f_puts                             C:00A47E ff              CODE                            
+_f_read                             C:007E97 ff              CODE                            
+_f_readdir                          C:00919A ff              CODE                            
+_f_rename                           C:009B43 ff              CODE                            
+_f_setlabel                         C:009FB1 ff              CODE                            
+_f_stat                             C:009256 ff              CODE                            
+_f_sync                             C:008744 ff              CODE                            
+_f_truncate                         C:00956D ff              CODE                            
+_f_unlink                           C:00970A ff              CODE                            
+_f_write                            C:008244 ff              CODE                            
+_fat_EOF                            C:002B33 mos             CODE                            
+_ff_oem2uni                         C:00AC5B ffunicode       CODE                            
+_ff_uni2oem                         C:00ABB3 ffunicode       CODE                            
+_ff_wtoupper                        C:00ACC0 ffunicode       CODE                            
+_get_fattime                        C:003D25 diskio          CODE                            
+_get_timer0                         C:0037FB timer           CODE                            
 _getch                              C:000DB5 serial          .STARTUP                        
-_getCursorPos                       C:002BA4 mos_editor      CODE                            
-_getModeInformation                 C:002BD7 mos_editor      CODE                            
+_getCursorPos                       C:002B81 mos_editor      CODE                            
+_getModeInformation                 C:002BB4 mos_editor      CODE                            
+_gotoEditLineEnd                    C:002E93 mos_editor      CODE                            
+_gotoEditLineStart                  C:002E6D mos_editor      CODE                            
 _gp                                 D:0BC2C7 globals         BSS                             
+_history_no                         D:0BC2FF globals         BSS                             
+_history_size                       D:0BC300 globals         BSS                             
 _init_default_vectors               C:0010AD vectors16       .STARTUP                        
 _init_interrupts                    C:0011F7 main            CODE                            
 _init_rtc                           C:000CD7 rtc             .STARTUP                        
-_init_spi                           C:0038E5 spi             CODE                            
-_init_timer0                        C:003486 timer           CODE                            
-_init_UART0                         C:00AC39 uart            CODE                            
-_init_UART1                         C:00AC4A uart            CODE                            
-_insertCharacter                    C:002CBE mos_editor      CODE                            
-_islower                            C:00BB10 islower         CODE                            
-_isspace                            C:00B81C isspace         CODE                            
-_isupper                            C:00BBBA isupper         CODE                            
+_init_spi                           C:003B79 spi             CODE                            
+_init_timer0                        C:00371A timer           CODE                            
+_init_UART0                         C:00AECD uart            CODE                            
+_init_UART1                         C:00AEDE uart            CODE                            
+_insertCharacter                    C:002C9B mos_editor      CODE                            
+_islower                            C:00BDA4 islower         CODE                            
+_isspace                            C:00BAB0 isspace         CODE                            
+_isupper                            C:00BE4E isupper         CODE                            
 _keyascii                           D:0BC295 globals         BSS                             
 _keycode                            D:0BC2A7 globals         BSS                             
 _keycount                           D:0BC2A9 globals         BSS                             
@@ -999,87 +1003,88 @@ _keymap                             D:0BC2D6 globals         BSS
 _keymods                            D:0BC296 globals         BSS                             
 _keyrate                            D:0BC2B4 globals         BSS                             
 _main                               C:001218 main            CODE                            
-_memcmp                             C:00B793 memcmp          CODE                            
-_memcpy                             C:00B739 memcpy          CODE                            
-_memset                             C:00BC1B memset          CODE                            
-_mos_CD                             C:0021C6 mos             CODE                            
-_mos_cmdCD                          C:001B71 mos             CODE                            
-_mos_cmdCLS                         C:001E75 mos             CODE                            
-_mos_cmdCOPY                        C:001BE7 mos             CODE                            
-_mos_cmdCREDITS                     C:001E00 mos             CODE                            
-_mos_cmdDEL                         C:001A85 mos             CODE                            
-_mos_cmdDIR                         C:001961 mos             CODE                            
-_mos_cmdEXEC                        C:0019E7 mos             CODE                            
-_mos_cmdHELP                        C:001F77 mos             CODE                            
-_mos_cmdJMP                         C:001AB5 mos             CODE                            
-_mos_cmdLOAD                        C:001994 mos             CODE                            
-_mos_cmdMKDIR                       C:001C2D mos             CODE                            
-_mos_cmdMOUNT                       C:001E8B mos             CODE                            
-_mos_cmdREN                         C:001BA1 mos             CODE                            
-_mos_cmdRUN                         C:001AE9 mos             CODE                            
-_mos_cmdSAVE                        C:001A29 mos             CODE                            
-_mos_cmdSET                         C:001C5D mos             CODE                            
-_mos_cmdTIME                        C:001D28 mos             CODE                            
-_mos_cmdTYPE                        C:001E45 mos             CODE                            
-_mos_cmdVDU                         C:001CEA mos             CODE                            
-_mos_cmp                            C:0014DF mos             CODE                            
-_mos_COPY                           C:0024CD mos             CODE                            
-_mos_DEL                            C:002496 mos             CODE                            
-_mos_DIR                            C:0021DF mos             CODE                            
-_mos_EDITLINE                       C:002E90 mos_editor      CODE                            
-_mos_error                          C:0013E0 mos             CODE                            
-_mos_EXEC                           C:0025AE mos             CODE                            
-_mos_exec                           C:0017A6 mos             CODE                            
-_mos_execMode                       C:001912 mos             CODE                            
-_mos_FCLOSE                         C:002713 mos             CODE                            
-_mos_FEOF                           C:002985 mos             CODE                            
-_mos_FGETC                          C:0027E2 mos             CODE                            
-_mos_FLSEEK                         C:002946 mos             CODE                            
-_mos_FOPEN                          C:002692 mos             CODE                            
-_mos_FPUTC                          C:00285B mos             CODE                            
-_mos_FREAD                          C:002890 mos             CODE                            
-_mos_FWRITE                         C:0028EB mos             CODE                            
-_mos_getCommand                     C:001486 mos             CODE                            
-_mos_GETERROR                       C:0029B6 mos             CODE                            
-_mos_GETFIL                         C:002B12 mos             CODE                            
-_mos_getkey                         C:00141A mos             CODE                            
-_mos_GETRTC                         C:0029FD mos             CODE                            
-_mos_input                          C:001442 mos             CODE                            
-_mos_LOAD                           C:00207C mos             CODE                            
-_mos_MKDIR                          C:002595 mos             CODE                            
-_mos_mount                          C:002B8D mos             CODE                            
-_mos_OSCLI                          C:0029E4 mos             CODE                            
-_mos_parseNumber                    C:0016E1 mos             CODE                            
-_mos_parseString                    C:001768 mos             CODE                            
-_mos_REN                            C:0024AF mos             CODE                            
-_mos_SAVE                           C:0020DB mos             CODE                            
-_mos_SETINTVECTOR                   C:002AF7 mos             CODE                            
-_mos_SETRTC                         C:002A33 mos             CODE                            
-_mos_strtok                         C:001632 mos             CODE                            
-_mos_strtok_r                       C:00164F mos             CODE                            
-_mos_trim                           C:00158F mos             CODE                            
-_mos_TYPE                           C:00212E mos             CODE                            
-_mosFileObjects                     D:0BC638 mos             BSS                             
+_memcmp                             C:00BA27 memcmp          CODE                            
+_memcpy                             C:00B9CD memcpy          CODE                            
+_memset                             C:00BEC1 memset          CODE                            
+_mos_CD                             C:0021A3 mos             CODE                            
+_mos_cmdCD                          C:001B4E mos             CODE                            
+_mos_cmdCLS                         C:001E52 mos             CODE                            
+_mos_cmdCOPY                        C:001BC4 mos             CODE                            
+_mos_cmdCREDITS                     C:001DDD mos             CODE                            
+_mos_cmdDEL                         C:001A62 mos             CODE                            
+_mos_cmdDIR                         C:00193E mos             CODE                            
+_mos_cmdEXEC                        C:0019C4 mos             CODE                            
+_mos_cmdHELP                        C:001F54 mos             CODE                            
+_mos_cmdJMP                         C:001A92 mos             CODE                            
+_mos_cmdLOAD                        C:001971 mos             CODE                            
+_mos_cmdMKDIR                       C:001C0A mos             CODE                            
+_mos_cmdMOUNT                       C:001E68 mos             CODE                            
+_mos_cmdREN                         C:001B7E mos             CODE                            
+_mos_cmdRUN                         C:001AC6 mos             CODE                            
+_mos_cmdSAVE                        C:001A06 mos             CODE                            
+_mos_cmdSET                         C:001C3A mos             CODE                            
+_mos_cmdTIME                        C:001D05 mos             CODE                            
+_mos_cmdTYPE                        C:001E22 mos             CODE                            
+_mos_cmdVDU                         C:001CC7 mos             CODE                            
+_mos_cmp                            C:0014BC mos             CODE                            
+_mos_COPY                           C:0024AA mos             CODE                            
+_mos_DEL                            C:002473 mos             CODE                            
+_mos_DIR                            C:0021BC mos             CODE                            
+_mos_EDITLINE                       C:002F0C mos_editor      CODE                            
+_mos_error                          C:0013BD mos             CODE                            
+_mos_EXEC                           C:00258B mos             CODE                            
+_mos_exec                           C:001783 mos             CODE                            
+_mos_execMode                       C:0018EF mos             CODE                            
+_mos_FCLOSE                         C:0026F0 mos             CODE                            
+_mos_FEOF                           C:002962 mos             CODE                            
+_mos_FGETC                          C:0027BF mos             CODE                            
+_mos_FLSEEK                         C:002923 mos             CODE                            
+_mos_FOPEN                          C:00266F mos             CODE                            
+_mos_FPUTC                          C:002838 mos             CODE                            
+_mos_FREAD                          C:00286D mos             CODE                            
+_mos_FWRITE                         C:0028C8 mos             CODE                            
+_mos_getCommand                     C:001463 mos             CODE                            
+_mos_GETERROR                       C:002993 mos             CODE                            
+_mos_GETFIL                         C:002AEF mos             CODE                            
+_mos_getkey                         C:0013F7 mos             CODE                            
+_mos_GETRTC                         C:0029DA mos             CODE                            
+_mos_input                          C:00141F mos             CODE                            
+_mos_LOAD                           C:002059 mos             CODE                            
+_mos_MKDIR                          C:002572 mos             CODE                            
+_mos_mount                          C:002B6A mos             CODE                            
+_mos_OSCLI                          C:0029C1 mos             CODE                            
+_mos_parseNumber                    C:0016BE mos             CODE                            
+_mos_parseString                    C:001745 mos             CODE                            
+_mos_REN                            C:00248C mos             CODE                            
+_mos_SAVE                           C:0020B8 mos             CODE                            
+_mos_SETINTVECTOR                   C:002AD4 mos             CODE                            
+_mos_SETRTC                         C:002A10 mos             CODE                            
+_mos_strtok                         C:00160F mos             CODE                            
+_mos_strtok_r                       C:00162C mos             CODE                            
+_mos_trim                           C:00156C mos             CODE                            
+_mos_TYPE                           C:00210B mos             CODE                            
+_mosFileObjects                     D:0BC63A mos             BSS                             
 _mouseButtons                       D:0BC2BD globals         BSS                             
 _mouseWheel                         D:0BC2BE globals         BSS                             
 _mouseX                             D:0BC2B9 globals         BSS                             
 _mouseXDelta                        D:0BC2BF globals         BSS                             
 _mouseY                             D:0BC2BB globals         BSS                             
 _mouseYDelta                        D:0BC2C1 globals         BSS                             
-_open_periphdevice                  C:00AECF zsldevinitdummy CODE                            
-_open_UART0                         C:00AC5B uart            CODE                            
-_open_UART1                         C:00AD41 uart            CODE                            
-_printCommandInfo                   C:001EB7 mos             CODE                            
+_open_periphdevice                  C:00B163 zsldevinitdummy CODE                            
+_open_UART0                         C:00AEEF uart            CODE                            
+_open_UART1                         C:00AFD5 uart            CODE                            
+_printCommandInfo                   C:001E94 mos             CODE                            
 _putch                              C:000D9B serial          .STARTUP                        
-_putchar                            C:00BAE2 putchar         CODE                            
+_putchar                            C:00BD76 putchar         CODE                            
+_removeEditLine                     C:002EC3 mos_editor      CODE                            
 _reset                              C:000000 vectors16       .RESET                          
 _rtc                                D:0BC2AA globals         BSS                             
 _rtc_days                           D:0BC19B clock           DATA                            
 _rtc_enable                         D:0BC2B8 globals         BSS                             
-_rtc_formatDateTime                 C:003318 clock           CODE                            
+_rtc_formatDateTime                 C:0035AC clock           CODE                            
 _rtc_months                         D:0BC1C5 clock           DATA                            
-_rtc_unpack                         C:00324A clock           CODE                            
-_rtc_update                         C:003208 clock           CODE                            
+_rtc_unpack                         C:0034DE clock           CODE                            
+_rtc_update                         C:00349C clock           CODE                            
 _scratchpad                         D:0BC2CE globals         BSS                             
 _scrchar                            D:0BC299 globals         BSS                             
 _scrcolours                         D:0BC2A5 globals         BSS                             
@@ -1090,29 +1095,29 @@ _scrpixel                           D:0BC29A globals         BSS
 _scrpixelIndex                      D:0BC2A6 globals         BSS                             
 _scrrows                            D:0BC2A4 globals         BSS                             
 _scrwidth                           D:0BC29F globals         BSS                             
-_SD_init                            C:0035D2 sd              CODE                            
-_SD_readBlocks                      C:003648 sd              CODE                            
-_SD_writeBlocks                     C:0036E0 sd              CODE                            
+_SD_init                            C:003866 sd              CODE                            
+_SD_readBlocks                      C:0038DC sd              CODE                            
+_SD_writeBlocks                     C:003974 sd              CODE                            
 _serialFlags                        D:0BC2C8 globals         BSS                             
 _set_vector                         C:0010DC vectors16       .STARTUP                        
-_spi_read                           C:00396F spi             CODE                            
-_spi_read_one                       C:003953 spi             CODE                            
-_spi_transfer                       C:00395B spi             CODE                            
-_spi_write                          C:0039B5 spi             CODE                            
-_strcasecmp                         C:00AE42 strings         CODE                            
-_strchr                             C:00B7FF strchr          CODE                            
-_strcmp                             C:00B2F0 strcmp          CODE                            
-_strcspn                            C:00BABB strcspn         CODE                            
-_strlen                             C:00B3AF strlen          CODE                            
-_strncpy                            C:00B2AD strncpy         CODE                            
-_strspn                             C:00BB5E strspn          CODE                            
-_strtol                             C:00AF0A strtol          CODE                            
+_spi_read                           C:003C03 spi             CODE                            
+_spi_read_one                       C:003BE7 spi             CODE                            
+_spi_transfer                       C:003BEF spi             CODE                            
+_spi_write                          C:003C49 spi             CODE                            
+_strcasecmp                         C:00B0D6 strings         CODE                            
+_strchr                             C:00BA93 strchr          CODE                            
+_strcmp                             C:00B584 strcmp          CODE                            
+_strcspn                            C:00BD4F strcspn         CODE                            
+_strlen                             C:00B643 strlen          CODE                            
+_strncpy                            C:00B541 strncpy         CODE                            
+_strspn                             C:00BDF2 strspn          CODE                            
+_strtol                             C:00B19E strtol          CODE                            
 _SYS_CLK_FREQ                       01194000 (User Defined)
 _SysClkFreq                         C:001070 init_params_f92 .STARTUP                        
 _sysvars                            D:0BC290 globals         BSS                             
 _timer0_delay                       C:000671 misc            .STARTUP                        
-_tolower                            C:00BB8A tolower         CODE                            
-_toupper                            C:00B37F toupper         CODE                            
+_tolower                            C:00BE1E tolower         CODE                            
+_toupper                            C:00B613 toupper         CODE                            
 _uart0_handler                      C:000CBD interrupts      .STARTUP                        
 _user_kbvector                      D:0BC2FC globals         BSS                             
 _vblank_handler                     C:000C91 interrupts      .STARTUP                        
@@ -1124,8 +1129,8 @@ _vdp_protocol_state                 D:0BC2E6 globals         BSS
 _vpd_protocol_flags                 D:0BC294 globals         BSS                             
 _wait_ESP32                         C:001112 main            CODE                            
 _wait_timer0                        C:00065B misc            .STARTUP                        
-_wait_VDP                           C:003591 timer           CODE                            
-_waitKey                            C:002E6C mos_editor      CODE                            
+_wait_VDP                           C:003825 timer           CODE                            
+_waitKey                            C:002E49 mos_editor      CODE                            
 GET_AHL24                           C:0005D8 misc            .STARTUP                        
 getch                               C:000DB5 serial          .STARTUP                        
 GPIOB_SETMODE                       C:000DCC gpio            .STARTUP                        
@@ -1145,7 +1150,7 @@ UART1_serial_RX                     C:000D37 serial          .STARTUP
 UART1_serial_TX                     C:000D0F serial          .STARTUP                        
 vdp_protocol                        C:000ABA vdp_protocol    .STARTUP                        
 
-345 external symbol(s).
+350 external symbol(s).
 
 SYMBOL CROSS REFERENCE:
 =======================
@@ -1279,6 +1284,7 @@ __frameset                        Defined     .\rtl\common\frameset.asm
                                   Referenced  .\rtl\common\uultoa.c
 __frameset0                       Defined     .\rtl\common\frameset0.asm
                                   Referenced  ..\src\mos.c
+                                  Referenced  ..\src\mos_editor.c
                                   Referenced  ..\src\clock.c
                                   Referenced  ..\src_fatfs\diskio.c
                                   Referenced  ..\src_fatfs\ff.c
@@ -1575,9 +1581,17 @@ _get_timer0                       Defined     ..\src\timer.c
 _getch                            Defined     Z:\home\tom\mycode\agon\agon-mos\src\serial.asm
 _getCursorPos                     Defined     ..\src\mos_editor.c
 _getModeInformation               Defined     ..\src\mos_editor.c
+_gotoEditLineEnd                  Defined     ..\src\mos_editor.c
+_gotoEditLineStart                Defined     ..\src\mos_editor.c
 _gp                               Defined     Z:\home\tom\mycode\agon\agon-mos\src_startup\globals.asm
                                   Referenced  ..\main.c
                                   Referenced  Z:\home\tom\mycode\agon\agon-mos\src\vdp_protocol.asm
+_history_no                       Defined     Z:\home\tom\mycode\agon\agon-mos\src_startup\globals.asm
+                                  Referenced  ..\main.c
+                                  Referenced  ..\src\mos_editor.c
+_history_size                     Defined     Z:\home\tom\mycode\agon\agon-mos\src_startup\globals.asm
+                                  Referenced  ..\main.c
+                                  Referenced  ..\src\mos_editor.c
 _init_default_vectors             Defined     Z:\home\tom\mycode\agon\agon-mos\src_startup\vectors16.asm
 _init_interrupts                  Defined     ..\main.c
 _init_rtc                         Defined     Z:\home\tom\mycode\agon\agon-mos\src\rtc.asm
@@ -1633,6 +1647,7 @@ _memcmp                           Defined     .\rtl\common\memcmp.asm
 _memcpy                           Defined     .\rtl\common\memcpy.asm
                                   Referenced  ..\src_fatfs\ff.c
 _memset                           Defined     .\rtl\common\memset.asm
+                                  Referenced  ..\src\mos_editor.c
                                   Referenced  ..\src_fatfs\ff.c
 _mos_CD                           Defined     ..\src\mos.c
                                   Referenced  Z:\home\tom\mycode\agon\agon-mos\src\mos_api.asm
@@ -1743,6 +1758,7 @@ _putch                            Defined     Z:\home\tom\mycode\agon\agon-mos\s
                                   Referenced  .\rtl\common\putchar.c
 _putchar                          Defined     .\rtl\common\putchar.c
                                   Referenced  ..\src\mos.c
+_removeEditLine                   Defined     ..\src\mos_editor.c
 _reset                            Defined     Z:\home\tom\mycode\agon\agon-mos\src_startup\vectors16.asm
 _rtc                              Defined     Z:\home\tom\mycode\agon\agon-mos\src_startup\globals.asm
                                   Referenced  ..\src\mos.c
@@ -1903,8 +1919,8 @@ vdp_protocol                      Defined     Z:\home\tom\mycode\agon\agon-mos\s
 
 OUTPUT CHECKSUM
 ===============
-MOS.hex              61065C
-MOS.lod              61065C
+MOS.hex              62495D
+MOS.lod              62495D
 
 
 
