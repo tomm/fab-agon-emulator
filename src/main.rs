@@ -146,9 +146,9 @@ pub fn main() -> Result<(), pico_args::Error> {
     unsafe { vgabuf.set_len(1024*768*3); }
     let mut mode_w: u32 = 640;
     let mut mode_h: u32 = 480;
+    let mut mouse_btn_state: u8 = 0;
 
     'running: loop {
-
         let (wx, wy): (u32, u32) = {
             if is_fullscreen {
                 (native_resolution.w as u32, native_resolution.h as u32)
@@ -170,6 +170,8 @@ pub fn main() -> Result<(), pico_args::Error> {
                 (640, 480)
             }
         };
+
+        sdl_context.mouse().set_relative_mouse_mode(is_fullscreen);
 
         let mut window = video_subsystem.window(&format!("Fab Agon Emulator {}", env!("CARGO_PKG_VERSION")), wx, wy)
             .resizable()
@@ -268,6 +270,55 @@ pub fn main() -> Result<(), pico_args::Error> {
                             unsafe {
                                 (*vdp_interface.sendHostKbEventToFabgl)(ps2scancode, 0);
                             }
+                        }
+                    }
+                    Event::MouseButtonUp { mouse_btn, .. } => {
+                        mouse_btn_state &= match mouse_btn {
+                            sdl2::mouse::MouseButton::Left => !1,
+                            sdl2::mouse::MouseButton::Right => !2,
+                            sdl2::mouse::MouseButton::Middle => !4,
+                            _ => !0
+                        };
+                        let packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
+                        unsafe {
+                            (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
+                        }
+                    }
+                    Event::MouseButtonDown { mouse_btn, .. } => {
+                        mouse_btn_state |= match mouse_btn {
+                            sdl2::mouse::MouseButton::Left => 1,
+                            sdl2::mouse::MouseButton::Right => 2,
+                            sdl2::mouse::MouseButton::Middle => 4,
+                            _ => 0
+                        };
+                        let packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
+                        unsafe {
+                            (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
+                        }
+                    }
+                    Event::MouseWheel { y, .. } => {
+                        let mut packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
+                        packet[3] = y as u8;
+                        unsafe {
+                            (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
+                        }
+                    }
+                    Event::MouseMotion { xrel, yrel, .. } => {
+                        let mut packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
+                        if xrel >= 0 {
+                            packet[1] = xrel as u8;
+                        } else {
+                            packet[1] = xrel as u8;
+                            packet[0] |= 0x10;
+                        }
+                        if yrel <= 0 {
+                            packet[2] = -yrel as u8;
+                        } else {
+                            packet[2] = -yrel as u8;
+                            packet[0] |= 0x20;
+                        }
+                        unsafe {
+                            (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
                         }
                     }
                     _ => {}

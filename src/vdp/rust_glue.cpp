@@ -21,6 +21,22 @@ extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 	}
 }
 
+extern "C" void sendHostMouseEventToFabgl(uint8_t mousePacket[4])
+{
+	fabgl::MousePacket packet;
+	packet.data[0] = mousePacket[0];
+	packet.data[1] = mousePacket[1];
+	packet.data[2] = mousePacket[2];
+	packet.data[3] = mousePacket[3];
+
+	auto lock = fabgl::VGABaseController::acquireLock();
+	// if the VGA controller is initialized we know the mouse is ready
+	if (fabgl::VGABaseController::activeController != nullptr
+			&& fabgl::PS2Controller::mouse() != nullptr) {
+		fabgl::PS2Controller::mouse()->injectPacket(&packet);
+	}
+}
+
 /* Buffer must be big enough for any screen resolution - up to 1024x768x3 bytes :) */
 extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 {
