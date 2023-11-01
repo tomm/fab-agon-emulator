@@ -3,7 +3,8 @@ make clean
 make
 
 VERSION=`cargo tree --depth 0 | awk '{print $2;}'`
-DIST_DIR=fab-agon-emulator-$VERSION-linux
+ARCH=`uname -m`
+DIST_DIR=fab-agon-emulator-$VERSION-linux-$ARCH
 
 rm -rf $DIST_DIR
 mkdir $DIST_DIR
