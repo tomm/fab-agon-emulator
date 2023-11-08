@@ -51,6 +51,8 @@ rust_glue.o: rust_glue.cpp userspace-vdp-gl/src/fabutils.h \
  userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
  userspace-vdp-gl/src/devdrivers/keyboard.h \
+ userspace-vdp-gl/src/comdrivers/ps2controller.h \
+ userspace-vdp-gl/src/comdrivers/ps2device.h \
  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
  userspace-vdp-gl/src/devdrivers/soundgen.h \
@@ -63,11 +65,8 @@ rust_glue.o: rust_glue.cpp userspace-vdp-gl/src/fabutils.h \
  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/userspace-platform/ps2controller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/scene.h userspace-vdp-gl/src/collisiondetector.h \
- vdp.h
+ userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+ userspace-vdp-gl/src/collisiondetector.h vdp.h
 vdp-1.03.o: vdp-1.03.cpp \
  userspace-vdp-gl/src/userspace-platform/Arduino.h vdp-1.03.h \
  userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
@@ -126,6 +125,8 @@ vdp-1.03.o: vdp-1.03.cpp \
  userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
  userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
  userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/devdrivers/keyboard.h \
+ userspace-vdp-gl/src/comdrivers/ps2controller.h \
+ userspace-vdp-gl/src/comdrivers/ps2device.h \
  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
  userspace-vdp-gl/src/devdrivers/soundgen.h \
@@ -135,11 +136,8 @@ vdp-1.03.o: vdp-1.03.cpp \
  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/userspace-platform/ps2controller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/scene.h userspace-vdp-gl/src/collisiondetector.h \
- vdp.h vdp-quark103/video.ino \
+ userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+ userspace-vdp-gl/src/collisiondetector.h vdp.h vdp-quark103/video.ino \
  userspace-vdp-gl/src/userspace-platform/ESP32Time.h vdp-quark103/agon.h \
  vdp-quark103/agon_fonts.h vdp-quark103/agon_audio.h \
  vdp-quark103/agon_palette.h
@@ -197,6 +195,8 @@ vdp-console8.o: vdp-console8.cpp \
  userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
  userspace-vdp-gl/src/devdrivers/keyboard.h \
+ userspace-vdp-gl/src/comdrivers/ps2controller.h \
+ userspace-vdp-gl/src/comdrivers/ps2device.h \
  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
  userspace-vdp-gl/src/devdrivers/soundgen.h \
@@ -209,20 +209,30 @@ vdp-console8.o: vdp-console8.cpp \
  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/userspace-platform/ps2controller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/scene.h userspace-vdp-gl/src/collisiondetector.h \
- vdp.h vdp-console8/video.ino vdp-console8/agon.h \
- vdp-console8/agon_keyboard.h vdp-console8/vdp_protocol.h \
- vdp-console8/agon_screen.h vdp-console8/graphics.h \
- vdp-console8/agon_fonts.h vdp-console8/agon_palette.h \
- vdp-console8/cursor.h vdp-console8/viewport.h vdp-console8/sprites.h \
- vdp-console8/vdu.h vdp-console8/vdu_audio.h vdp-console8/agon_audio.h \
- vdp-console8/envelopes/volume.h vdp-console8/envelopes/frequency.h \
- vdp-console8/vdu_sys.h \
+ userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+ userspace-vdp-gl/src/collisiondetector.h vdp.h \
+ vdp-console8/video/video.ino \
+ userspace-vdp-gl/src/userspace-platform/WiFi.h vdp-console8/video/agon.h \
+ vdp-console8/video/version.h vdp-console8/video/agon_ps2.h \
+ vdp-console8/video/agon_audio.h vdp-console8/video/audio_channel.h \
+ vdp-console8/video/types.h vdp-console8/video/envelopes/volume.h \
+ vdp-console8/video/envelopes/frequency.h \
+ vdp-console8/video/audio_sample.h vdp-console8/video/buffer_stream.h \
+ vdp-console8/video/enhanced_samples_generator.h \
+ vdp-console8/video/agon_ttxt.h vdp-console8/video/ttxtfont.h \
+ vdp-console8/video/agon_palette.h vdp-console8/video/agon_screen.h \
+ vdp-console8/video/graphics.h vdp-console8/video/agon_fonts.h \
+ vdp-console8/video/cursor.h vdp-console8/video/viewport.h \
+ vdp-console8/video/vdp_protocol.h vdp-console8/video/sprites.h \
+ vdp-console8/video/vdu_stream_processor.h vdp-console8/video/vdu.h \
+ vdp-console8/video/vdu_audio.h vdp-console8/video/buffers.h \
+ vdp-console8/video/vdu_sys.h \
  userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
- vdp-console8/vdu_sprites.h
+ vdp-console8/video/vdu_buffered.h \
+ vdp-console8/video/multi_buffer_stream.h \
+ vdp-console8/video/vdu_sprites.h vdp-console8/video/updater.h \
+ userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
+ vdp-console8/video/hexload.h
 vdp_quark104.o: vdp_quark104.cpp \
  userspace-vdp-gl/src/userspace-platform/Arduino.h vdp_quark104.h \
  userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
@@ -277,6 +287,8 @@ vdp_quark104.o: vdp_quark104.cpp \
  userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
  userspace-vdp-gl/src/devdrivers/keyboard.h \
+ userspace-vdp-gl/src/comdrivers/ps2controller.h \
+ userspace-vdp-gl/src/comdrivers/ps2device.h \
  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
  userspace-vdp-gl/src/devdrivers/soundgen.h \
@@ -289,21 +301,18 @@ vdp_quark104.o: vdp_quark104.cpp \
  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/userspace-platform/ps2controller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/scene.h userspace-vdp-gl/src/collisiondetector.h \
- vdp.h vdp-quark104/video.ino vdp-quark104/agon.h \
- vdp-quark104/agon_keyboard.h vdp-quark104/agon_audio.h \
- vdp-quark104/audio_channel.h vdp-quark104/types.h \
- vdp-quark104/envelopes/volume.h vdp-quark104/envelopes/frequency.h \
- vdp-quark104/audio_sample.h vdp-quark104/enhanced_samples_generator.h \
- vdp-quark104/graphics.h vdp-quark104/agon_screen.h \
- vdp-quark104/agon_fonts.h vdp-quark104/agon_palette.h \
- vdp-quark104/cursor.h vdp-quark104/viewport.h \
- vdp-quark104/vdp_protocol.h vdp-quark104/sprites.h \
- vdp-quark104/vdu_stream_processor.h vdp-quark104/vdu.h \
- vdp-quark104/vdu_audio.h vdp-quark104/vdu_sys.h \
+ userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+ userspace-vdp-gl/src/collisiondetector.h vdp.h vdp-quark104/video.ino \
+ vdp-quark104/agon.h vdp-quark104/agon_keyboard.h \
+ vdp-quark104/agon_audio.h vdp-quark104/audio_channel.h \
+ vdp-quark104/types.h vdp-quark104/envelopes/volume.h \
+ vdp-quark104/envelopes/frequency.h vdp-quark104/audio_sample.h \
+ vdp-quark104/enhanced_samples_generator.h vdp-quark104/graphics.h \
+ vdp-quark104/agon_screen.h vdp-quark104/agon_fonts.h \
+ vdp-quark104/agon_palette.h vdp-quark104/cursor.h \
+ vdp-quark104/viewport.h vdp-quark104/vdp_protocol.h \
+ vdp-quark104/sprites.h vdp-quark104/vdu_stream_processor.h \
+ vdp-quark104/vdu.h vdp-quark104/vdu_audio.h vdp-quark104/vdu_sys.h \
  userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
  vdp-quark104/vdu_buffered.h vdp-quark104/buffer_stream.h \
  vdp-quark104/multi_buffer_stream.h vdp-quark104/vdu_sprites.h \

@@ -1,6 +1,6 @@
 [package]
 name = "fab-agon-emulator"
-version = "0.8.9"
+version = "0.9.2"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"
@@ -18,8 +18,8 @@ sdl2 = "0.35.2"
 [dependencies]
 sdl2 = "0.35.2"
 pico-args = "0.5.0"
-agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="06aba0a4cba64baebacf883692b9940b1355dc1b"}
-agon-light-emulator-debugger = { git = "https://github.com/tomm/agon-light-emulator-debugger.git", rev="6cee077e12b9c1b40a7c8ccbdc6d4cc02beb3f2f"}
+agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="d5a52f0fc41aa363816874e986e8d71af1297315"}
+agon-light-emulator-debugger = { git = "https://github.com/tomm/agon-light-emulator-debugger.git", rev="e9859b98f9852ab82a508193e04735636cca8848"}
 libloading = "0.8.0"
 
 #agon-cpu-emulator = { path = "../agon-cpu-emulator" }

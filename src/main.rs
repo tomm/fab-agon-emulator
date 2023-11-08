@@ -1,14 +1,16 @@
-use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit };
+use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit, gpio };
 use agon_cpu_emulator::debugger::{ DebugCmd, DebugResp, DebuggerConnection, Trigger };
 use sdl2::event::Event;
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
+use std::sync::{ Arc, Mutex };
 use std::thread;
 use crate::parse_args::parse_args;
 mod sdl2ps2;
 mod parse_args;
 mod vdp_interface;
 mod audio;
+mod joypad;
 
 const AUDIO_BUFLEN: u16 = 256;
 
@@ -22,6 +24,8 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     let (tx_cmd_debugger, rx_cmd_debugger): (Sender<DebugCmd>, Receiver<DebugCmd>) = mpsc::channel();
     let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) = mpsc::channel();
+
+    let gpios = Arc::new(Mutex::new(gpio::GpioSet::new()));
 
     if let Some(breakpoint) = args.breakpoint {
         if let Ok(breakpoint) = u32::from_str_radix(&breakpoint, 16) {
@@ -41,7 +45,6 @@ pub fn main() -> Result<(), pico_args::Error> {
     // Atomics for various state communication
     let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-    let vsync_counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
 
     // Preserve stdin state, as debugger can leave stdin in raw mode
     #[cfg(target_os = "linux")]
@@ -59,14 +62,15 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     let _cpu_thread = {
         let soft_reset_ez80 = soft_reset.clone();
-        let vsync_counter_ez80 = vsync_counter.clone();
+        let gpios_ = gpios.clone();
+
         thread::spawn(move || {
             // Prepare the device
             let mut machine = AgonMachine::new(AgonMachineConfig {
                 ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
                 to_vdp: tx_ez80_to_vdp,
                 from_vdp: rx_vdp_to_ez80,
-                vsync_counter: vsync_counter_ez80,
+                gpios: gpios_,
                 soft_reset: soft_reset_ez80,
                 clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },
                 mos_bin: if let Some(mos_bin) = args.mos_bin {
@@ -121,7 +125,11 @@ pub fn main() -> Result<(), pico_args::Error> {
     let native_resolution = sdl_context.video().unwrap().current_display_mode(0).unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let audio_subsystem = sdl_context.audio().unwrap();
+    let joystick_subsystem = sdl_context.joystick().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
+    let mut joysticks = vec![];
+
+    open_joystick_devices(&mut joysticks, &joystick_subsystem);
 
     //println!("Detected {}x{} native resolution", native_resolution.w, native_resolution.h);
 
@@ -146,9 +154,11 @@ pub fn main() -> Result<(), pico_args::Error> {
     unsafe { vgabuf.set_len(1024*768*3); }
     let mut mode_w: u32 = 640;
     let mut mode_h: u32 = 480;
+    let mut mouse_btn_state: u8 = 0;
+
+    joypad::clear_state(&mut gpios.lock().unwrap());
 
     'running: loop {
-
         let (wx, wy): (u32, u32) = {
             if is_fullscreen {
                 (native_resolution.w as u32, native_resolution.h as u32)
@@ -170,6 +180,8 @@ pub fn main() -> Result<(), pico_args::Error> {
                 (640, 480)
             }
         };
+
+        sdl_context.mouse().set_relative_mouse_mode(is_fullscreen);
 
         let mut window = video_subsystem.window(&format!("Fab Agon Emulator {}", env!("CARGO_PKG_VERSION")), wx, wy)
             .resizable()
@@ -206,8 +218,12 @@ pub fn main() -> Result<(), pico_args::Error> {
             // Present a frame
             last_frame_time = last_frame_time.checked_add(frame_duration).unwrap_or(std::time::Instant::now());
 
-            // signal the vsync to the ez80
-            vsync_counter.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            // signal vsync to ez80 via GPIO (pin 1 (from 0) of GPIO port B)
+            {
+                let mut gpios = gpios.lock().unwrap();
+                gpios.b.set_input_pin(1, true);
+                gpios.b.set_input_pin(1, false);
+            }
 
             // shutdown if requested (atomic could be set from the debugger)
             if emulator_shutdown.load(std::sync::atomic::Ordering::Relaxed) {
@@ -269,6 +285,69 @@ pub fn main() -> Result<(), pico_args::Error> {
                                 (*vdp_interface.sendHostKbEventToFabgl)(ps2scancode, 0);
                             }
                         }
+                    }
+                    Event::MouseButtonUp { mouse_btn, .. } => {
+                        mouse_btn_state &= match mouse_btn {
+                            sdl2::mouse::MouseButton::Left => !1,
+                            sdl2::mouse::MouseButton::Right => !2,
+                            sdl2::mouse::MouseButton::Middle => !4,
+                            _ => !0
+                        };
+                        let packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
+                        unsafe {
+                            (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
+                        }
+                    }
+                    Event::MouseButtonDown { mouse_btn, .. } => {
+                        mouse_btn_state |= match mouse_btn {
+                            sdl2::mouse::MouseButton::Left => 1,
+                            sdl2::mouse::MouseButton::Right => 2,
+                            sdl2::mouse::MouseButton::Middle => 4,
+                            _ => 0
+                        };
+                        let packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
+                        unsafe {
+                            (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
+                        }
+                    }
+                    Event::MouseWheel { y, .. } => {
+                        let mut packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
+                        packet[3] = y as u8;
+                        unsafe {
+                            (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
+                        }
+                    }
+                    Event::MouseMotion { xrel, yrel, .. } => {
+                        let mut packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
+                        if xrel >= 0 {
+                            packet[1] = xrel as u8;
+                        } else {
+                            packet[1] = xrel as u8;
+                            packet[0] |= 0x10;
+                        }
+                        if yrel <= 0 {
+                            packet[2] = -yrel as u8;
+                        } else {
+                            packet[2] = -yrel as u8;
+                            packet[0] |= 0x20;
+                        }
+                        unsafe {
+                            (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
+                        }
+                    }
+                    Event::JoyButtonUp { which, button_idx, .. } => {
+                        joypad::on_button(&mut gpios.lock().unwrap(), which, button_idx, false);
+                    }
+                    Event::JoyButtonDown { which, button_idx, .. } => {
+                        joypad::on_button(&mut gpios.lock().unwrap(), which, button_idx, true);
+                    }
+                    Event::JoyAxisMotion { which, axis_idx, value, .. } => {
+                        joypad::on_axis_motion(&mut gpios.lock().unwrap(), which, axis_idx, value);
+                    }
+                    Event::JoyDeviceRemoved { .. } => {
+                    }
+                    Event::JoyDeviceAdded { .. } => {
+                        open_joystick_devices(&mut joysticks, &joystick_subsystem);
                     }
                     _ => {}
                 }
@@ -332,5 +411,13 @@ fn calc_4_3_output_rect<T: sdl2::render::RenderTarget>(canvas: &sdl2::render::Ca
             (wy as i32 - 3*wx as i32/4) >> 1,
             wx, 3*wx/4
         )
+    }
+}
+
+fn open_joystick_devices(joysticks: &mut Vec<sdl2::joystick::Joystick>, joystick_subsystem: &sdl2::JoystickSubsystem) {
+    joysticks.clear();
+
+    for i in 0..joystick_subsystem.num_joysticks().unwrap() {
+        joysticks.push(joystick_subsystem.open(i).unwrap());
     }
 }

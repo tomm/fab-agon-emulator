@@ -6,7 +6,7 @@
 #include "vdp.h"
 #include "dispdrivers/vga16controller.h"
 #include "dispdrivers/vgabasecontroller.h"
-#include "ps2controller.h"
+#include "userspace-vdp-gl/src/comdrivers/ps2controller.h"
 
 // Arduino.h
 extern void delay(int ms);
@@ -18,6 +18,22 @@ extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 	// if the VGA controller is initialized we know the keyboard is ready
 	if (fabgl::VGABaseController::activeController != nullptr) {
 		fabgl::PS2Controller::keyboard()->injectScancode(ps2scancode, isDown);
+	}
+}
+
+extern "C" void sendHostMouseEventToFabgl(uint8_t mousePacket[4])
+{
+	fabgl::MousePacket packet;
+	packet.data[0] = mousePacket[0];
+	packet.data[1] = mousePacket[1];
+	packet.data[2] = mousePacket[2];
+	packet.data[3] = mousePacket[3];
+
+	auto lock = fabgl::VGABaseController::acquireLock();
+	// if the VGA controller is initialized we know the mouse is ready
+	if (fabgl::VGABaseController::activeController != nullptr
+			&& fabgl::PS2Controller::mouse() != nullptr) {
+		fabgl::PS2Controller::mouse()->injectPacket(&packet);
 	}
 }
 
