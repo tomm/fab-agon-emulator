@@ -335,6 +335,9 @@ pub fn main() -> Result<(), pico_args::Error> {
                             (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
                         }
                     }
+                    Event::JoyHatMotion { which, hat_idx, state, ..} => {
+                        joypad::on_hat_motion(&mut gpios.lock().unwrap(), which, hat_idx, state);
+                    }
                     Event::JoyButtonUp { which, button_idx, .. } => {
                         joypad::on_button(&mut gpios.lock().unwrap(), which, button_idx, false);
                     }
