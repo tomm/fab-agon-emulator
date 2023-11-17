@@ -1,12 +1,21 @@
-[package]
-name = "fab-agon-emulator"
-version = "0.9.3"
+[workspace]
+members = ["agon-light-emulator-debugger"]
+
+[workspace.package]
+version = "0.9.4"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"
+
+[package]
+name = "fab-agon-emulator"
 keywords = ["Agon Light", "Agon Console8", "emulator"]
 homepage = "https://github.com/tomm/fab-agon-emulator"
 repository = "https://github.com/tomm/fab-agon-emulator"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [build-dependencies]
 # system-deps does platform searches for dependencies and sets -L and -l appropriately
@@ -18,10 +27,13 @@ sdl2 = "0.35.2"
 [dependencies]
 sdl2 = "0.35.2"
 pico-args = "0.5.0"
-#agon-cpu-emulator = { path = "../agon-cpu-emulator" }
-agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="2578da036d1f96b2e5ad215729cb869a8b83b4bd"}
+agon-cpu-emulator = { workspace = true }
 agon-light-emulator-debugger = { path = "agon-light-emulator-debugger" }
 libloading = "0.8.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 raw_tty = "0.1.0"
+
+[workspace.dependencies]
+#agon-cpu-emulator = { path = "../agon-cpu-emulator" }
+agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="6cd76ccecbbba344fb7d42abe7fc7ea183ac6efa"}
