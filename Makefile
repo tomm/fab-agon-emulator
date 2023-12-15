@@ -28,6 +28,7 @@ else
 endif
 
 vdp-clean:
+	rm -f firmware/*.so
 	$(MAKE) -C src/vdp clean
 
 cargo-clean:
