@@ -68,17 +68,18 @@ rust_glue.o: rust_glue.cpp userspace-vdp-gl/src/fabutils.h \
  userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
  userspace-vdp-gl/src/collisiondetector.h vdp.h
 vdp-1.03.o: vdp-1.03.cpp \
- userspace-vdp-gl/src/userspace-platform/Arduino.h vdp-1.03.h \
+ userspace-vdp-gl/src/userspace-platform/Arduino.h \
+ userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
+ userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
+ userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
+ userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
+ userspace-vdp-gl/src/userspace-platform/Stream.h vdp-1.03.h \
  userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
  userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
- userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
  userspace-vdp-gl/src/fabglconf.h \
  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
  userspace-vdp-gl/src/fabutils.h \
- userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
- userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h \
  userspace-vdp-gl/src/devdrivers/swgenerator.h \
  userspace-vdp-gl/src/displaycontroller.h \
  userspace-vdp-gl/src/userspace-platform/freertos/task.h \
@@ -142,12 +143,13 @@ vdp-1.03.o: vdp-1.03.cpp \
  vdp-quark103/agon_fonts.h vdp-quark103/agon_audio.h \
  vdp-quark103/agon_palette.h
 vdp-console8.o: vdp-console8.cpp \
- userspace-vdp-gl/src/userspace-platform/Arduino.h vdp-console8.h \
- userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
+ userspace-vdp-gl/src/userspace-platform/Arduino.h \
+ userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
  userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
  userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
  userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h \
+ userspace-vdp-gl/src/userspace-platform/Stream.h vdp-console8.h \
+ userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
  userspace-vdp-gl/src/fabfonts.h userspace-vdp-gl/src/fabglconf.h \
  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
  userspace-vdp-gl/src/fonts/font_4x6.h \
@@ -234,12 +236,13 @@ vdp-console8.o: vdp-console8.cpp \
  userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
  vdp-console8/video/hexload.h
 vdp_quark104.o: vdp_quark104.cpp \
- userspace-vdp-gl/src/userspace-platform/Arduino.h vdp_quark104.h \
- userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
+ userspace-vdp-gl/src/userspace-platform/Arduino.h \
+ userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
  userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
  userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
  userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h \
+ userspace-vdp-gl/src/userspace-platform/Stream.h vdp_quark104.h \
+ userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
  userspace-vdp-gl/src/fabfonts.h userspace-vdp-gl/src/fabglconf.h \
  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
  userspace-vdp-gl/src/fonts/font_4x6.h \

@@ -1,5 +1,5 @@
 CXX ?= g++
-CFLAGS = -Wall -O2 -fmax-errors=1 -std=c++11 $(EXTRA_FLAGS) -DUSERSPACE -g -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers
+CFLAGS = -Wall -O2 -fmax-errors=1 -std=c++11 $(EXTRA_FLAGS) -DUSERSPACE -fPIC -fno-exceptions -g -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers
 OPTIONS = 
 
 SRCS = rust_glue.cpp
@@ -7,7 +7,7 @@ SRCS = rust_glue.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(OPTIONS) -fPIC -c $< -o $@
+	$(CXX) $(CFLAGS) $(OPTIONS) -c $< -o $@
 
 all: userspace-vdp-gl/vdp_gl.a vdp_console8.so vdp_quark103.so vdp_quark104.so test_main
 
