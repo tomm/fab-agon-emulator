@@ -48,4 +48,5 @@ extern void vdu_sys_keystate();
 extern uint8_t play_note(uint8_t channel, uint8_t volume, uint16_t frequency, uint16_t duration);
 extern void printFmt(const char *format, ...);
 
-extern std::unique_ptr<fabgl::SoundGenerator>		soundGenerator;		// The audio class
+extern fabgl::SoundGenerator		*soundGenerator;		// The audio class
+extern std::mutex soundGeneratorMutex;

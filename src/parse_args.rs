@@ -25,7 +25,7 @@ ADVANCED:
 #[allow(non_camel_case_types)]
 pub enum FirmwareVer {
   quark103,
-  quark104,
+  quark,
   console8
 }
 
@@ -66,12 +66,12 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         firmware: if let Some(ver) = firmware_ver {
           if ver == "1.03" {
             FirmwareVer::quark103
-          } else if ver == "1.04" {
-            FirmwareVer::quark104
+          } else if ver == "quark" {
+            FirmwareVer::quark
           } else if ver == "console8" {
             FirmwareVer::console8
           } else {
-            println!("Unknown --firmware value: {}. Valid values are: 1.03, 1.04, console8", ver);
+            println!("Unknown --firmware value: {}. Valid values are: 1.03, quark, console8", ver);
             std::process::exit(0);
           }
         } else {

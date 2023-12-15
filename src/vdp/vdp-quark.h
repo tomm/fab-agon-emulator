@@ -12,6 +12,8 @@ extern void boot_screen();
 extern void do_keyboard_terminal();
 extern void do_cursor();
 extern void do_keyboard();
+extern void do_mouse();
+extern bool processTerminal();
 extern void vdu(byte c);
 extern void vdu_sys();
 extern void audio_driver(void *parameters);

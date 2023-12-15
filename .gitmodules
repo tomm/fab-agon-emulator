@@ -7,3 +7,6 @@
 [submodule "src/vdp/vdp-console8"]
 	path = src/vdp/vdp-console8
 	url = https://github.com/tomm/agon-vdp
+[submodule "src/vdp/vdp-quark"]
+	path = src/vdp/vdp-quark
+	url = https://github.com/tomm/agon-vdp

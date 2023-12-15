@@ -73,6 +73,7 @@ extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 
 extern "C" void getAudioSamples(uint8_t *buffer, uint32_t length)
 {
+  auto lock = std::unique_lock<std::mutex>(soundGeneratorMutex);
   auto gen = getVDPSoundGenerator();
   for (uint32_t i = 0; i < length; ++i) {
     buffer[i] = gen ? gen->getSample() + 127 : 0;
