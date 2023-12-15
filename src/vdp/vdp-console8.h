@@ -13,6 +13,7 @@ extern void do_keyboard_terminal();
 extern void do_cursor();
 extern void do_keyboard();
 extern void do_mouse();
+extern bool processTerminal();
 extern void vdu(byte c);
 extern void vdu_sys();
 extern void audio_driver(void *parameters);
@@ -47,4 +48,4 @@ extern void vdu_sys_keystate();
 extern uint8_t play_note(uint8_t channel, uint8_t volume, uint16_t frequency, uint16_t duration);
 extern void printFmt(const char *format, ...);
 
-extern fabgl::SoundGenerator		SoundGenerator;		// The audio class
+extern std::unique_ptr<fabgl::SoundGenerator>		soundGenerator;		// The audio class

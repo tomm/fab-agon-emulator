@@ -6,7 +6,7 @@
 
 // VDP version-agnostic getters :)
 fabgl::SoundGenerator *getVDPSoundGenerator() {
-	return &SoundGenerator;
+	return &*soundGenerator;
 }
 
 #include "vdp-console8/video/video.ino"

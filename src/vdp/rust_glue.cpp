@@ -75,7 +75,7 @@ extern "C" void getAudioSamples(uint8_t *buffer, uint32_t length)
 {
   auto gen = getVDPSoundGenerator();
   for (uint32_t i = 0; i < length; ++i) {
-    buffer[i] = gen->getSample() + 127;
+    buffer[i] = gen ? gen->getSample() + 127 : 0;
   }
 }
 
