@@ -124,7 +124,6 @@ pub fn main() -> Result<(), pico_args::Error> {
     let sdl_context = sdl2::init().unwrap();
     let native_resolution = sdl_context.video().unwrap().current_display_mode(0).unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    let audio_subsystem = sdl_context.audio().unwrap();
     let joystick_subsystem = sdl_context.joystick().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut joysticks = vec![];
@@ -133,20 +132,38 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     //println!("Detected {}x{} native resolution", native_resolution.w, native_resolution.h);
 
-    let desired_spec = sdl2::audio::AudioSpecDesired {
-        freq: Some(16384), // real VDP uses 16384Hz
-        channels: Some(1),
-        samples: Some(AUDIO_BUFLEN),
-    };
+    let _audio_device = {
+        match sdl_context.audio() {
+            Ok(audio_subsystem) => {
+                let desired_spec = sdl2::audio::AudioSpecDesired {
+                    freq: Some(16384), // real VDP uses 16384Hz
+                    channels: Some(1),
+                    samples: Some(AUDIO_BUFLEN),
+                };
 
-    let audio_device = audio_subsystem.open_playback(None, &desired_spec, |_spec| {
-        audio::VdpAudioStream {
-            getAudioSamples: vdp_interface.getAudioSamples
+                match audio_subsystem.open_playback(None, &desired_spec, |_spec| {
+                    audio::VdpAudioStream {
+                        getAudioSamples: vdp_interface.getAudioSamples
+                    }
+                }) {
+                    Ok(audio_device) => {
+                        // start playback
+                        audio_device.resume();
+
+                        Some(audio_device)
+                    }
+                    Err(e) => {
+                        println!("Error opening audio device: {:?}", e);
+                        None
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Error opening audio subsystem: {:?}", e);
+                None
+            }
         }
-    }).unwrap();
-
-    // start playback
-    audio_device.resume();
+    };
 
     let mut is_fullscreen = args.fullscreen;
     // large enough for any agon video mode
