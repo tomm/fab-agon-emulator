@@ -41,5 +41,6 @@ cp libwinpthread-1.dll $DIST_DIR
 cp LICENSE README.md $DIST_DIR
 mkdir $DIST_DIR/sdcard
 cp -r sdcard/* $DIST_DIR/sdcard/
+x86_64-w64-mingw32-strip $DIST_DIR/firmware/*.so $DIST_DIR/*.exe $DIST_DIR/*.dll
 zip -r $DIST_DIR.zip $DIST_DIR
 
