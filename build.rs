@@ -1,5 +1,5 @@
 fn main() {
-    if std::env::var("CARGO_CFG_TARGET_OS").unwrap() != "windows" {
+    if std::env::var("CARGO_CFG_TARGET_OS").unwrap() != "windows" && std::env::var("CARGO_CFG_TARGET_OS").unwrap() != "macos" {
         system_deps::Config::new().probe().unwrap();
     }
     if std::env::var("FORCE").is_err() {

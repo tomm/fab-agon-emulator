@@ -4,27 +4,27 @@ OPTIONS =
 
 SRCS = rust_glue.cpp
 
-OBJS = $(SRCS:.cpp=.o)
+OBJS = $(SRCS:.cpp=$(SUFFIX).o)
 
-.cpp.o:
+%$(SUFFIX).o: %.cpp
 	$(CXX) $(CFLAGS) $(OPTIONS) -c $< -o $@
 
-all: userspace-vdp-gl/vdp_gl.a vdp_console8.so vdp_quark103.so vdp_quark.so test_main
+all: userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp_console8$(SUFFIX).so vdp_quark103$(SUFFIX).so vdp_quark$(SUFFIX).so
 
-userspace-vdp-gl/vdp_gl.a:
+userspace-vdp-gl/vdp_gl$(SUFFIX).a:
 	$(MAKE) -C userspace-vdp-gl/src
 
-test_main: $(OBJS) userspace-vdp-gl/vdp_gl.a vdp-1.03.o test_main.o
-	$(CXX) $(OBJS) -pthread test_main.o vdp-1.03.o userspace-vdp-gl/src/vdp-gl.a -o test_main
+test_main$(SUFFIX): $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp-1.03$(SUFFIX).o test_main$(SUFFIX).o
+	$(CXX) $(CFLAGS) $(OBJS) -pthread test_main$(SUFFIX).o vdp-1.03$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o test_main$(SUFFIX)
 
-vdp_console8.so: $(OBJS) userspace-vdp-gl/vdp_gl.a vdp-console8.o
-	$(CXX) -shared $(OBJS) vdp-console8.o userspace-vdp-gl/src/vdp-gl.a -o vdp_console8.so
+vdp_console8$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp-console8$(SUFFIX).o
+	$(CXX) $(CFLAGS) -shared $(OBJS) vdp-console8$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o vdp_console8$(SUFFIX).so
 
-vdp_quark103.so: $(OBJS) userspace-vdp-gl/vdp_gl.a vdp-1.03.o
-	$(CXX) -shared $(OBJS) vdp-1.03.o userspace-vdp-gl/src/vdp-gl.a -o vdp_quark103.so
+vdp_quark103$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp-1.03$(SUFFIX).o
+	$(CXX) $(CFLAGS) -shared $(OBJS) vdp-1.03$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o vdp_quark103$(SUFFIX).so
 
-vdp_quark.so: $(OBJS) userspace-vdp-gl/vdp_gl.a vdp-quark.o
-	$(CXX) -shared $(OBJS) vdp-quark.o userspace-vdp-gl/src/vdp-gl.a -o vdp_quark.so
+vdp_quark$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp-quark$(SUFFIX).o
+	$(CXX) $(CFLAGS) -shared $(OBJS) vdp-quark$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o vdp_quark$(SUFFIX).so
 
 clean:
 	-rm *.o
