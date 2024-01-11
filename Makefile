@@ -12,19 +12,12 @@ endif
 
 
 vdp:
-ifneq ($(OS), Windows_NT)
 ifeq ($(UNAME_S),Darwin)
 	EXTRA_FLAGS="-Wno-c++11-narrowing -arch x86_64" SUFFIX=.x86_64 $(MAKE) -C src/vdp
 	EXTRA_FLAGS="-Wno-c++11-narrowing -arch arm64" SUFFIX=.arm64 $(MAKE) -C src/vdp
 	$(foreach file, $(wildcard src/vdp/*.x86_64.so), lipo -create -output src/vdp/$(notdir $(file:.x86_64.so=.so)) $(file) src/vdp/$(notdir $(file:.x86_64.so=.arm64.so));)
-endif
 else
-	ifeq ($(COMPILER),clang)
-		# clang is strict about narrowing, where g++ is not
-		EXTRA_FLAGS=-Wno-c++11-narrowing $(MAKE) -C src/vdp
-	else
-		$(MAKE) -C src/vdp
-	endif
+	$(MAKE) -C src/vdp
 endif
 	cp src/vdp/*.so firmware/
 
