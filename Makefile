@@ -1,6 +1,7 @@
 all: check vdp cargo
 
 COMPILER := $(filter g++ clang,$(shell $(CXX) --version))
+UNAME_S := $(shell uname)
 
 check:
 ifeq ($(OS),Windows_NT)
@@ -9,10 +10,12 @@ else
 	@if [ ! -f ./src/vdp/userspace-vdp-gl/README.md ]; then echo "Error: no source tree in ./src/vdp/userspace-vdp."; echo "Maybe you forgot to run: git submodule update --init"; echo; exit 1; fi
 endif
 
+
 vdp:
-ifeq ($(COMPILER),clang)
-	# clang is strict about narrowing, where g++ is not
-	EXTRA_FLAGS=-Wno-c++11-narrowing $(MAKE) -C src/vdp
+ifeq ($(UNAME_S),Darwin)
+	EXTRA_FLAGS="-Wno-c++11-narrowing -arch x86_64" SUFFIX=.x86_64 $(MAKE) -C src/vdp
+	EXTRA_FLAGS="-Wno-c++11-narrowing -arch arm64" SUFFIX=.arm64 $(MAKE) -C src/vdp
+	$(foreach file, $(wildcard src/vdp/*.x86_64.so), lipo -create -output src/vdp/$(notdir $(file:.x86_64.so=.so)) $(file) src/vdp/$(notdir $(file:.x86_64.so=.arm64.so));)
 else
 	$(MAKE) -C src/vdp
 endif
@@ -22,6 +25,10 @@ cargo:
 ifeq ($(OS),Windows_NT)
 	set FORCE=1 && cargo build -r
 	cp ./target/release/fab-agon-emulator.exe .
+else ifeq ($(UNAME_S),Darwin)
+	FORCE=1 cargo build -r --target=x86_64-apple-darwin
+	FORCE=1 cargo build -r --target=aarch64-apple-darwin
+	lipo -create -output ./fab-agon-emulator ./target/x86_64-apple-darwin/release/fab-agon-emulator ./target/aarch64-apple-darwin/release/fab-agon-emulator
 else
 	FORCE=1 cargo build -r
 	cp ./target/release/fab-agon-emulator .
