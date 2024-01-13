@@ -9,13 +9,16 @@ OBJS = $(SRCS:.cpp=$(SUFFIX).o)
 %$(SUFFIX).o: %.cpp
 	$(CXX) $(CFLAGS) $(OPTIONS) -c $< -o $@
 
-all: userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp_console8$(SUFFIX).so vdp_quark103$(SUFFIX).so vdp_quark$(SUFFIX).so
+all: userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp_console8$(SUFFIX).so vdp_quark103$(SUFFIX).so vdp_quark$(SUFFIX).so directcontroller_test$(SUFFIX).so
 
 userspace-vdp-gl/vdp_gl$(SUFFIX).a:
 	$(MAKE) -C userspace-vdp-gl/src
 
 test_main$(SUFFIX): $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp-1.03$(SUFFIX).o test_main$(SUFFIX).o
 	$(CXX) $(CFLAGS) $(OBJS) -pthread test_main$(SUFFIX).o vdp-1.03$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o test_main$(SUFFIX)
+
+directcontroller_test$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a directcontroller_test$(SUFFIX).o
+	$(CXX) $(CFLAGS) -shared $(OBJS) directcontroller_test$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o directcontroller_test$(SUFFIX).so
 
 vdp_console8$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp-console8$(SUFFIX).o
 	$(CXX) $(CFLAGS) -shared $(OBJS) vdp-console8$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o vdp_console8$(SUFFIX).so
@@ -31,7 +34,7 @@ clean:
 	-rm *.so
 	$(MAKE) -C userspace-vdp-gl/src clean
 
-SRC_ALL = $(SRCS) vdp-1.03.cpp vdp-console8.cpp vdp-quark.cpp
+SRC_ALL = $(SRCS) vdp-1.03.cpp vdp-console8.cpp vdp-quark.cpp directcontroller_test.cpp
 
 depends: $(SRC_ALL)
 	$(CXX) -MM $(CFLAGS) $(SRC_ALL) > Makefile.dep
