@@ -401,13 +401,24 @@ pub fn main() -> Result<(), pico_args::Error> {
                         texture.update(None, &vgabuf, 3*w as usize);
                     }
                     parse_args::Renderer::Accelerated => {
+                        texture.update(None, &vgabuf, 3*w as usize);
+                        /*
+                         * This is how it's supposed to be done for a streaming texture,
+                         * but it produces a black screen on some systems...
                         texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, pitch| {
+                            let mut i = 0;
                             for y in 0..h {
-                                let src_row = (y * w * 3) as usize;
-                                let dest_row = y as usize * pitch;
-                                data[dest_row..dest_row + 3*w as usize].copy_from_slice(&vgabuf[src_row..src_row+(3*w as usize)]);
-                            }
+                                let row = y as usize * pitch;
+                                for x in 0..w {
+                                    let col = 3 * x as usize;
+                                    data[row + col] = vgabuf[i];
+                                    data[row + col + 1] = vgabuf[i+1];
+                                    data[row + col + 2] = vgabuf[i+2];
+                                    i += 3;
+                                }
+                             }
                         }).unwrap();
+                        */
                     }
                 }
             }
