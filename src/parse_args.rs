@@ -26,7 +26,8 @@ ADVANCED:
 pub enum FirmwareVer {
   quark103,
   quark104,
-  console8
+  console8,
+  electronhal
 }
 
 #[derive(Debug)]
@@ -70,8 +71,10 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
             FirmwareVer::quark104
           } else if ver == "console8" {
             FirmwareVer::console8
-          } else {
-            println!("Unknown --firmware value: {}. Valid values are: 1.03, 1.04, console8", ver);
+          }  else if ver == "electronhal" {
+            FirmwareVer::electronhal
+          }else {
+            println!("Unknown --firmware value: {}. Valid values are: 1.03, 1.04, console8, electronhal", ver);
             std::process::exit(0);
           }
         } else {

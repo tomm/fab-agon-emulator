@@ -5,7 +5,7 @@
 #include "vdp.h"
 #include "dispdrivers/vga16controller.h"
 #include "dispdrivers/vgabasecontroller.h"
-#include "ps2controller.h"
+
 
 // Arduino.h
 extern void delay(int ms);

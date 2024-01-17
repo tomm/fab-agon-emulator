@@ -1,0 +1,81 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "fab-agon-emulator v1.04",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=fab-agon-emulator",
+                    "--package=fab-agon-emulator"
+                ],
+                "filter": {
+                    "name": "fab-agon-emulator",
+                    "kind": "bin"
+                }
+            },
+            "args": ["--firmware","1.04"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "ElectronOS",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=fab-agon-emulator",
+                    "--package=fab-agon-emulator"
+                ],
+                "filter": {
+                    "name": "fab-agon-emulator",
+                    "kind": "bin"
+                }
+            },
+            "args": ["--firmware","electronhal","-d"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "fab-agon-emulator v1.03",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=fab-agon-emulator",
+                    "--package=fab-agon-emulator"
+                ],
+                "filter": {
+                    "name": "fab-agon-emulator",
+                    "kind": "bin"
+                }
+            },
+            "args": ["--firmware","1.03"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'fab-agon-emulator'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=fab-agon-emulator",
+                    "--package=fab-agon-emulator"
+                ],
+                "filter": {
+                    "name": "fab-agon-emulator",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

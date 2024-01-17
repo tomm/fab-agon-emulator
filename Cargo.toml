@@ -15,5 +15,7 @@ agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev
 agon-light-emulator-debugger = { git = "https://github.com/tomm/agon-light-emulator-debugger.git", rev="275880c9c567e13cc880d76bb0b3c7b145a0f5e4"}
 libloading = "0.8.0"
 
-#agon-cpu-emulator = { path = "../agon-cpu-emulator" }
+[patch."https://github.com/tomm/agon-cpu-emulator.git"]
+agon-cpu-emulator = { path = "../agon-cpu-emulator" }
 #agon-light-emulator-debugger = { path = "../agon-light-emulator-debugger" }
+
