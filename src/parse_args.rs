@@ -12,6 +12,7 @@ OPTIONS:
   -h, --help            Prints help information
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
   --firmware 1.03       Use quark 1.03 firmware (default is console8)
+  --firmware quark      Use quark 1.04 firmware (default is console8)
   --sdcard <path>       Sets the path of the emulated SDCard
   --scale <max-height>  Use perfect (integer) video mode scaling, up to
                         a maximum window height of <max-height>
@@ -19,6 +20,8 @@ OPTIONS:
 ADVANCED:
   --mos PATH            Use a different MOS.bin firmware
   --vdp PATH            Use a different VDP dll/so firmware
+  --renderer sw         Use software renderer
+  --renderer hw         Use GL/D3D renderer (default)
 ";
 
 #[derive(Debug)]
@@ -27,6 +30,12 @@ pub enum FirmwareVer {
   quark103,
   quark,
   console8
+}
+
+#[derive(Debug)]
+pub enum Renderer {
+  Software,
+  Accelerated
 }
 
 #[derive(Debug)]
@@ -41,6 +50,7 @@ pub struct AppArgs {
     pub vdp_dll: Option<std::path::PathBuf>,
     pub firmware: FirmwareVer,
     pub perfect_scale: Option<u32>,
+    pub renderer: Renderer,
 }
 
 pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
@@ -52,6 +62,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
     }
 
     let firmware_ver: Option<String> = pargs.opt_value_from_str("--firmware")?;
+    let renderer: Option<String> = pargs.opt_value_from_str("--renderer")?;
 
     let args = AppArgs {
         sdcard: pargs.opt_value_from_str("--sdcard")?,
@@ -63,6 +74,18 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         perfect_scale: pargs.opt_value_from_str("--scale")?,
         mos_bin: pargs.opt_value_from_str("--mos")?,
         vdp_dll: pargs.opt_value_from_str("--vdp")?,
+        renderer: if let Some(r) = renderer {
+          match r.as_str() {
+            "hw" => Renderer::Accelerated,
+            "sw" => Renderer::Software,
+            _ => {
+              println!("Unknown --renderer value: {}. Valid values are: hw, sw", r);
+              std::process::exit(0);
+            }
+          }
+        } else {
+          Renderer::Accelerated
+        },
         firmware: if let Some(ver) = firmware_ver {
           if ver == "1.03" {
             FirmwareVer::quark103

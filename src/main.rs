@@ -210,7 +210,12 @@ pub fn main() -> Result<(), pico_args::Error> {
             window.set_fullscreen(sdl2::video::FullscreenType::True).unwrap();
         }
 
-        let mut canvas = window.into_canvas().build().unwrap();
+        let mut canvas = {
+            match args.renderer {
+                parse_args::Renderer::Software => window.into_canvas().software(),
+                parse_args::Renderer::Accelerated => window.into_canvas().accelerated()
+            }
+        }.build().unwrap();
         let texture_creator = canvas.texture_creator();
         let mut texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
 
@@ -391,11 +396,20 @@ pub fn main() -> Result<(), pico_args::Error> {
                     }
                 }
 
-                texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, _pitch| {
-                    for i in 0..w*h*3 {
-                        data[i as usize] = vgabuf[i as usize];
+                match args.renderer {
+                    parse_args::Renderer::Software => {
+                        texture.update(None, &vgabuf, 3*w as usize);
                     }
-                }).unwrap();
+                    parse_args::Renderer::Accelerated => {
+                        texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, pitch| {
+                            for y in 0..h {
+                                let src_row = (y * w * 3) as usize;
+                                let dest_row = y as usize * pitch;
+                                data[dest_row..dest_row + 3*w as usize].copy_from_slice(&vgabuf[src_row..src_row+(3*w as usize)]);
+                            }
+                        }).unwrap();
+                    }
+                }
             }
 
             /* Keep rendered output to 4:3 aspect ratio */
