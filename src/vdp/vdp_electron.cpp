@@ -2,7 +2,7 @@
 
 // VDP uses various functions before their definition, so here
 // vdp-console8.h gives those functions prototypes to avoid errors
-#include "vdp_electronhal.h"
+#include "vdp_electron.h"
 
 fabgl::SoundGenerator *getVDPSoundGenerator() {
 	return &SoundGenerator;

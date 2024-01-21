@@ -282,7 +282,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     }
     println!("Shutting down fabgl+vdp...");
     unsafe { (*vdp_interface.vdp_shutdown)(); }
-    std::thread::sleep(std::time::Duration::from_millis(200));
+    std::thread::sleep(std::time::Duration::from_millis(500));
 
     Ok(())
 }

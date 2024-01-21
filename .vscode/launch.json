@@ -37,7 +37,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["--firmware","electronhal","-d"],
+            "args": ["--firmware","electron","-d"],
             "cwd": "${workspaceFolder}"
         },
         {
@@ -55,7 +55,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["--firmware","electronhal"],
+            "args": ["--firmware","electron"],
             "cwd": "${workspaceFolder}"
         },
         {
