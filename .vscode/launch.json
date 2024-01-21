@@ -25,7 +25,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "ElectronOS",
+            "name": "ElectronOS Debug",
             "cargo": {
                 "args": [
                     "build",
@@ -38,6 +38,24 @@
                 }
             },
             "args": ["--firmware","electronhal","-d"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "ElectronOS",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=fab-agon-emulator",
+                    "--package=fab-agon-emulator"
+                ],
+                "filter": {
+                    "name": "fab-agon-emulator",
+                    "kind": "bin"
+                }
+            },
+            "args": ["--firmware","electronhal"],
             "cwd": "${workspaceFolder}"
         },
         {

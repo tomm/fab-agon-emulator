@@ -101,9 +101,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     let _vdp_thread = thread::spawn(move || {
         unsafe {
             (*vdp_interface.vdp_setup)();
-            loop {
-                (*vdp_interface.vdp_loop)();
-            }
+            (*vdp_interface.vdp_loop)();
         }
     });
 
