@@ -1,5 +1,5 @@
 CXX ?= g++
-CFLAGS = -Wall -fmax-errors=1 -std=c++11 -g -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers -Wno-narrowing -DUSERSPACE
+CFLAGS = -Wall -fmax-errors=1 -std=c++11 -g -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers -I./AgonElectronHAL/include -Wno-narrowing -DUSERSPACE
 OPTIONS = 
 
 SRCS = rust_glue.cpp
