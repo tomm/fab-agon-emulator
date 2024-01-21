@@ -4,3 +4,6 @@
 [submodule "sdcard"]
 	path = sdcard
 	url = https://github.com/tomm/popup-mos.git
+[submodule "src/vdp/AgonElectronHAL"]
+	path = src/vdp/AgonElectronHAL
+	url = https://github.com/S0urceror/AgonElectronHAL.git
