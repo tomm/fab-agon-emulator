@@ -1,5 +1,5 @@
 CXX ?= g++
-CFLAGS = -Wall -O2 -fmax-errors=1 -std=c++11 $(EXTRA_FLAGS) -DUSERSPACE -fPIC -g -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers
+CFLAGS = -Wall -O2 -fmax-errors=1 -std=c++11 $(EXTRA_FLAGS) -DUSERSPACE -fPIC -g -I. -I./AgonElectronHAL/include -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers
 OPTIONS = 
 
 SRCS = rust_glue.cpp
@@ -10,7 +10,7 @@ OBJS = $(SRCS:.cpp=$(SUFFIX).o)
 	$(CXX) $(CFLAGS) $(OPTIONS) -c $< -o $@
 
 all: userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp_console8$(SUFFIX).so vdp_quark103$(SUFFIX).so \
-	vdp_quark$(SUFFIX).so directcontroller_test$(SUFFIX).so vdp_electronhal$(SUFFIX).so
+	vdp_quark$(SUFFIX).so directcontroller_test$(SUFFIX).so vdp_electron$(SUFFIX).so
 
 userspace-vdp-gl/vdp_gl$(SUFFIX).a:
 	$(MAKE) -C userspace-vdp-gl/src
@@ -30,15 +30,15 @@ vdp_quark103$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp-1.03$(S
 vdp_quark$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp-quark$(SUFFIX).o
 	$(CXX) $(CFLAGS) -shared $(OBJS) vdp-quark$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o vdp_quark$(SUFFIX).so
 
-vdp_electronhal$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp_electronhal$(SUFFIX).o
-	$(CXX) $(CFLAGS) -shared $(OBJS) vdp_electronhal$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o vdp_electronhal$(SUFFIX).so
+vdp_electron$(SUFFIX).so: $(OBJS) userspace-vdp-gl/vdp_gl$(SUFFIX).a vdp_electron$(SUFFIX).o
+	$(CXX) $(CFLAGS) -shared $(OBJS) vdp_electron$(SUFFIX).o userspace-vdp-gl/src/vdp-gl$(SUFFIX).a -o vdp_electron$(SUFFIX).so
 
 clean:
 	-rm *.o
 	-rm *.so
 	$(MAKE) -C userspace-vdp-gl/src clean
 
-SRC_ALL = $(SRCS) vdp-1.03.cpp vdp-console8.cpp vdp-quark.cpp directcontroller_test.cpp vdp_electronhal.cpp
+SRC_ALL = $(SRCS) vdp-1.03.cpp vdp-console8.cpp vdp-quark.cpp directcontroller_test.cpp vdp_electron.cpp
 
 depends: $(SRC_ALL)
 	$(CXX) -MM $(CFLAGS) $(SRC_ALL) > Makefile.dep
