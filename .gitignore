@@ -2,7 +2,7 @@
 src/vdp/*.o
 src/vdp/*.so
 .DS_Store
-firmware/vdp_*.so
+firmware/*.so
 fab-agon-emulator
 *.exe
 SDL2.dll

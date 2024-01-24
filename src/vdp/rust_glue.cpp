@@ -86,7 +86,9 @@ extern "C" void vdp_setup() {
 }
 
 extern "C" void vdp_loop() {
-	loop();
+	while (!is_fabgl_terminating) {
+		loop();
+	}
 }
 
 extern "C" void vdp_shutdown() {

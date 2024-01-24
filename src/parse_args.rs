@@ -13,6 +13,7 @@ OPTIONS:
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
   --firmware 1.03       Use quark 1.03 firmware (default is console8)
   --firmware quark      Use quark 1.04 firmware (default is console8)
+  --firmware electron   Use ElectronOS firmware (default is console8)
   --sdcard <path>       Sets the path of the emulated SDCard
   --scale <max-height>  Use perfect (integer) video mode scaling, up to
                         a maximum window height of <max-height>
@@ -29,7 +30,8 @@ ADVANCED:
 pub enum FirmwareVer {
   quark103,
   quark,
-  console8
+  console8,
+  electronhal
 }
 
 #[derive(Debug)]
@@ -93,8 +95,10 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
             FirmwareVer::quark
           } else if ver == "console8" {
             FirmwareVer::console8
+          } else if ver == "electron" {
+            FirmwareVer::electronhal
           } else {
-            println!("Unknown --firmware value: {}. Valid values are: 1.03, quark, console8", ver);
+            println!("Unknown --firmware value: {}. Valid values are: 1.03, quark, console8, electron", ver);
             std::process::exit(0);
           }
         } else {
