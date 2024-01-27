@@ -5,7 +5,6 @@ version = 3
 [[package]]
 name = "agon-cpu-emulator"
 version = "0.4.1"
-source = "git+https://github.com/tomm/agon-cpu-emulator.git?rev=9bca003b07cc09f7f5594e6451589843c733a9ee#9bca003b07cc09f7f5594e6451589843c733a9ee"
 dependencies = [
  "ez80",
  "rand",

@@ -7,3 +7,4 @@ fab-agon-emulator
 *.exe
 SDL2.dll
 fab-agon-emulator-v*
+.vscode

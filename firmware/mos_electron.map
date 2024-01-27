@@ -4,7 +4,7 @@ Copyright (C) 1999-2008 Zilog, Inc. All Rights Reserved
 
 LINK MAP:
 
-DATE:      Sun Jan 21 15:39:29 2024
+DATE:      Sat Jan 27 11:38:47 2024
 PROCESSOR: assembler
 FILES:     .\main.obj             .\globals.obj          .\misc.obj             
            .\interrupts.obj
@@ -97,7 +97,7 @@ DEFINE __CS3_BMC_INIT_PARAM = $00
 DEFINE __RAM_CTL_INIT_PARAM = $80
 DEFINE __RAM_ADDR_U_INIT_PARAM = $B7
 DEFINE __FLASH_CTL_INIT_PARAM = $08
-DEFINE __FLASH_ADDR_U_INIT_PARAM = $08
+DEFINE __FLASH_ADDR_U_INIT_PARAM = $00
 
 define _SYS_CLK_FREQ = 20000000
 define _OSC_FREQ = 20000000
@@ -142,7 +142,7 @@ TEXT               normal data            C:00AD44    C:00B1C2      47fh
 SEGMENTS WITHIN MODULES:
 ========================
 
-Module: ..\main.c (File: main.obj) Version: 1:0 01/21/2024 10:40:52
+Module: ..\main.c (File: main.obj) Version: 1:0 01/27/2024 11:38:40
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
@@ -158,7 +158,7 @@ Module: ..\src\boot\common\zsldevinitdummy.asm (File: zsldevinitdummy.obj) Versi
     Segment: CODE                              C:009DB2    C:009DB2        1h
 
 
-Module: ..\src\cp.c (File: cp.obj) Version: 1:0 01/21/2024 10:40:58
+Module: ..\src\cp.c (File: cp.obj) Version: 1:0 01/27/2024 11:38:46
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
@@ -168,7 +168,7 @@ Module: ..\src\cp.c (File: cp.obj) Version: 1:0 01/21/2024 10:40:58
     Segment: TEXT                              C:00B1A3    C:00B1C2       20h
 
 
-Module: ..\src\machine.c (File: machine.obj) Version: 1:0 01/21/2024 10:40:58
+Module: ..\src\machine.c (File: machine.obj) Version: 1:0 01/27/2024 11:38:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
@@ -178,35 +178,35 @@ Module: ..\src\machine.c (File: machine.obj) Version: 1:0 01/21/2024 10:40:58
     Segment: TEXT                              C:00B191    C:00B1A2       12h
 
 
-Module: ..\src\sd.c (File: sd.obj) Version: 1:0 01/21/2024 10:40:53
+Module: ..\src\sd.c (File: sd.obj) Version: 1:0 01/27/2024 11:38:40
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: CODE                              C:000ABF    C:0011EB      72dh
 
 
-Module: ..\src\spi.c (File: spi.obj) Version: 1:0 01/21/2024 10:40:53
+Module: ..\src\spi.c (File: spi.obj) Version: 1:0 01/27/2024 11:38:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: CODE                              C:0011EC    C:001309      11eh
 
 
-Module: ..\src\timer.c (File: timer.obj) Version: 1:0 01/21/2024 10:40:57
+Module: ..\src\timer.c (File: timer.obj) Version: 1:0 01/27/2024 11:38:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: CODE                              C:00854A    C:00875F      216h
 
 
-Module: ..\src_fatfs\diskio.c (File: diskio.obj) Version: 1:0 01/21/2024 10:40:53
+Module: ..\src_fatfs\diskio.c (File: diskio.obj) Version: 1:0 01/27/2024 11:38:41
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: CODE                              C:00130A    C:00147C      173h
 
 
-Module: ..\src_fatfs\ff.c (File: ff.obj) Version: 1:0 01/21/2024 10:40:55
+Module: ..\src_fatfs\ff.c (File: ff.obj) Version: 1:0 01/27/2024 11:38:43
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
@@ -216,7 +216,7 @@ Module: ..\src_fatfs\ff.c (File: ff.obj) Version: 1:0 01/21/2024 10:40:55
     Segment: TEXT                              C:00AD44    C:00ADE2       9fh
 
 
-Module: ..\src_fatfs\ffunicode.c (File: ffunicode.obj) Version: 1:0 01/21/2024 10:40:56
+Module: ..\src_fatfs\ffunicode.c (File: ffunicode.obj) Version: 1:0 01/27/2024 11:38:44
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
@@ -680,77 +680,77 @@ Module: .\strlen.asm (Library: crt.lib) Version: 1:0 10/02/2022 22:48:23
     Segment: CODE                              C:00A2BA    C:00A2CE       15h
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src\eos_api.asm (File: eos_api.obj) Version: 1:0 01/21/2024 10:40:59
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src\eos_api.asm (File: eos_api.obj) Version: 1:0 01/27/2024 11:38:46
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: CODE                              C:009BA4    C:009DB1      20eh
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src\gpio.asm (File: gpio.obj) Version: 1:0 01/21/2024 10:40:57
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src\gpio.asm (File: gpio.obj) Version: 1:0 01/27/2024 11:38:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000317    C:00047D      167h
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src\interrupts.asm (File: interrupts.obj) Version: 1:0 01/21/2024 10:40:53
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src\interrupts.asm (File: interrupts.obj) Version: 1:0 01/27/2024 11:38:40
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:0002EB    C:000316       2ch
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src\joystick.asm (File: joystick.obj) Version: 1:0 01/21/2024 10:40:59
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src\joystick.asm (File: joystick.obj) Version: 1:0 01/27/2024 11:38:46
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:0008EB    C:00091E       34h
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src\misc.asm (File: misc.obj) Version: 1:0 01/21/2024 10:40:52
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src\misc.asm (File: misc.obj) Version: 1:0 01/27/2024 11:38:40
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000220    C:0002EA       cbh
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src\rtc.asm (File: rtc.obj) Version: 1:0 01/21/2024 10:40:57
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src\rtc.asm (File: rtc.obj) Version: 1:0 01/27/2024 11:38:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:000669    C:000669        1h
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src\uart_.asm (File: uart_.obj) Version: 1:0 01/21/2024 10:40:57
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src\uart_.asm (File: uart_.obj) Version: 1:0 01/27/2024 11:38:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:00066A    C:0008EA      281h
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src_startup\cstartup.asm (File: cstartup.obj) Version: 1:0 01/21/2024 10:40:57
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src_startup\cstartup.asm (File: cstartup.obj) Version: 1:0 01/27/2024 11:38:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:00047E    C:0004CB       4eh
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src_startup\globals.asm (File: globals.obj) Version: 1:0 01/21/2024 10:40:52
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src_startup\globals.asm (File: globals.obj) Version: 1:0 01/27/2024 11:38:40
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: BSS                               D:0BC2BA    D:0BC36B       b2h
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src_startup\init_params_f92.asm (File: init_params_f92.obj) Version: 1:0 01/21/2024 10:40:57
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src_startup\init_params_f92.asm (File: init_params_f92.obj) Version: 1:0 01/27/2024 11:38:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
     Segment: .STARTUP                          C:0004CC    C:0005BE       f3h
 
 
-Module: Z:\Development\AgonLight\software\AgonElectronOS\src_startup\vectors16.asm (File: vectors16.obj) Version: 1:0 01/21/2024 10:40:57
+Module: Z:\Development\AgonLight\software\AgonElectronOS\src_startup\vectors16.asm (File: vectors16.obj) Version: 1:0 01/27/2024 11:38:45
 
     Name                                           Base         Top      Size
     --------------------------------------- ----------- ----------- ---------
@@ -806,7 +806,7 @@ __default_nmi_handler               C:0005FD vectors16       .STARTUP
 __exec16                            C:000277 misc            .STARTUP                        
 __exec24                            C:00024A misc            .STARTUP                        
 __exit                              C:0005B9 init_params_f92 .STARTUP                        
-__FLASH_ADDR_U_INIT_PARAM           00000008 (User Defined)
+__FLASH_ADDR_U_INIT_PARAM           00000000 (User Defined)
 __FLASH_CTL_INIT_PARAM              00000008 (User Defined)
 __frameset                          C:00A6AA frameset        CODE                            
 __frameset0                         C:00A36F frameset0       CODE                            
@@ -1669,8 +1669,8 @@ uart0_send_fifo_add               Defined     Z:\Development\AgonLight\software\
 
 OUTPUT CHECKSUM
 ===============
-mos_electron.hex     54A974
-mos_electron.lod     54A974
+mos_electron.hex     54A96C
+mos_electron.lod     54A96C
 
 
 
