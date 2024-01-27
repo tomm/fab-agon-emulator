@@ -14,9 +14,7 @@ extern void delay(int ms);
 /* ps2scancode is the set2 'make' code */
 extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 {
-	auto lock = fabgl::VGABaseController::acquireLock();
-	// if the VGA controller is initialized we know the keyboard is ready
-	if (fabgl::VGABaseController::activeController != nullptr) {
+	if (fabgl::PS2Controller::keyboard() != nullptr) {
 		fabgl::PS2Controller::keyboard()->injectScancode(ps2scancode, isDown);
 	}
 }
