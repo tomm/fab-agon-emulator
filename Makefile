@@ -26,11 +26,9 @@ ifeq ($(OS),Windows_NT)
 	set FORCE=1 && cargo build -r
 	cp ./target/release/fab-agon-emulator.exe .
 else ifeq ($(UNAME_S),Darwin)
-	#FORCE=1 cargo build -r --target=x86_64-apple-darwin
+	FORCE=1 cargo build -r --target=x86_64-apple-darwin
 	FORCE=1 cargo build -r --target=aarch64-apple-darwin
-	#lipo -create -output ./fab-agon-emulator ./target/x86_64-apple-darwin/release/fab-agon-emulator ./target/aarch64-apple-darwin/release/fab-agon-emulator
-	lipo -create -output ./fab-agon-emulator ./target/aarch64-apple-darwin/release/fab-agon-emulator
-	install_name_tool -add_rpath /opt/homebrew/lib ./fab-agon-emulator
+	lipo -create -output ./fab-agon-emulator ./target/x86_64-apple-darwin/release/fab-agon-emulator ./target/aarch64-apple-darwin/release/fab-agon-emulator
 else
 	FORCE=1 cargo build -r
 	cp ./target/release/fab-agon-emulator .
