@@ -225,9 +225,8 @@ vdp-console8.o: vdp-console8.cpp \
   vdp-console8/video/agon.h vdp-console8/video/version.h \
   vdp-console8/video/agon_ps2.h vdp-console8/video/agon_audio.h \
   vdp-console8/video/audio_channel.h vdp-console8/video/types.h \
-  vdp-console8/video/envelopes/volume.h \
-  vdp-console8/video/envelopes/frequency.h \
-  vdp-console8/video/audio_sample.h vdp-console8/video/buffer_stream.h \
+  vdp-console8/video/envelopes/types.h vdp-console8/video/audio_sample.h \
+  vdp-console8/video/buffer_stream.h \
   vdp-console8/video/enhanced_samples_generator.h \
   vdp-console8/video/agon_ttxt.h vdp-console8/video/ttxtfont.h \
   vdp-console8/video/agon_palette.h vdp-console8/video/agon_screen.h \
@@ -236,7 +235,10 @@ vdp-console8.o: vdp-console8.cpp \
   vdp-console8/video/vdp_protocol.h vdp-console8/video/sprites.h \
   vdp-console8/video/vdu_stream_processor.h vdp-console8/video/vdu.h \
   vdp-console8/video/vdu_audio.h vdp-console8/video/buffers.h \
-  vdp-console8/video/vdu_sys.h \
+  vdp-console8/video/envelopes/adsr.h \
+  vdp-console8/video/envelopes/./types.h \
+  vdp-console8/video/envelopes/multiphase_adsr.h \
+  vdp-console8/video/envelopes/frequency.h vdp-console8/video/vdu_sys.h \
   userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
   vdp-console8/video/vdu_buffered.h \
   vdp-console8/video/multi_buffer_stream.h \
@@ -318,9 +320,9 @@ vdp-quark.o: vdp-quark.cpp \
   userspace-vdp-gl/src/collisiondetector.h vdp.h \
   vdp-quark/video/video.ino \
   userspace-vdp-gl/src/userspace-platform/WiFi.h vdp-quark/video/agon.h \
-  vdp-quark/video/version.h vdp-quark/video/agon_ps2.h \
-  vdp-quark/video/agon_audio.h vdp-quark/video/audio_channel.h \
-  vdp-quark/video/types.h vdp-quark/video/envelopes/volume.h \
+  vdp-quark/video/agon_ps2.h vdp-quark/video/agon_audio.h \
+  vdp-quark/video/audio_channel.h vdp-quark/video/types.h \
+  vdp-quark/video/envelopes/volume.h \
   vdp-quark/video/envelopes/frequency.h vdp-quark/video/audio_sample.h \
   vdp-quark/video/buffer_stream.h \
   vdp-quark/video/enhanced_samples_generator.h \
@@ -412,13 +414,13 @@ directcontroller_test.o: directcontroller_test.cpp \
   userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
   userspace-vdp-gl/src/collisiondetector.h vdp.h \
   directcontroller-test/video.ino
-vdp_electronhal.o: vdp_electronhal.cpp \
+vdp_electron.o: vdp_electron.cpp \
   userspace-vdp-gl/src/userspace-platform/Arduino.h \
   userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
   userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
   userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
   userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
-  userspace-vdp-gl/src/userspace-platform/Stream.h vdp_electronhal.h \
+  userspace-vdp-gl/src/userspace-platform/Stream.h vdp_electron.h \
   userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
   userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
   userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
@@ -487,24 +489,31 @@ vdp_electronhal.o: vdp_electronhal.cpp \
   userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
   userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
   userspace-vdp-gl/src/collisiondetector.h vdp.h \
-  vdp-electronhal/main.cpp vdp-electronhal/globals.h \
-  vdp-electronhal/hal.h vdp-electronhal/zdi.h vdp-electronhal/eos.h \
-  vdp-electronhal/tms9918.h vdp-electronhal/ay_3_8910.h \
-  vdp-electronhal/sn76489an.h vdp-electronhal/ppi-8255.h \
-  vdp-electronhal/audio_driver.h vdp-electronhal/updater.h \
-  vdp-electronhal/sn76489an.cpp vdp-electronhal/audio_channel.h \
-  vdp-electronhal/audio_envelopes/volume.h \
-  vdp-electronhal/audio_envelopes/frequency.h vdp-electronhal/types.h \
-  vdp-electronhal/tms9918.cpp vdp-electronhal/zdi.cpp \
-  vdp-electronhal/OneWire_direct_gpio.h vdp-electronhal/updater.cpp \
+  AgonElectronHAL/src/main.cpp AgonElectronHAL/include/globals.h \
+  AgonElectronHAL/include/hal.h AgonElectronHAL/include/zdi.h \
+  AgonElectronHAL/include/eos.h AgonElectronHAL/include/tms9918.h \
+  AgonElectronHAL/include/ay_3_8910.h \
+  AgonElectronHAL/include/sn76489an.h AgonElectronHAL/include/ppi-8255.h \
+  AgonElectronHAL/include/audio_driver.h \
+  AgonElectronHAL/include/updater.h AgonElectronHAL/src/sn76489an.cpp \
+  AgonElectronHAL/include/audio_channel.h \
+  AgonElectronHAL/include/audio_envelopes/volume.h \
+  AgonElectronHAL/include/audio_envelopes/frequency.h \
+  AgonElectronHAL/include/types.h AgonElectronHAL/src/tms9918.cpp \
+  AgonElectronHAL/src/zdi.cpp \
+  AgonElectronHAL/include/OneWire_direct_gpio.h \
+  AgonElectronHAL/src/updater.cpp \
   userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
-  vdp-electronhal/ppi-8255.cpp vdp-electronhal/mos.cpp \
-  vdp-electronhal/mos.h vdp-electronhal/hal.cpp vdp-electronhal/eos.cpp \
-  vdp-electronhal/ay_3_8910.cpp vdp-electronhal/ay_3_8910_noise.cpp \
-  vdp-electronhal/ay_3_8910_noise.h vdp-electronhal/audio_driver.cpp \
-  vdp-electronhal/audio_sample.h vdp-electronhal/audio_sample.cpp \
-  vdp-electronhal/audio_enhanced_samples_generator.cpp \
-  vdp-electronhal/audio_enhanced_samples_generator.h \
-  vdp-electronhal/audio_channel.cpp \
-  vdp-electronhal/audio_envelopes/frequency.cpp \
-  vdp-electronhal/audio_envelopes/volume.cpp
+  AgonElectronHAL/src/ppi-8255.cpp AgonElectronHAL/src/mos.cpp \
+  AgonElectronHAL/include/mos.h AgonElectronHAL/src/hal.cpp \
+  AgonElectronHAL/src/eos.cpp AgonElectronHAL/src/ay_3_8910.cpp \
+  AgonElectronHAL/src/ay_3_8910_noise.cpp \
+  AgonElectronHAL/include/ay_3_8910_noise.h \
+  AgonElectronHAL/src/audio_driver.cpp \
+  AgonElectronHAL/include/audio_sample.h \
+  AgonElectronHAL/src/audio_sample.cpp \
+  AgonElectronHAL/src/audio_enhanced_samples_generator.cpp \
+  AgonElectronHAL/include/audio_enhanced_samples_generator.h \
+  AgonElectronHAL/src/audio_channel.cpp \
+  AgonElectronHAL/src/audio_envelopes/frequency.cpp \
+  AgonElectronHAL/src/audio_envelopes/volume.cpp
