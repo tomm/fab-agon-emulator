@@ -48,7 +48,7 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     // Preserve stdin state, as debugger can leave stdin in raw mode
     #[cfg(target_os = "linux")]
-    let _tty = raw_tty::TtyWithGuard::new(std::io::stdin()).unwrap();
+    let _tty = raw_tty::TtyWithGuard::new(std::io::stdin());
 
     let debugger_con = if args.debugger {
         let _emulator_shutdown = emulator_shutdown.clone();
