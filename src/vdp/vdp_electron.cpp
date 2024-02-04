@@ -2,7 +2,7 @@
 
 // VDP uses various functions before their definition, so here
 // vdp-console8.h gives those functions prototypes to avoid errors
-#include "vdp_electronhal.h"
+#include "vdp_electron.h"
 
 // Define soundGeneratorMutex, as this vdp doesn't actually have one
 std::mutex soundGeneratorMutex;
@@ -37,23 +37,23 @@ typedef uint16_t u16_t;
 #define OUTPUT 1
 #define ARDUINO_RUNNING_CORE 0
 
-#include "vdp-electronhal/main.cpp"
-#include "vdp-electronhal/sn76489an.cpp"
-#include "vdp-electronhal/tms9918.cpp"
-#include "vdp-electronhal/zdi.cpp"
-#include "vdp-electronhal/updater.cpp"
-#include "vdp-electronhal/ppi-8255.cpp"
-#include "vdp-electronhal/mos.cpp"
-#include "vdp-electronhal/hal.cpp"
-#include "vdp-electronhal/eos.cpp"
-#include "vdp-electronhal/ay_3_8910.cpp"
-#include "vdp-electronhal/ay_3_8910_noise.cpp"
-#include "vdp-electronhal/audio_driver.cpp"
-#include "vdp-electronhal/audio_sample.cpp"
-#include "vdp-electronhal/audio_enhanced_samples_generator.cpp"
-#include "vdp-electronhal/audio_channel.cpp"
-#include "vdp-electronhal/audio_envelopes/frequency.cpp"
-#include "vdp-electronhal/audio_envelopes/volume.cpp"
+#include "AgonElectronHAL/src/main.cpp"
+#include "AgonElectronHAL/src/sn76489an.cpp"
+#include "AgonElectronHAL/src/tms9918.cpp"
+#include "AgonElectronHAL/src/zdi.cpp"
+#include "AgonElectronHAL/src/updater.cpp"
+#include "AgonElectronHAL/src/ppi-8255.cpp"
+#include "AgonElectronHAL/src/mos.cpp"
+#include "AgonElectronHAL/src/hal.cpp"
+#include "AgonElectronHAL/src/eos.cpp"
+#include "AgonElectronHAL/src/ay_3_8910.cpp"
+#include "AgonElectronHAL/src/ay_3_8910_noise.cpp"
+#include "AgonElectronHAL/src/audio_driver.cpp"
+#include "AgonElectronHAL/src/audio_sample.cpp"
+#include "AgonElectronHAL/src/audio_enhanced_samples_generator.cpp"
+#include "AgonElectronHAL/src/audio_channel.cpp"
+#include "AgonElectronHAL/src/audio_envelopes/frequency.cpp"
+#include "AgonElectronHAL/src/audio_envelopes/volume.cpp"
 
 uint8_t VolumeEnvelope::getVolume(uint8_t baseVolume, uint32_t elapsed, int32_t duration) {return 0;};
 bool VolumeEnvelope::isReleasing(uint32_t elapsed, int32_t duration) {return false;};

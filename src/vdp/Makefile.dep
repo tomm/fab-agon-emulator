@@ -1,500 +1,519 @@
 rust_glue.o: rust_glue.cpp userspace-vdp-gl/src/fabutils.h \
- userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
- userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
- userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h \
- userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabfonts.h \
- userspace-vdp-gl/src/fabglconf.h \
- userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
- userspace-vdp-gl/src/fonts/font_4x6.h \
- userspace-vdp-gl/src/fonts/font_5x7.h \
- userspace-vdp-gl/src/fonts/font_5x8.h \
- userspace-vdp-gl/src/fonts/font_6x8.h \
- userspace-vdp-gl/src/fonts/font_6x9.h \
- userspace-vdp-gl/src/fonts/font_6x10.h \
- userspace-vdp-gl/src/fonts/font_6x12.h \
- userspace-vdp-gl/src/fonts/font_6x13.h \
- userspace-vdp-gl/src/fonts/font_7x13.h \
- userspace-vdp-gl/src/fonts/font_7x14.h \
- userspace-vdp-gl/src/fonts/font_8x13.h \
- userspace-vdp-gl/src/fonts/font_8x8.h \
- userspace-vdp-gl/src/fonts/font_8x9.h \
- userspace-vdp-gl/src/fonts/font_8x14.h \
- userspace-vdp-gl/src/fonts/font_8x16.h \
- userspace-vdp-gl/src/fonts/font_8x19.h \
- userspace-vdp-gl/src/fonts/font_9x15.h \
- userspace-vdp-gl/src/fonts/font_9x18.h \
- userspace-vdp-gl/src/fonts/font_10x20.h \
- userspace-vdp-gl/src/fonts/font_slant_8x14.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
- userspace-vdp-gl/src/fonts/font_courier_8x14.h \
- userspace-vdp-gl/src/fonts/font_computer_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_block_8x14.h \
- userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
- userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
- userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
- userspace-vdp-gl/src/fonts/font_std_12.h \
- userspace-vdp-gl/src/fonts/font_std_14.h \
- userspace-vdp-gl/src/fonts/font_std_15.h \
- userspace-vdp-gl/src/fonts/font_std_16.h \
- userspace-vdp-gl/src/fonts/font_std_17.h \
- userspace-vdp-gl/src/fonts/font_std_18.h \
- userspace-vdp-gl/src/fonts/font_std_22.h \
- userspace-vdp-gl/src/fonts/font_std_24.h userspace-vdp-gl/src/terminal.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
- userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
- userspace-vdp-gl/src/devdrivers/keyboard.h \
- userspace-vdp-gl/src/comdrivers/ps2controller.h \
- userspace-vdp-gl/src/comdrivers/ps2device.h \
- userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
- userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
- userspace-vdp-gl/src/devdrivers/soundgen.h \
- userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
- userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
- userspace-vdp-gl/src/devdrivers/swgenerator.h \
- userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga2controller.h \
- userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga4controller.h \
- userspace-vdp-gl/src/dispdrivers/vga8controller.h \
- userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
- userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
- userspace-vdp-gl/src/collisiondetector.h vdp.h
+  userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
+  userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
+  userspace-vdp-gl/src/userspace-platform/Stream.h \
+  userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabfonts.h \
+  userspace-vdp-gl/src/fabglconf.h \
+  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
+  userspace-vdp-gl/src/fonts/font_4x6.h \
+  userspace-vdp-gl/src/fonts/font_5x7.h \
+  userspace-vdp-gl/src/fonts/font_5x8.h \
+  userspace-vdp-gl/src/fonts/font_6x8.h \
+  userspace-vdp-gl/src/fonts/font_6x9.h \
+  userspace-vdp-gl/src/fonts/font_6x10.h \
+  userspace-vdp-gl/src/fonts/font_6x12.h \
+  userspace-vdp-gl/src/fonts/font_6x13.h \
+  userspace-vdp-gl/src/fonts/font_7x13.h \
+  userspace-vdp-gl/src/fonts/font_7x14.h \
+  userspace-vdp-gl/src/fonts/font_8x13.h \
+  userspace-vdp-gl/src/fonts/font_8x8.h \
+  userspace-vdp-gl/src/fonts/font_8x9.h \
+  userspace-vdp-gl/src/fonts/font_8x14.h \
+  userspace-vdp-gl/src/fonts/font_8x16.h \
+  userspace-vdp-gl/src/fonts/font_8x19.h \
+  userspace-vdp-gl/src/fonts/font_9x15.h \
+  userspace-vdp-gl/src/fonts/font_9x18.h \
+  userspace-vdp-gl/src/fonts/font_10x20.h \
+  userspace-vdp-gl/src/fonts/font_slant_8x14.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
+  userspace-vdp-gl/src/fonts/font_courier_8x14.h \
+  userspace-vdp-gl/src/fonts/font_computer_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_block_8x14.h \
+  userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
+  userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
+  userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
+  userspace-vdp-gl/src/fonts/font_std_12.h \
+  userspace-vdp-gl/src/fonts/font_std_14.h \
+  userspace-vdp-gl/src/fonts/font_std_15.h \
+  userspace-vdp-gl/src/fonts/font_std_16.h \
+  userspace-vdp-gl/src/fonts/font_std_17.h \
+  userspace-vdp-gl/src/fonts/font_std_18.h \
+  userspace-vdp-gl/src/fonts/font_std_22.h \
+  userspace-vdp-gl/src/fonts/font_std_24.h \
+  userspace-vdp-gl/src/terminal.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/task.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
+  userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
+  userspace-vdp-gl/src/devdrivers/keyboard.h \
+  userspace-vdp-gl/src/comdrivers/ps2controller.h \
+  userspace-vdp-gl/src/comdrivers/ps2device.h \
+  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
+  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
+  userspace-vdp-gl/src/devdrivers/soundgen.h \
+  userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
+  userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
+  userspace-vdp-gl/src/devdrivers/swgenerator.h \
+  userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga2controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
+  userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+  userspace-vdp-gl/src/collisiondetector.h vdp.h
 vdp-1.03.o: vdp-1.03.cpp \
- userspace-vdp-gl/src/userspace-platform/Arduino.h \
- userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
- userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
- userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
- userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h vdp-1.03.h \
- userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
- userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
- userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
- userspace-vdp-gl/src/fabglconf.h \
- userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
- userspace-vdp-gl/src/fabutils.h \
- userspace-vdp-gl/src/devdrivers/swgenerator.h \
- userspace-vdp-gl/src/displaycontroller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabfonts.h \
- userspace-vdp-gl/src/fonts/font_4x6.h \
- userspace-vdp-gl/src/fonts/font_5x7.h \
- userspace-vdp-gl/src/fonts/font_5x8.h \
- userspace-vdp-gl/src/fonts/font_6x8.h \
- userspace-vdp-gl/src/fonts/font_6x9.h \
- userspace-vdp-gl/src/fonts/font_6x10.h \
- userspace-vdp-gl/src/fonts/font_6x12.h \
- userspace-vdp-gl/src/fonts/font_6x13.h \
- userspace-vdp-gl/src/fonts/font_7x13.h \
- userspace-vdp-gl/src/fonts/font_7x14.h \
- userspace-vdp-gl/src/fonts/font_8x13.h \
- userspace-vdp-gl/src/fonts/font_8x8.h \
- userspace-vdp-gl/src/fonts/font_8x9.h \
- userspace-vdp-gl/src/fonts/font_8x14.h \
- userspace-vdp-gl/src/fonts/font_8x16.h \
- userspace-vdp-gl/src/fonts/font_8x19.h \
- userspace-vdp-gl/src/fonts/font_9x15.h \
- userspace-vdp-gl/src/fonts/font_9x18.h \
- userspace-vdp-gl/src/fonts/font_10x20.h \
- userspace-vdp-gl/src/fonts/font_slant_8x14.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
- userspace-vdp-gl/src/fonts/font_courier_8x14.h \
- userspace-vdp-gl/src/fonts/font_computer_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_block_8x14.h \
- userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
- userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
- userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
- userspace-vdp-gl/src/fonts/font_std_12.h \
- userspace-vdp-gl/src/fonts/font_std_14.h \
- userspace-vdp-gl/src/fonts/font_std_15.h \
- userspace-vdp-gl/src/fonts/font_std_16.h \
- userspace-vdp-gl/src/fonts/font_std_17.h \
- userspace-vdp-gl/src/fonts/font_std_18.h \
- userspace-vdp-gl/src/fonts/font_std_22.h \
- userspace-vdp-gl/src/fonts/font_std_24.h userspace-vdp-gl/src/terminal.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
- userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/devdrivers/keyboard.h \
- userspace-vdp-gl/src/comdrivers/ps2controller.h \
- userspace-vdp-gl/src/comdrivers/ps2device.h \
- userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
- userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
- userspace-vdp-gl/src/devdrivers/soundgen.h \
- userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga2controller.h \
- userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga4controller.h \
- userspace-vdp-gl/src/dispdrivers/vga8controller.h \
- userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
- userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
- userspace-vdp-gl/src/collisiondetector.h vdp.h vdp-quark103/video.ino \
- userspace-vdp-gl/src/userspace-platform/ESP32Time.h vdp-quark103/agon.h \
- vdp-quark103/agon_fonts.h vdp-quark103/agon_audio.h \
- vdp-quark103/agon_palette.h
+  userspace-vdp-gl/src/userspace-platform/Arduino.h \
+  userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
+  userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
+  userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
+  userspace-vdp-gl/src/userspace-platform/Stream.h vdp-1.03.h \
+  userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
+  userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
+  userspace-vdp-gl/src/fabglconf.h \
+  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
+  userspace-vdp-gl/src/fabutils.h \
+  userspace-vdp-gl/src/devdrivers/swgenerator.h \
+  userspace-vdp-gl/src/displaycontroller.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/task.h \
+  userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabfonts.h \
+  userspace-vdp-gl/src/fonts/font_4x6.h \
+  userspace-vdp-gl/src/fonts/font_5x7.h \
+  userspace-vdp-gl/src/fonts/font_5x8.h \
+  userspace-vdp-gl/src/fonts/font_6x8.h \
+  userspace-vdp-gl/src/fonts/font_6x9.h \
+  userspace-vdp-gl/src/fonts/font_6x10.h \
+  userspace-vdp-gl/src/fonts/font_6x12.h \
+  userspace-vdp-gl/src/fonts/font_6x13.h \
+  userspace-vdp-gl/src/fonts/font_7x13.h \
+  userspace-vdp-gl/src/fonts/font_7x14.h \
+  userspace-vdp-gl/src/fonts/font_8x13.h \
+  userspace-vdp-gl/src/fonts/font_8x8.h \
+  userspace-vdp-gl/src/fonts/font_8x9.h \
+  userspace-vdp-gl/src/fonts/font_8x14.h \
+  userspace-vdp-gl/src/fonts/font_8x16.h \
+  userspace-vdp-gl/src/fonts/font_8x19.h \
+  userspace-vdp-gl/src/fonts/font_9x15.h \
+  userspace-vdp-gl/src/fonts/font_9x18.h \
+  userspace-vdp-gl/src/fonts/font_10x20.h \
+  userspace-vdp-gl/src/fonts/font_slant_8x14.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
+  userspace-vdp-gl/src/fonts/font_courier_8x14.h \
+  userspace-vdp-gl/src/fonts/font_computer_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_block_8x14.h \
+  userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
+  userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
+  userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
+  userspace-vdp-gl/src/fonts/font_std_12.h \
+  userspace-vdp-gl/src/fonts/font_std_14.h \
+  userspace-vdp-gl/src/fonts/font_std_15.h \
+  userspace-vdp-gl/src/fonts/font_std_16.h \
+  userspace-vdp-gl/src/fonts/font_std_17.h \
+  userspace-vdp-gl/src/fonts/font_std_18.h \
+  userspace-vdp-gl/src/fonts/font_std_22.h \
+  userspace-vdp-gl/src/fonts/font_std_24.h \
+  userspace-vdp-gl/src/terminal.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
+  userspace-vdp-gl/src/canvas.h \
+  userspace-vdp-gl/src/devdrivers/keyboard.h \
+  userspace-vdp-gl/src/comdrivers/ps2controller.h \
+  userspace-vdp-gl/src/comdrivers/ps2device.h \
+  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
+  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
+  userspace-vdp-gl/src/devdrivers/soundgen.h \
+  userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga2controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
+  userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+  userspace-vdp-gl/src/collisiondetector.h vdp.h vdp-quark103/video.ino \
+  userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
+  vdp-quark103/agon.h vdp-quark103/agon_fonts.h \
+  vdp-quark103/agon_audio.h vdp-quark103/agon_palette.h
 vdp-console8.o: vdp-console8.cpp \
- userspace-vdp-gl/src/userspace-platform/Arduino.h \
- userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
- userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
- userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
- userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h vdp-console8.h \
- userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
- userspace-vdp-gl/src/fabfonts.h userspace-vdp-gl/src/fabglconf.h \
- userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
- userspace-vdp-gl/src/fonts/font_4x6.h \
- userspace-vdp-gl/src/fonts/font_5x7.h \
- userspace-vdp-gl/src/fonts/font_5x8.h \
- userspace-vdp-gl/src/fonts/font_6x8.h \
- userspace-vdp-gl/src/fonts/font_6x9.h \
- userspace-vdp-gl/src/fonts/font_6x10.h \
- userspace-vdp-gl/src/fonts/font_6x12.h \
- userspace-vdp-gl/src/fonts/font_6x13.h \
- userspace-vdp-gl/src/fonts/font_7x13.h \
- userspace-vdp-gl/src/fonts/font_7x14.h \
- userspace-vdp-gl/src/fonts/font_8x13.h \
- userspace-vdp-gl/src/fonts/font_8x8.h \
- userspace-vdp-gl/src/fonts/font_8x9.h \
- userspace-vdp-gl/src/fonts/font_8x14.h \
- userspace-vdp-gl/src/fonts/font_8x16.h \
- userspace-vdp-gl/src/fonts/font_8x19.h \
- userspace-vdp-gl/src/fonts/font_9x15.h \
- userspace-vdp-gl/src/fonts/font_9x18.h \
- userspace-vdp-gl/src/fonts/font_10x20.h \
- userspace-vdp-gl/src/fonts/font_slant_8x14.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
- userspace-vdp-gl/src/fonts/font_courier_8x14.h \
- userspace-vdp-gl/src/fonts/font_computer_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_block_8x14.h \
- userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
- userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
- userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
- userspace-vdp-gl/src/fonts/font_std_12.h \
- userspace-vdp-gl/src/fonts/font_std_14.h \
- userspace-vdp-gl/src/fonts/font_std_15.h \
- userspace-vdp-gl/src/fonts/font_std_16.h \
- userspace-vdp-gl/src/fonts/font_std_17.h \
- userspace-vdp-gl/src/fonts/font_std_18.h \
- userspace-vdp-gl/src/fonts/font_std_22.h \
- userspace-vdp-gl/src/fonts/font_std_24.h userspace-vdp-gl/src/terminal.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
- userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
- userspace-vdp-gl/src/devdrivers/keyboard.h \
- userspace-vdp-gl/src/comdrivers/ps2controller.h \
- userspace-vdp-gl/src/comdrivers/ps2device.h \
- userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
- userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
- userspace-vdp-gl/src/devdrivers/soundgen.h \
- userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
- userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
- userspace-vdp-gl/src/devdrivers/swgenerator.h \
- userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga2controller.h \
- userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga4controller.h \
- userspace-vdp-gl/src/dispdrivers/vga8controller.h \
- userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
- userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
- userspace-vdp-gl/src/collisiondetector.h vdp.h \
- vdp-console8/video/video.ino \
- userspace-vdp-gl/src/userspace-platform/WiFi.h vdp-console8/video/agon.h \
- vdp-console8/video/version.h vdp-console8/video/agon_ps2.h \
- vdp-console8/video/agon_audio.h vdp-console8/video/audio_channel.h \
- vdp-console8/video/types.h vdp-console8/video/envelopes/types.h \
- vdp-console8/video/audio_sample.h vdp-console8/video/buffer_stream.h \
- vdp-console8/video/enhanced_samples_generator.h \
- vdp-console8/video/agon_ttxt.h vdp-console8/video/ttxtfont.h \
- vdp-console8/video/agon_palette.h vdp-console8/video/agon_screen.h \
- vdp-console8/video/graphics.h vdp-console8/video/agon_fonts.h \
- vdp-console8/video/cursor.h vdp-console8/video/viewport.h \
- vdp-console8/video/vdp_protocol.h vdp-console8/video/sprites.h \
- vdp-console8/video/vdu_stream_processor.h vdp-console8/video/vdu.h \
- vdp-console8/video/vdu_audio.h vdp-console8/video/buffers.h \
- vdp-console8/video/envelopes/adsr.h \
- vdp-console8/video/envelopes/./types.h \
- vdp-console8/video/envelopes/multiphase_adsr.h \
- vdp-console8/video/envelopes/frequency.h vdp-console8/video/vdu_sys.h \
- userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
- vdp-console8/video/vdu_buffered.h \
- vdp-console8/video/multi_buffer_stream.h \
- vdp-console8/video/vdu_sprites.h vdp-console8/video/updater.h \
- userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
- vdp-console8/video/hexload.h
+  userspace-vdp-gl/src/userspace-platform/Arduino.h \
+  userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
+  userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
+  userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
+  userspace-vdp-gl/src/userspace-platform/Stream.h vdp-console8.h \
+  userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
+  userspace-vdp-gl/src/fabfonts.h userspace-vdp-gl/src/fabglconf.h \
+  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
+  userspace-vdp-gl/src/fonts/font_4x6.h \
+  userspace-vdp-gl/src/fonts/font_5x7.h \
+  userspace-vdp-gl/src/fonts/font_5x8.h \
+  userspace-vdp-gl/src/fonts/font_6x8.h \
+  userspace-vdp-gl/src/fonts/font_6x9.h \
+  userspace-vdp-gl/src/fonts/font_6x10.h \
+  userspace-vdp-gl/src/fonts/font_6x12.h \
+  userspace-vdp-gl/src/fonts/font_6x13.h \
+  userspace-vdp-gl/src/fonts/font_7x13.h \
+  userspace-vdp-gl/src/fonts/font_7x14.h \
+  userspace-vdp-gl/src/fonts/font_8x13.h \
+  userspace-vdp-gl/src/fonts/font_8x8.h \
+  userspace-vdp-gl/src/fonts/font_8x9.h \
+  userspace-vdp-gl/src/fonts/font_8x14.h \
+  userspace-vdp-gl/src/fonts/font_8x16.h \
+  userspace-vdp-gl/src/fonts/font_8x19.h \
+  userspace-vdp-gl/src/fonts/font_9x15.h \
+  userspace-vdp-gl/src/fonts/font_9x18.h \
+  userspace-vdp-gl/src/fonts/font_10x20.h \
+  userspace-vdp-gl/src/fonts/font_slant_8x14.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
+  userspace-vdp-gl/src/fonts/font_courier_8x14.h \
+  userspace-vdp-gl/src/fonts/font_computer_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_block_8x14.h \
+  userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
+  userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
+  userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
+  userspace-vdp-gl/src/fonts/font_std_12.h \
+  userspace-vdp-gl/src/fonts/font_std_14.h \
+  userspace-vdp-gl/src/fonts/font_std_15.h \
+  userspace-vdp-gl/src/fonts/font_std_16.h \
+  userspace-vdp-gl/src/fonts/font_std_17.h \
+  userspace-vdp-gl/src/fonts/font_std_18.h \
+  userspace-vdp-gl/src/fonts/font_std_22.h \
+  userspace-vdp-gl/src/fonts/font_std_24.h \
+  userspace-vdp-gl/src/terminal.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/task.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
+  userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
+  userspace-vdp-gl/src/devdrivers/keyboard.h \
+  userspace-vdp-gl/src/comdrivers/ps2controller.h \
+  userspace-vdp-gl/src/comdrivers/ps2device.h \
+  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
+  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
+  userspace-vdp-gl/src/devdrivers/soundgen.h \
+  userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
+  userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
+  userspace-vdp-gl/src/devdrivers/swgenerator.h \
+  userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga2controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
+  userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+  userspace-vdp-gl/src/collisiondetector.h vdp.h \
+  vdp-console8/video/video.ino \
+  userspace-vdp-gl/src/userspace-platform/WiFi.h \
+  vdp-console8/video/agon.h vdp-console8/video/version.h \
+  vdp-console8/video/agon_ps2.h vdp-console8/video/agon_audio.h \
+  vdp-console8/video/audio_channel.h vdp-console8/video/types.h \
+  vdp-console8/video/envelopes/types.h vdp-console8/video/audio_sample.h \
+  vdp-console8/video/buffer_stream.h \
+  vdp-console8/video/enhanced_samples_generator.h \
+  vdp-console8/video/agon_ttxt.h vdp-console8/video/ttxtfont.h \
+  vdp-console8/video/agon_palette.h vdp-console8/video/agon_screen.h \
+  vdp-console8/video/graphics.h vdp-console8/video/agon_fonts.h \
+  vdp-console8/video/cursor.h vdp-console8/video/viewport.h \
+  vdp-console8/video/vdp_protocol.h vdp-console8/video/sprites.h \
+  vdp-console8/video/vdu_stream_processor.h vdp-console8/video/vdu.h \
+  vdp-console8/video/vdu_audio.h vdp-console8/video/buffers.h \
+  vdp-console8/video/envelopes/adsr.h \
+  vdp-console8/video/envelopes/./types.h \
+  vdp-console8/video/envelopes/multiphase_adsr.h \
+  vdp-console8/video/envelopes/frequency.h vdp-console8/video/vdu_sys.h \
+  userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
+  vdp-console8/video/vdu_buffered.h \
+  vdp-console8/video/multi_buffer_stream.h \
+  vdp-console8/video/vdu_sprites.h vdp-console8/video/updater.h \
+  userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
+  vdp-console8/video/hexload.h
 vdp-quark.o: vdp-quark.cpp \
- userspace-vdp-gl/src/userspace-platform/Arduino.h \
- userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
- userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
- userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
- userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h vdp-quark.h \
- userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
- userspace-vdp-gl/src/fabfonts.h userspace-vdp-gl/src/fabglconf.h \
- userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
- userspace-vdp-gl/src/fonts/font_4x6.h \
- userspace-vdp-gl/src/fonts/font_5x7.h \
- userspace-vdp-gl/src/fonts/font_5x8.h \
- userspace-vdp-gl/src/fonts/font_6x8.h \
- userspace-vdp-gl/src/fonts/font_6x9.h \
- userspace-vdp-gl/src/fonts/font_6x10.h \
- userspace-vdp-gl/src/fonts/font_6x12.h \
- userspace-vdp-gl/src/fonts/font_6x13.h \
- userspace-vdp-gl/src/fonts/font_7x13.h \
- userspace-vdp-gl/src/fonts/font_7x14.h \
- userspace-vdp-gl/src/fonts/font_8x13.h \
- userspace-vdp-gl/src/fonts/font_8x8.h \
- userspace-vdp-gl/src/fonts/font_8x9.h \
- userspace-vdp-gl/src/fonts/font_8x14.h \
- userspace-vdp-gl/src/fonts/font_8x16.h \
- userspace-vdp-gl/src/fonts/font_8x19.h \
- userspace-vdp-gl/src/fonts/font_9x15.h \
- userspace-vdp-gl/src/fonts/font_9x18.h \
- userspace-vdp-gl/src/fonts/font_10x20.h \
- userspace-vdp-gl/src/fonts/font_slant_8x14.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
- userspace-vdp-gl/src/fonts/font_courier_8x14.h \
- userspace-vdp-gl/src/fonts/font_computer_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_block_8x14.h \
- userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
- userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
- userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
- userspace-vdp-gl/src/fonts/font_std_12.h \
- userspace-vdp-gl/src/fonts/font_std_14.h \
- userspace-vdp-gl/src/fonts/font_std_15.h \
- userspace-vdp-gl/src/fonts/font_std_16.h \
- userspace-vdp-gl/src/fonts/font_std_17.h \
- userspace-vdp-gl/src/fonts/font_std_18.h \
- userspace-vdp-gl/src/fonts/font_std_22.h \
- userspace-vdp-gl/src/fonts/font_std_24.h userspace-vdp-gl/src/terminal.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
- userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
- userspace-vdp-gl/src/devdrivers/keyboard.h \
- userspace-vdp-gl/src/comdrivers/ps2controller.h \
- userspace-vdp-gl/src/comdrivers/ps2device.h \
- userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
- userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
- userspace-vdp-gl/src/devdrivers/soundgen.h \
- userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
- userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
- userspace-vdp-gl/src/devdrivers/swgenerator.h \
- userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga2controller.h \
- userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga4controller.h \
- userspace-vdp-gl/src/dispdrivers/vga8controller.h \
- userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
- userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
- userspace-vdp-gl/src/collisiondetector.h vdp.h vdp-quark/video/video.ino \
- userspace-vdp-gl/src/userspace-platform/WiFi.h vdp-quark/video/agon.h \
- vdp-quark/video/agon_ps2.h vdp-quark/video/agon_audio.h \
- vdp-quark/video/audio_channel.h vdp-quark/video/types.h \
- vdp-quark/video/envelopes/volume.h vdp-quark/video/envelopes/frequency.h \
- vdp-quark/video/audio_sample.h vdp-quark/video/buffer_stream.h \
- vdp-quark/video/enhanced_samples_generator.h vdp-quark/video/agon_ttxt.h \
- vdp-quark/video/ttxtfont.h vdp-quark/video/agon_palette.h \
- vdp-quark/video/agon_screen.h vdp-quark/video/graphics.h \
- vdp-quark/video/agon_fonts.h vdp-quark/video/cursor.h \
- vdp-quark/video/viewport.h vdp-quark/video/vdp_protocol.h \
- vdp-quark/video/sprites.h vdp-quark/video/vdu_stream_processor.h \
- vdp-quark/video/vdu.h vdp-quark/video/vdu_audio.h \
- vdp-quark/video/buffers.h vdp-quark/video/vdu_sys.h \
- userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
- vdp-quark/video/vdu_buffered.h vdp-quark/video/multi_buffer_stream.h \
- vdp-quark/video/vdu_sprites.h vdp-quark/video/updater.h \
- userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
- vdp-quark/video/hexload.h
+  userspace-vdp-gl/src/userspace-platform/Arduino.h \
+  userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
+  userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
+  userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
+  userspace-vdp-gl/src/userspace-platform/Stream.h vdp-quark.h \
+  userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
+  userspace-vdp-gl/src/fabfonts.h userspace-vdp-gl/src/fabglconf.h \
+  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
+  userspace-vdp-gl/src/fonts/font_4x6.h \
+  userspace-vdp-gl/src/fonts/font_5x7.h \
+  userspace-vdp-gl/src/fonts/font_5x8.h \
+  userspace-vdp-gl/src/fonts/font_6x8.h \
+  userspace-vdp-gl/src/fonts/font_6x9.h \
+  userspace-vdp-gl/src/fonts/font_6x10.h \
+  userspace-vdp-gl/src/fonts/font_6x12.h \
+  userspace-vdp-gl/src/fonts/font_6x13.h \
+  userspace-vdp-gl/src/fonts/font_7x13.h \
+  userspace-vdp-gl/src/fonts/font_7x14.h \
+  userspace-vdp-gl/src/fonts/font_8x13.h \
+  userspace-vdp-gl/src/fonts/font_8x8.h \
+  userspace-vdp-gl/src/fonts/font_8x9.h \
+  userspace-vdp-gl/src/fonts/font_8x14.h \
+  userspace-vdp-gl/src/fonts/font_8x16.h \
+  userspace-vdp-gl/src/fonts/font_8x19.h \
+  userspace-vdp-gl/src/fonts/font_9x15.h \
+  userspace-vdp-gl/src/fonts/font_9x18.h \
+  userspace-vdp-gl/src/fonts/font_10x20.h \
+  userspace-vdp-gl/src/fonts/font_slant_8x14.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
+  userspace-vdp-gl/src/fonts/font_courier_8x14.h \
+  userspace-vdp-gl/src/fonts/font_computer_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_block_8x14.h \
+  userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
+  userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
+  userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
+  userspace-vdp-gl/src/fonts/font_std_12.h \
+  userspace-vdp-gl/src/fonts/font_std_14.h \
+  userspace-vdp-gl/src/fonts/font_std_15.h \
+  userspace-vdp-gl/src/fonts/font_std_16.h \
+  userspace-vdp-gl/src/fonts/font_std_17.h \
+  userspace-vdp-gl/src/fonts/font_std_18.h \
+  userspace-vdp-gl/src/fonts/font_std_22.h \
+  userspace-vdp-gl/src/fonts/font_std_24.h \
+  userspace-vdp-gl/src/terminal.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/task.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
+  userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
+  userspace-vdp-gl/src/devdrivers/keyboard.h \
+  userspace-vdp-gl/src/comdrivers/ps2controller.h \
+  userspace-vdp-gl/src/comdrivers/ps2device.h \
+  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
+  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
+  userspace-vdp-gl/src/devdrivers/soundgen.h \
+  userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
+  userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
+  userspace-vdp-gl/src/devdrivers/swgenerator.h \
+  userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga2controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
+  userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+  userspace-vdp-gl/src/collisiondetector.h vdp.h \
+  vdp-quark/video/video.ino \
+  userspace-vdp-gl/src/userspace-platform/WiFi.h vdp-quark/video/agon.h \
+  vdp-quark/video/agon_ps2.h vdp-quark/video/agon_audio.h \
+  vdp-quark/video/audio_channel.h vdp-quark/video/types.h \
+  vdp-quark/video/envelopes/volume.h \
+  vdp-quark/video/envelopes/frequency.h vdp-quark/video/audio_sample.h \
+  vdp-quark/video/buffer_stream.h \
+  vdp-quark/video/enhanced_samples_generator.h \
+  vdp-quark/video/agon_ttxt.h vdp-quark/video/ttxtfont.h \
+  vdp-quark/video/agon_palette.h vdp-quark/video/agon_screen.h \
+  vdp-quark/video/graphics.h vdp-quark/video/agon_fonts.h \
+  vdp-quark/video/cursor.h vdp-quark/video/viewport.h \
+  vdp-quark/video/vdp_protocol.h vdp-quark/video/sprites.h \
+  vdp-quark/video/vdu_stream_processor.h vdp-quark/video/vdu.h \
+  vdp-quark/video/vdu_audio.h vdp-quark/video/buffers.h \
+  vdp-quark/video/vdu_sys.h \
+  userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
+  vdp-quark/video/vdu_buffered.h vdp-quark/video/multi_buffer_stream.h \
+  vdp-quark/video/vdu_sprites.h vdp-quark/video/updater.h \
+  userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
+  vdp-quark/video/hexload.h
 directcontroller_test.o: directcontroller_test.cpp \
- userspace-vdp-gl/src/userspace-platform/Arduino.h \
- userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
- userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
- userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
- userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h directcontroller_test.h \
- userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabutils.h \
- userspace-vdp-gl/src/fabfonts.h userspace-vdp-gl/src/fabglconf.h \
- userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
- userspace-vdp-gl/src/fonts/font_4x6.h \
- userspace-vdp-gl/src/fonts/font_5x7.h \
- userspace-vdp-gl/src/fonts/font_5x8.h \
- userspace-vdp-gl/src/fonts/font_6x8.h \
- userspace-vdp-gl/src/fonts/font_6x9.h \
- userspace-vdp-gl/src/fonts/font_6x10.h \
- userspace-vdp-gl/src/fonts/font_6x12.h \
- userspace-vdp-gl/src/fonts/font_6x13.h \
- userspace-vdp-gl/src/fonts/font_7x13.h \
- userspace-vdp-gl/src/fonts/font_7x14.h \
- userspace-vdp-gl/src/fonts/font_8x13.h \
- userspace-vdp-gl/src/fonts/font_8x8.h \
- userspace-vdp-gl/src/fonts/font_8x9.h \
- userspace-vdp-gl/src/fonts/font_8x14.h \
- userspace-vdp-gl/src/fonts/font_8x16.h \
- userspace-vdp-gl/src/fonts/font_8x19.h \
- userspace-vdp-gl/src/fonts/font_9x15.h \
- userspace-vdp-gl/src/fonts/font_9x18.h \
- userspace-vdp-gl/src/fonts/font_10x20.h \
- userspace-vdp-gl/src/fonts/font_slant_8x14.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
- userspace-vdp-gl/src/fonts/font_courier_8x14.h \
- userspace-vdp-gl/src/fonts/font_computer_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_block_8x14.h \
- userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
- userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
- userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
- userspace-vdp-gl/src/fonts/font_std_12.h \
- userspace-vdp-gl/src/fonts/font_std_14.h \
- userspace-vdp-gl/src/fonts/font_std_15.h \
- userspace-vdp-gl/src/fonts/font_std_16.h \
- userspace-vdp-gl/src/fonts/font_std_17.h \
- userspace-vdp-gl/src/fonts/font_std_18.h \
- userspace-vdp-gl/src/fonts/font_std_22.h \
- userspace-vdp-gl/src/fonts/font_std_24.h userspace-vdp-gl/src/terminal.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
- userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
- userspace-vdp-gl/src/devdrivers/keyboard.h \
- userspace-vdp-gl/src/comdrivers/ps2controller.h \
- userspace-vdp-gl/src/comdrivers/ps2device.h \
- userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
- userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
- userspace-vdp-gl/src/devdrivers/soundgen.h \
- userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
- userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
- userspace-vdp-gl/src/devdrivers/swgenerator.h \
- userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga2controller.h \
- userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga4controller.h \
- userspace-vdp-gl/src/dispdrivers/vga8controller.h \
- userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
- userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
- userspace-vdp-gl/src/collisiondetector.h vdp.h \
- directcontroller-test/video.ino
-vdp_electronhal.o: vdp_electronhal.cpp \
- userspace-vdp-gl/src/userspace-platform/Arduino.h \
- userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
- userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
- userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
- userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
- userspace-vdp-gl/src/userspace-platform/Stream.h vdp_electronhal.h \
- userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
- userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
- userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
- userspace-vdp-gl/src/fabglconf.h \
- userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
- userspace-vdp-gl/src/fabutils.h \
- userspace-vdp-gl/src/devdrivers/swgenerator.h \
- userspace-vdp-gl/src/displaycontroller.h \
- userspace-vdp-gl/src/userspace-platform/freertos/task.h \
- userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabfonts.h \
- userspace-vdp-gl/src/fonts/font_4x6.h \
- userspace-vdp-gl/src/fonts/font_5x7.h \
- userspace-vdp-gl/src/fonts/font_5x8.h \
- userspace-vdp-gl/src/fonts/font_6x8.h \
- userspace-vdp-gl/src/fonts/font_6x9.h \
- userspace-vdp-gl/src/fonts/font_6x10.h \
- userspace-vdp-gl/src/fonts/font_6x12.h \
- userspace-vdp-gl/src/fonts/font_6x13.h \
- userspace-vdp-gl/src/fonts/font_7x13.h \
- userspace-vdp-gl/src/fonts/font_7x14.h \
- userspace-vdp-gl/src/fonts/font_8x13.h \
- userspace-vdp-gl/src/fonts/font_8x8.h \
- userspace-vdp-gl/src/fonts/font_8x9.h \
- userspace-vdp-gl/src/fonts/font_8x14.h \
- userspace-vdp-gl/src/fonts/font_8x16.h \
- userspace-vdp-gl/src/fonts/font_8x19.h \
- userspace-vdp-gl/src/fonts/font_9x15.h \
- userspace-vdp-gl/src/fonts/font_9x18.h \
- userspace-vdp-gl/src/fonts/font_10x20.h \
- userspace-vdp-gl/src/fonts/font_slant_8x14.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
- userspace-vdp-gl/src/fonts/font_courier_8x14.h \
- userspace-vdp-gl/src/fonts/font_computer_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
- userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
- userspace-vdp-gl/src/fonts/font_block_8x14.h \
- userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
- userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
- userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
- userspace-vdp-gl/src/fonts/font_std_12.h \
- userspace-vdp-gl/src/fonts/font_std_14.h \
- userspace-vdp-gl/src/fonts/font_std_15.h \
- userspace-vdp-gl/src/fonts/font_std_16.h \
- userspace-vdp-gl/src/fonts/font_std_17.h \
- userspace-vdp-gl/src/fonts/font_std_18.h \
- userspace-vdp-gl/src/fonts/font_std_22.h \
- userspace-vdp-gl/src/fonts/font_std_24.h userspace-vdp-gl/src/terminal.h \
- userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
- userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
- userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/devdrivers/keyboard.h \
- userspace-vdp-gl/src/comdrivers/ps2controller.h \
- userspace-vdp-gl/src/comdrivers/ps2device.h \
- userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
- userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
- userspace-vdp-gl/src/devdrivers/soundgen.h \
- userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga2controller.h \
- userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
- userspace-vdp-gl/src/dispdrivers/vga4controller.h \
- userspace-vdp-gl/src/dispdrivers/vga8controller.h \
- userspace-vdp-gl/src/dispdrivers/vga16controller.h \
- userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
- userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
- userspace-vdp-gl/src/collisiondetector.h vdp.h vdp-electronhal/main.cpp \
- vdp-electronhal/globals.h vdp-electronhal/hal.h vdp-electronhal/zdi.h \
- vdp-electronhal/eos.h vdp-electronhal/tms9918.h \
- vdp-electronhal/ay_3_8910.h vdp-electronhal/sn76489an.h \
- vdp-electronhal/ppi-8255.h vdp-electronhal/audio_driver.h \
- vdp-electronhal/updater.h vdp-electronhal/sn76489an.cpp \
- vdp-electronhal/audio_channel.h vdp-electronhal/audio_envelopes/volume.h \
- vdp-electronhal/audio_envelopes/frequency.h vdp-electronhal/types.h \
- vdp-electronhal/tms9918.cpp vdp-electronhal/zdi.cpp \
- vdp-electronhal/OneWire_direct_gpio.h vdp-electronhal/updater.cpp \
- userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
- vdp-electronhal/ppi-8255.cpp vdp-electronhal/mos.cpp \
- vdp-electronhal/mos.h vdp-electronhal/hal.cpp vdp-electronhal/eos.cpp \
- vdp-electronhal/ay_3_8910.cpp vdp-electronhal/ay_3_8910_noise.cpp \
- vdp-electronhal/ay_3_8910_noise.h vdp-electronhal/audio_driver.cpp \
- vdp-electronhal/audio_sample.h vdp-electronhal/audio_sample.cpp \
- vdp-electronhal/audio_enhanced_samples_generator.cpp \
- vdp-electronhal/audio_enhanced_samples_generator.h \
- vdp-electronhal/audio_channel.cpp \
- vdp-electronhal/audio_envelopes/frequency.cpp \
- vdp-electronhal/audio_envelopes/frequency.h \
- vdp-electronhal/audio_envelopes/volume.cpp \
- vdp-electronhal/audio_envelopes/volume.h
+  userspace-vdp-gl/src/userspace-platform/Arduino.h \
+  userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
+  userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
+  userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
+  userspace-vdp-gl/src/userspace-platform/Stream.h \
+  directcontroller_test.h userspace-vdp-gl/src/fabgl.h \
+  userspace-vdp-gl/src/fabutils.h userspace-vdp-gl/src/fabfonts.h \
+  userspace-vdp-gl/src/fabglconf.h \
+  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
+  userspace-vdp-gl/src/fonts/font_4x6.h \
+  userspace-vdp-gl/src/fonts/font_5x7.h \
+  userspace-vdp-gl/src/fonts/font_5x8.h \
+  userspace-vdp-gl/src/fonts/font_6x8.h \
+  userspace-vdp-gl/src/fonts/font_6x9.h \
+  userspace-vdp-gl/src/fonts/font_6x10.h \
+  userspace-vdp-gl/src/fonts/font_6x12.h \
+  userspace-vdp-gl/src/fonts/font_6x13.h \
+  userspace-vdp-gl/src/fonts/font_7x13.h \
+  userspace-vdp-gl/src/fonts/font_7x14.h \
+  userspace-vdp-gl/src/fonts/font_8x13.h \
+  userspace-vdp-gl/src/fonts/font_8x8.h \
+  userspace-vdp-gl/src/fonts/font_8x9.h \
+  userspace-vdp-gl/src/fonts/font_8x14.h \
+  userspace-vdp-gl/src/fonts/font_8x16.h \
+  userspace-vdp-gl/src/fonts/font_8x19.h \
+  userspace-vdp-gl/src/fonts/font_9x15.h \
+  userspace-vdp-gl/src/fonts/font_9x18.h \
+  userspace-vdp-gl/src/fonts/font_10x20.h \
+  userspace-vdp-gl/src/fonts/font_slant_8x14.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
+  userspace-vdp-gl/src/fonts/font_courier_8x14.h \
+  userspace-vdp-gl/src/fonts/font_computer_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_block_8x14.h \
+  userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
+  userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
+  userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
+  userspace-vdp-gl/src/fonts/font_std_12.h \
+  userspace-vdp-gl/src/fonts/font_std_14.h \
+  userspace-vdp-gl/src/fonts/font_std_15.h \
+  userspace-vdp-gl/src/fonts/font_std_16.h \
+  userspace-vdp-gl/src/fonts/font_std_17.h \
+  userspace-vdp-gl/src/fonts/font_std_18.h \
+  userspace-vdp-gl/src/fonts/font_std_22.h \
+  userspace-vdp-gl/src/fonts/font_std_24.h \
+  userspace-vdp-gl/src/terminal.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/task.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
+  userspace-vdp-gl/src/canvas.h userspace-vdp-gl/src/displaycontroller.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
+  userspace-vdp-gl/src/devdrivers/keyboard.h \
+  userspace-vdp-gl/src/comdrivers/ps2controller.h \
+  userspace-vdp-gl/src/comdrivers/ps2device.h \
+  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
+  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
+  userspace-vdp-gl/src/devdrivers/soundgen.h \
+  userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
+  userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
+  userspace-vdp-gl/src/devdrivers/swgenerator.h \
+  userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga2controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
+  userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+  userspace-vdp-gl/src/collisiondetector.h vdp.h \
+  directcontroller-test/video.ino
+vdp_electron.o: vdp_electron.cpp \
+  userspace-vdp-gl/src/userspace-platform/Arduino.h \
+  userspace-vdp-gl/src/userspace-platform/malloc_wrapper.h \
+  userspace-vdp-gl/src/userspace-platform/fake_fabgl.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/FreeRTOS.h \
+  userspace-vdp-gl/src/userspace-platform/HardwareSerial.h \
+  userspace-vdp-gl/src/userspace-platform/Stream.h vdp_electron.h \
+  userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h \
+  userspace-vdp-gl/src/userspace-platform/driver/gpio.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/queue.h \
+  userspace-vdp-gl/src/fabglconf.h \
+  userspace-vdp-gl/src/userspace-platform/esp_wifi.h \
+  userspace-vdp-gl/src/fabutils.h \
+  userspace-vdp-gl/src/devdrivers/swgenerator.h \
+  userspace-vdp-gl/src/displaycontroller.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/task.h \
+  userspace-vdp-gl/src/fabgl.h userspace-vdp-gl/src/fabfonts.h \
+  userspace-vdp-gl/src/fonts/font_4x6.h \
+  userspace-vdp-gl/src/fonts/font_5x7.h \
+  userspace-vdp-gl/src/fonts/font_5x8.h \
+  userspace-vdp-gl/src/fonts/font_6x8.h \
+  userspace-vdp-gl/src/fonts/font_6x9.h \
+  userspace-vdp-gl/src/fonts/font_6x10.h \
+  userspace-vdp-gl/src/fonts/font_6x12.h \
+  userspace-vdp-gl/src/fonts/font_6x13.h \
+  userspace-vdp-gl/src/fonts/font_7x13.h \
+  userspace-vdp-gl/src/fonts/font_7x14.h \
+  userspace-vdp-gl/src/fonts/font_8x13.h \
+  userspace-vdp-gl/src/fonts/font_8x8.h \
+  userspace-vdp-gl/src/fonts/font_8x9.h \
+  userspace-vdp-gl/src/fonts/font_8x14.h \
+  userspace-vdp-gl/src/fonts/font_8x16.h \
+  userspace-vdp-gl/src/fonts/font_8x19.h \
+  userspace-vdp-gl/src/fonts/font_9x15.h \
+  userspace-vdp-gl/src/fonts/font_9x18.h \
+  userspace-vdp-gl/src/fonts/font_10x20.h \
+  userspace-vdp-gl/src/fonts/font_slant_8x14.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_sanserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_lcd_8x14.h \
+  userspace-vdp-gl/src/fonts/font_courier_8x14.h \
+  userspace-vdp-gl/src/fonts/font_computer_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x14.h \
+  userspace-vdp-gl/src/fonts/font_bigserif_8x16.h \
+  userspace-vdp-gl/src/fonts/font_block_8x14.h \
+  userspace-vdp-gl/src/fonts/font_broadway_8x14.h \
+  userspace-vdp-gl/src/fonts/font_oldengl_8x16.h \
+  userspace-vdp-gl/src/fonts/font_wiggly_8x16.h \
+  userspace-vdp-gl/src/fonts/font_std_12.h \
+  userspace-vdp-gl/src/fonts/font_std_14.h \
+  userspace-vdp-gl/src/fonts/font_std_15.h \
+  userspace-vdp-gl/src/fonts/font_std_16.h \
+  userspace-vdp-gl/src/fonts/font_std_17.h \
+  userspace-vdp-gl/src/fonts/font_std_18.h \
+  userspace-vdp-gl/src/fonts/font_std_22.h \
+  userspace-vdp-gl/src/fonts/font_std_24.h \
+  userspace-vdp-gl/src/terminal.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/timers.h \
+  userspace-vdp-gl/src/userspace-platform/freertos/semphr.h \
+  userspace-vdp-gl/src/canvas.h \
+  userspace-vdp-gl/src/devdrivers/keyboard.h \
+  userspace-vdp-gl/src/comdrivers/ps2controller.h \
+  userspace-vdp-gl/src/comdrivers/ps2device.h \
+  userspace-vdp-gl/src/devdrivers/kbdlayouts.h \
+  userspace-vdp-gl/src/codepages.h userspace-vdp-gl/src/terminfo.h \
+  userspace-vdp-gl/src/devdrivers/soundgen.h \
+  userspace-vdp-gl/src/dispdrivers/vgacontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga2controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgapalettedcontroller.h \
+  userspace-vdp-gl/src/dispdrivers/vga4controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga8controller.h \
+  userspace-vdp-gl/src/dispdrivers/vga16controller.h \
+  userspace-vdp-gl/src/dispdrivers/vgadirectcontroller.h \
+  userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
+  userspace-vdp-gl/src/collisiondetector.h vdp.h \
+  AgonElectronHAL/src/main.cpp AgonElectronHAL/include/globals.h \
+  AgonElectronHAL/include/hal.h AgonElectronHAL/include/zdi.h \
+  AgonElectronHAL/include/eos.h AgonElectronHAL/include/tms9918.h \
+  AgonElectronHAL/include/ay_3_8910.h \
+  AgonElectronHAL/include/sn76489an.h AgonElectronHAL/include/ppi-8255.h \
+  AgonElectronHAL/include/audio_driver.h \
+  AgonElectronHAL/include/updater.h AgonElectronHAL/src/sn76489an.cpp \
+  AgonElectronHAL/include/audio_channel.h \
+  AgonElectronHAL/include/audio_envelopes/volume.h \
+  AgonElectronHAL/include/audio_envelopes/frequency.h \
+  AgonElectronHAL/include/types.h AgonElectronHAL/src/tms9918.cpp \
+  AgonElectronHAL/src/zdi.cpp \
+  AgonElectronHAL/include/OneWire_direct_gpio.h \
+  AgonElectronHAL/src/updater.cpp \
+  userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
+  AgonElectronHAL/src/ppi-8255.cpp AgonElectronHAL/src/mos.cpp \
+  AgonElectronHAL/include/mos.h AgonElectronHAL/src/hal.cpp \
+  AgonElectronHAL/src/eos.cpp AgonElectronHAL/src/ay_3_8910.cpp \
+  AgonElectronHAL/src/ay_3_8910_noise.cpp \
+  AgonElectronHAL/include/ay_3_8910_noise.h \
+  AgonElectronHAL/src/audio_driver.cpp \
+  AgonElectronHAL/include/audio_sample.h \
+  AgonElectronHAL/src/audio_sample.cpp \
+  AgonElectronHAL/src/audio_enhanced_samples_generator.cpp \
+  AgonElectronHAL/include/audio_enhanced_samples_generator.h \
+  AgonElectronHAL/src/audio_channel.cpp \
+  AgonElectronHAL/src/audio_envelopes/frequency.cpp \
+  AgonElectronHAL/src/audio_envelopes/volume.cpp
