@@ -8,7 +8,7 @@
   - [ ] on firmware 1.04
   - [ ] in terminal mode
 - [ ] consider what to do about firmware paths (eg on linux installing to /usr/local)
-- [ ] finish electron firmware merge
+- [x] finish electron firmware merge
 - [x] playmod slow playback issue
 - [ ] enforce uart0 transfer rate limit
 
