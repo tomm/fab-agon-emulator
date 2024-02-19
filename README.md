@@ -12,6 +12,13 @@ Emulator shortcuts are accessed with the *right alt* key (AltGr on some keyboard
  * RightAlt-R - Soft-reset
  * RightAlt-Q - Quit
 
+## Emulated SDCard
+
+If a directory is specified with `fab-agon-emulator --sdcard <dir>` then that will
+be used as the emulated SDCard. Otherwise, the `.agon-sdcard/` directory in your
+home directory will be used if present, and if not then `sdcard/` in the current
+directory is used.
+
 ## Compiling the Fab Agon Emulator (on Linux)
 
 To make an optimised release build, run:
@@ -27,13 +34,26 @@ Then you can run the emulator with:
 ./fab-agon-emulator
 ```
 
-## Changing VDP version
-
-By default, Fab Agon Emulator boots with 1.04 firmware. To start up
-with 1.03 firmware, run:
+## Installing to a prefix (eg /usr/local or $HOME/.local)
 
 ```
-./fab-agon-emulator --firmware 1.03
+PREFIX=/usr/local make
+sudo make install
+```
+
+## Changing VDP version
+
+By default, Fab Agon Emulator boots with Console8 firmware. To start up
+with quark firmware, run:
+
+```
+fab-agon-emulator --firmware quark
+```
+
+Legacy 1.03 firmware is also available:
+
+```
+fab-agon-emulator --firmware 1.03
 ```
 
 ## Other command-line options
@@ -41,7 +61,7 @@ with 1.03 firmware, run:
 Read about other command-line options with:
 
 ```
-./fab-agon-emulator --help
+fab-agon-emulator --help
 ```
 
 ## Compiling for Windows
@@ -62,3 +82,7 @@ Read about other command-line options with:
 * copy SDL2.dll to the root of the project
 * run `make` in the root of the project
 * run `fab-agon-emulator.exe` in the root of the project
+
+## Compiling for Mac
+
+TODO

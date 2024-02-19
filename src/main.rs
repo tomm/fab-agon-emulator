@@ -1,5 +1,6 @@
 use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit, gpio };
 use agon_cpu_emulator::debugger::{ DebugCmd, DebugResp, DebuggerConnection, Trigger };
+use parse_args::FirmwareVer;
 use sdl2::event::Event;
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
@@ -13,10 +14,22 @@ mod audio;
 mod joypad;
 
 const AUDIO_BUFLEN: u16 = 256;
+const PREFIX: Option<&'static str> = option_env!("PREFIX");
+
+pub fn firmware_path(ver: parse_args::FirmwareVer, is_mos: bool) -> std::path::PathBuf {
+    match PREFIX {
+        None => std::path::Path::new(".").join("firmware"),
+        Some(prefix) => std::path::Path::new(prefix).join("share").join("fab-agon-emulator")
+    }.join(format!("{}_{:?}.{}", 
+                   if is_mos { "mos" } else { "vdp" },
+                   ver,
+                   if is_mos { "bin" } else { "so" },
+                   ))
+}
 
 pub fn main() -> Result<(), pico_args::Error> {
     let args = parse_args()?;
-    let vdp_interface = vdp_interface::init(&format!("firmware/vdp_{:?}.so", args.firmware), &args);
+    let vdp_interface = vdp_interface::init(firmware_path(args.firmware, false), &args);
 
     // Set up various comms channels
     let (tx_vdp_to_ez80, rx_vdp_to_ez80): (Sender<u8>, Receiver<u8>) = mpsc::channel();
@@ -65,6 +78,26 @@ pub fn main() -> Result<(), pico_args::Error> {
         let gpios_ = gpios.clone();
 
         thread::spawn(move || {
+            let ez80_firmware = if let Some(mos_bin) = args.mos_bin {
+                mos_bin
+            } else {
+                firmware_path(args.firmware, true)
+            };
+
+            let sdcard_dir = if let Some(p) = args.sdcard {
+                std::path::PathBuf::from(p)
+            } else if let Some(home_dir) = home::home_dir() {
+                let p = home_dir.join(".agon-sdcard");
+                if p.exists() { p } else { std::path::PathBuf::from("sdcard".to_string()) }
+            } else {
+                std::path::PathBuf::from("sdcard".to_string())
+            };
+
+            if args.verbose {
+                eprintln!("EZ80 firmware: {:?}", ez80_firmware);
+                eprintln!("Emulated SDCard: {:?}", sdcard_dir);
+            }
+
             // Prepare the device
             let mut machine = AgonMachine::new(AgonMachineConfig {
                 ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
@@ -73,13 +106,9 @@ pub fn main() -> Result<(), pico_args::Error> {
                 gpios: gpios_,
                 soft_reset: soft_reset_ez80,
                 clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },
-                mos_bin: if let Some(mos_bin) = args.mos_bin {
-                    mos_bin
-                } else {
-                    std::path::PathBuf::from(format!("firmware/mos_{:?}.bin", args.firmware))
-                },
+                mos_bin: ez80_firmware,
             });
-            machine.set_sdcard_directory(std::path::PathBuf::from(args.sdcard.unwrap_or("sdcard".to_string())));
+            machine.set_sdcard_directory(sdcard_dir);
             machine.start(debugger_con);
             panic!("ez80 cpu thread terminated");
         })

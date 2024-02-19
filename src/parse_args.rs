@@ -23,9 +23,10 @@ ADVANCED:
   --vdp PATH            Use a different VDP dll/so firmware
   --renderer sw         Use software renderer
   --renderer hw         Use GL/D3D renderer (default)
+  --verbose             Verbose mode
 ";
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 #[allow(non_camel_case_types)]
 pub enum FirmwareVer {
   quark103,
@@ -47,6 +48,7 @@ pub struct AppArgs {
     pub breakpoint: Option<String>,
     pub unlimited_cpu: bool,
     pub fullscreen: bool,
+    pub verbose: bool,
     pub zero: bool,
     pub mos_bin: Option<std::path::PathBuf>,
     pub vdp_dll: Option<std::path::PathBuf>,
@@ -57,6 +59,12 @@ pub struct AppArgs {
 
 pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
     let mut pargs = pico_args::Arguments::from_env();
+
+    // for `make install`
+    if pargs.contains("--prefix") {
+      print!("{}", option_env!("PREFIX").unwrap_or(""));
+      std::process::exit(0);
+    }
 
     if pargs.contains(["-h", "--help"]) {
         print!("{}", HELP);
@@ -72,6 +80,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         breakpoint: pargs.opt_value_from_str(["-b", "--breakpoint"])?,
         unlimited_cpu: pargs.contains(["-u", "--unlimited_cpu"]),
         fullscreen: pargs.contains(["-f", "--fullscreen"]),
+        verbose: pargs.contains("--verbose"),
         zero: pargs.contains(["-z", "--zero"]),
         perfect_scale: pargs.opt_value_from_str("--scale")?,
         mos_bin: pargs.opt_value_from_str("--mos")?,

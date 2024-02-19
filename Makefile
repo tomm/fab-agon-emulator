@@ -45,3 +45,13 @@ clean: vdp-clean cargo-clean
 
 depends:
 	$(MAKE) -C src/vdp depends
+
+install:
+ifneq ($(shell ./fab-agon-emulator --prefix),)
+	install -D -t $(shell ./fab-agon-emulator --prefix)/share/fab-agon-emulator/ firmware/vdp_*.so
+	install -D -t $(shell ./fab-agon-emulator --prefix)/share/fab-agon-emulator/ firmware/mos_*.bin
+	install -D -t $(shell ./fab-agon-emulator --prefix)/share/fab-agon-emulator/ firmware/mos_*.map
+	install -D -t $(shell ./fab-agon-emulator --prefix)/bin/ fab-agon-emulator
+else
+	@echo "make install requires an install PREFIX (eg PREFIX=/usr/local make)"
+endif

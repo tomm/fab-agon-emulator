@@ -33,13 +33,17 @@ impl VdpInterface {
     }
 }
 
-pub fn init(default_vdp: &str, args: &crate::parse_args::AppArgs) -> VdpInterface {
+pub fn init(default_vdp: std::path::PathBuf, args: &crate::parse_args::AppArgs) -> VdpInterface {
     assert!(unsafe { VDP_DLL == std::ptr::null() });
 
     let vdp_dll_path = match args.vdp_dll {
         Some(ref p) => Path::new(".").join(p),
-        None => Path::new(".").join(default_vdp)
+        None => default_vdp
     };
+
+    if args.verbose {
+        eprintln!("VDP firmware: {:?}", vdp_dll_path);
+    }
 
     unsafe {
         VDP_DLL = Box::leak(Box::new(libloading::Library::new(vdp_dll_path).unwrap()));
