@@ -11,6 +11,13 @@
 // Arduino.h
 extern void delay(int ms);
 
+bool vdp_debug_logging = false;
+
+extern "C" void setVdpDebugLogging(bool state)
+{
+	vdp_debug_logging = state;
+}
+
 /* ps2scancode is the set2 'make' code */
 extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 {

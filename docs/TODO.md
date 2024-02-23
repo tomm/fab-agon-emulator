@@ -4,7 +4,6 @@
 
 - [ ] symbol support in debugger
 - [ ] enforce uart0 transfer rate limit
-- [ ] DEBUG logging for VDP
 
 ## Mañana mañana
 

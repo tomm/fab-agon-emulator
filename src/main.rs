@@ -31,6 +31,8 @@ pub fn main() -> Result<(), pico_args::Error> {
     let args = parse_args()?;
     let vdp_interface = vdp_interface::init(firmware_path(args.firmware, false), &args);
 
+    unsafe { (*vdp_interface.setVdpDebugLogging)(args.verbose) }
+
     // Set up various comms channels
     let (tx_vdp_to_ez80, rx_vdp_to_ez80): (Sender<u8>, Receiver<u8>) = mpsc::channel();
     let (tx_ez80_to_vdp, rx_ez80_to_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();

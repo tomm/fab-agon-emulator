@@ -42,7 +42,7 @@
 #define REVISION		3
 #define RC				0
 
-#define	DEBUG			0						// Serial Debug Mode: 1 = enable
+#define	DEBUG			1						// Serial Debug Mode: 1 = enable
 #define SERIALKB		0						// Serial Keyboard: 1 = enable (Experimental)
 
 fabgl::PS2Controller		PS2Controller;		// The keyboard class
@@ -181,6 +181,7 @@ void boot_screen() {
 
 // Debug printf to PC
 //
+#ifndef USERSPACE
 void debug_log(const char *format, ...) {
 	#if DEBUG == 1
    	va_list ap;
@@ -191,11 +192,12 @@ void debug_log(const char *format, ...) {
      	va_start(ap, format);
      	char buf[size + 1];
      	vsnprintf(buf, size, format, ap);
-     	DBGSerial.print(buf);
+	DBGSerial.print(buf);
    	}
    	va_end(ap);
 	#endif
 }
+#endif
 
 // Read an unsigned byte from the serial port, with a timeout
 // Returns:
