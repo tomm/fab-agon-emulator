@@ -1,6 +1,5 @@
 use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit, gpio };
 use agon_cpu_emulator::debugger::{ DebugCmd, DebugResp, DebuggerConnection, Trigger };
-use parse_args::FirmwareVer;
 use sdl2::event::Event;
 use std::sync::mpsc;
 use std::sync::mpsc::{Sender, Receiver};
@@ -29,13 +28,17 @@ pub fn firmware_path(ver: parse_args::FirmwareVer, is_mos: bool) -> std::path::P
 
 pub fn main() -> Result<(), pico_args::Error> {
     let args = parse_args()?;
+    let t = thread::Builder::new().name("UI".to_string()).spawn(move || {
+        mainloop(args);
+    }).unwrap();
+    t.join().unwrap();
+    Ok(())
+}
+
+fn mainloop(args: parse_args::AppArgs) {
     let vdp_interface = vdp_interface::init(firmware_path(args.firmware, false), &args);
 
     unsafe { (*vdp_interface.setVdpDebugLogging)(args.verbose) }
-
-    // Set up various comms channels
-    let (tx_vdp_to_ez80, rx_vdp_to_ez80): (Sender<u8>, Receiver<u8>) = mpsc::channel();
-    let (tx_ez80_to_vdp, rx_ez80_to_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
 
     let (tx_cmd_debugger, rx_cmd_debugger): (Sender<DebugCmd>, Receiver<DebugCmd>) = mpsc::channel();
     let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) = mpsc::channel();
@@ -79,7 +82,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         let soft_reset_ez80 = soft_reset.clone();
         let gpios_ = gpios.clone();
 
-        thread::spawn(move || {
+        thread::Builder::new().name("ez80".to_string()).spawn(move || {
             let ez80_firmware = if let Some(mos_bin) = args.mos_bin {
                 mos_bin
             } else {
@@ -103,8 +106,17 @@ pub fn main() -> Result<(), pico_args::Error> {
             // Prepare the device
             let mut machine = AgonMachine::new(AgonMachineConfig {
                 ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
-                to_vdp: tx_ez80_to_vdp,
-                from_vdp: rx_vdp_to_ez80,
+                to_vdp: Box::new(move |data| unsafe{(*vdp_interface.z80_send_to_vdp)(data)}),
+                from_vdp: Box::new(move || {
+                    let mut data: u8 = 0;
+                    unsafe {
+                        if !(*vdp_interface.z80_recv_from_vdp)(&mut data as *mut u8) {
+                            None
+                        } else {
+                            Some(data)
+                        }
+                    }
+                }),
                 gpios: gpios_,
                 soft_reset: soft_reset_ez80,
                 clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },
@@ -116,36 +128,8 @@ pub fn main() -> Result<(), pico_args::Error> {
         })
     };
 
-    let _comms_thread = thread::spawn(move || {
-        loop {
-            'z80_to_vdp: loop {
-                match rx_ez80_to_vdp.try_recv() {
-                    Ok(data) => unsafe {
-                        (*vdp_interface.z80_send_to_vdp)(data);
-                    }
-                    Err(mpsc::TryRecvError::Disconnected) => panic!(),
-                    Err(mpsc::TryRecvError::Empty) => {
-                        break 'z80_to_vdp;
-                    }
-                }
-            }
-
-            'vdp_to_z80: loop {
-                let mut data: u8 = 0;
-                unsafe {
-                    if !(*vdp_interface.z80_recv_from_vdp)(&mut data as *mut u8) {
-                        break 'vdp_to_z80;
-                    }
-                    tx_vdp_to_ez80.send(data).unwrap();
-                }
-            }
-
-            std::thread::sleep(std::time::Duration::from_micros(100));
-        }
-    });
-
     // VDP thread
-    let _vdp_thread = thread::spawn(move || {
+    let _vdp_thread = thread::Builder::new().name("VDP".to_string()).spawn(move || {
         unsafe {
             (*vdp_interface.vdp_setup)();
             (*vdp_interface.vdp_loop)();
@@ -260,7 +244,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         'inner: loop {
             let elapsed_since_last_frame = last_frame_time.elapsed();
             if elapsed_since_last_frame < frame_duration {
-                std::thread::sleep(std::time::Duration::from_millis(1));
+                std::thread::sleep(std::time::Duration::from_millis(5));
                 continue;
             }
             else if elapsed_since_last_frame > std::time::Duration::from_millis(100) {
@@ -469,8 +453,6 @@ pub fn main() -> Result<(), pico_args::Error> {
     // give vdp some time to shutdown
     unsafe { (*vdp_interface.vdp_shutdown)(); }
     std::thread::sleep(std::time::Duration::from_millis(200));
-
-    Ok(())
 }
 
 fn calc_4_3_output_rect<T: sdl2::render::RenderTarget>(canvas: &sdl2::render::Canvas<T>) -> sdl2::rect::Rect {
