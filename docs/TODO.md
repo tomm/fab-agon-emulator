@@ -11,3 +11,4 @@
 - [ ] trs-os hang on "run auto command" -- IS CPU-emu BUG! Works with: real agon & emulated VDP!
 - [ ] not all screen modes are 60Hz, but emulator assumes they are
 - [ ] c8 joystick gpio mutex contention on windows -- probably use atomics instead
+- [ ] vdp audio sample rate setting
