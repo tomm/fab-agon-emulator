@@ -106,8 +106,8 @@ fn mainloop(args: parse_args::AppArgs) {
             // Prepare the device
             let mut machine = AgonMachine::new(AgonMachineConfig {
                 ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
-                to_vdp: Box::new(move |data| unsafe{(*vdp_interface.z80_send_to_vdp)(data)}),
-                from_vdp: Box::new(move || {
+                uart0_send: Box::new(move |data| unsafe{(*vdp_interface.z80_send_to_vdp)(data)}),
+                uart0_recv: Box::new(move || {
                     let mut data: u8 = 0;
                     unsafe {
                         if !(*vdp_interface.z80_recv_from_vdp)(&mut data as *mut u8) {
@@ -117,6 +117,8 @@ fn mainloop(args: parse_args::AppArgs) {
                         }
                     }
                 }),
+                uart1_send: Box::new(move |byte| { println!("uart0_tx: 0x{:02x}", byte) }),
+                uart1_recv: Box::new(move || { println!("uart0_rx attempted."); None }),
                 gpios: gpios_,
                 soft_reset: soft_reset_ez80,
                 clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },
