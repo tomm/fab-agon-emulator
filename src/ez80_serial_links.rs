@@ -9,6 +9,7 @@ impl SerialLink for DummySerialLink {
         println!("{}_send: 0x{:02x}", self.name, byte);
     }
     fn recv(&mut self) -> Option<u8> { None }
+    fn read_clear_to_send(&mut self) -> bool { true }
 }
 
 pub struct Ez80ToVdpSerialLink {
@@ -30,6 +31,7 @@ impl SerialLink for Ez80ToVdpSerialLink {
             }
         }
     }
+    fn read_clear_to_send(&mut self) -> bool { true }
 }
 
 pub struct Ez80ToHostSerialLink {
@@ -70,5 +72,8 @@ impl SerialLink for Ez80ToHostSerialLink {
             }
             Err(_) => None
         }
+    }
+    fn read_clear_to_send(&mut self) -> bool {
+        self.port.read_clear_to_send().unwrap_or(false)
     }
 }
