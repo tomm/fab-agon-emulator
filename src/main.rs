@@ -1,4 +1,4 @@
-use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit, gpio };
+use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit, SerialLink, gpio };
 use agon_cpu_emulator::debugger::{ DebugCmd, DebugResp, DebuggerConnection, Trigger };
 use sdl2::event::Event;
 use std::sync::mpsc;
@@ -11,6 +11,7 @@ mod parse_args;
 mod vdp_interface;
 mod audio;
 mod joypad;
+mod ez80_serial_links;
 
 const AUDIO_BUFLEN: u16 = 256;
 const PREFIX: Option<&'static str> = option_env!("PREFIX");
@@ -103,22 +104,24 @@ fn mainloop(args: parse_args::AppArgs) {
                 eprintln!("Emulated SDCard: {:?}", sdcard_dir);
             }
 
+            let uart1_serial: Option<Box<dyn SerialLink>> = args.uart1_device.as_ref().and_then(|device| {
+                let baud = args.uart1_baud.unwrap_or(9600);
+                println!("Using uart1 device {:?}, baud rate {:?}", device, baud);
+                match ez80_serial_links::Ez80ToHostSerialLink::try_open(&device, baud) {
+                    Some(link) => Some(Box::new(link) as Box<dyn SerialLink>),
+                    None => None
+                }
+            });
+            let uart1_dummy: Box<dyn SerialLink> = Box::new(ez80_serial_links::DummySerialLink { name: "uart1".to_string() });
+
             // Prepare the device
             let mut machine = AgonMachine::new(AgonMachineConfig {
                 ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
-                uart0_send: Box::new(move |data| unsafe{(*vdp_interface.z80_send_to_vdp)(data)}),
-                uart0_recv: Box::new(move || {
-                    let mut data: u8 = 0;
-                    unsafe {
-                        if !(*vdp_interface.z80_recv_from_vdp)(&mut data as *mut u8) {
-                            None
-                        } else {
-                            Some(data)
-                        }
-                    }
+                uart0_link: Box::new(ez80_serial_links::Ez80ToVdpSerialLink {
+                    z80_send_to_vdp: vdp_interface.z80_send_to_vdp.clone(),
+                    z80_recv_from_vdp: vdp_interface.z80_recv_from_vdp.clone()
                 }),
-                uart1_send: Box::new(move |byte| { println!("uart0_tx: 0x{:02x}", byte) }),
-                uart1_recv: Box::new(move || { println!("uart0_rx attempted."); None }),
+                uart1_link: uart1_serial.unwrap_or(uart1_dummy),
                 gpios: gpios_,
                 soft_reset: soft_reset_ez80,
                 clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },

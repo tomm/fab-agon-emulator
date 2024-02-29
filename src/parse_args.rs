@@ -23,6 +23,8 @@ ADVANCED:
   --vdp PATH            Use a different VDP dll/so firmware
   --renderer sw         Use software renderer
   --renderer hw         Use GL/D3D renderer (default)
+  --uart1-device <dev>  Link ez80 uart1 to this host serial device
+  --uart1-baud <rate>   Open --uart1-device with the given baud rate
   --verbose             Verbose mode
 ";
 
@@ -55,6 +57,8 @@ pub struct AppArgs {
     pub firmware: FirmwareVer,
     pub perfect_scale: Option<u32>,
     pub renderer: Renderer,
+    pub uart1_device: Option<String>,
+    pub uart1_baud: Option<u32>,
 }
 
 pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
@@ -85,6 +89,8 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         perfect_scale: pargs.opt_value_from_str("--scale")?,
         mos_bin: pargs.opt_value_from_str("--mos")?,
         vdp_dll: pargs.opt_value_from_str("--vdp")?,
+        uart1_device: pargs.opt_value_from_str("--uart1-device")?,
+        uart1_baud: pargs.opt_value_from_str("--uart1-baud")?,
         renderer: if let Some(r) = renderer {
           match r.as_str() {
             "hw" => Renderer::Accelerated,

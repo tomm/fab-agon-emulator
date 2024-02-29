@@ -2,7 +2,7 @@
 members = ["agon-light-emulator-debugger"]
 
 [workspace.package]
-version = "0.9.31"
+version = "0.9.32"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"
@@ -31,6 +31,7 @@ agon-cpu-emulator = { workspace = true }
 agon-light-emulator-debugger = { path = "agon-light-emulator-debugger" }
 libloading = "0.8.0"
 home = "0.5.9"
+serialport = "4.3.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 sdl2 = { version = "0.36.0", features = ["bundled", "static-link"] }
@@ -40,4 +41,4 @@ raw_tty = "0.1.0"
 
 [workspace.dependencies]
 #agon-cpu-emulator = { path = "../agon-cpu-emulator" }
-agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="7761e75e1aa35ae12de780cdd047a26bf5e57729"}
+agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="6ac7dd0696c6a24c2aa29433ed513f7d77bee14e"}
