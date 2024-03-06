@@ -1,10 +1,10 @@
-use std::sync::mpsc::{Sender, Receiver};
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
+use std::sync::mpsc::{Receiver, Sender};
 
 mod parser;
 
-use agon_cpu_emulator::debugger::{ DebugResp, DebugCmd, Registers, Reg16 };
+use agon_cpu_emulator::debugger::{DebugCmd, DebugResp, Reg16, Registers};
 
 #[derive(Clone)]
 struct EmuState {
@@ -18,15 +18,18 @@ impl EmuState {
     }
 
     pub fn set_in_debugger(&self, state: bool) {
-        self.in_debugger.store(state, std::sync::atomic::Ordering::SeqCst);
+        self.in_debugger
+            .store(state, std::sync::atomic::Ordering::SeqCst);
     }
 
     pub fn is_emulator_shutdown(&self) -> bool {
-        self.emulator_shutdown.load(std::sync::atomic::Ordering::SeqCst)
+        self.emulator_shutdown
+            .load(std::sync::atomic::Ordering::SeqCst)
     }
 
     pub fn shutdown(&self) {
-        self.emulator_shutdown.store(true, std::sync::atomic::Ordering::SeqCst);
+        self.emulator_shutdown
+            .store(true, std::sync::atomic::Ordering::SeqCst);
         self.set_in_debugger(false);
     }
 }
@@ -77,7 +80,7 @@ fn do_cmd(cmd: parser::Cmd, tx: &Sender<DebugCmd>, rx: &Receiver<DebugResp>, sta
 fn eval_cmd(text: &str, tx: &Sender<DebugCmd>, rx: &Receiver<DebugResp>, state: &EmuState) {
     match parser::parse_cmd(&mut parser::tokenize(text).into_iter().peekable()) {
         Ok(cmd) => do_cmd(cmd, tx, rx, state),
-        Err(msg) => println!("{}", msg)
+        Err(msg) => println!("{}", msg),
     }
 }
 
@@ -130,27 +133,36 @@ fn handle_debug_resp(resp: &DebugResp, state: &EmuState) {
         DebugResp::Triggers(bs) => {
             println!("Triggers:");
             for b in bs {
-                println!("\t&{:06x} {:?}{}",
-                         b.address,
-                         b.actions,
-                         if b.once { " (once)" } else { "" });
+                println!(
+                    "\t&{:06x} {:?}{}",
+                    b.address,
+                    b.actions,
+                    if b.once { " (once)" } else { "" }
+                );
             }
         }
-        DebugResp::Pong => {},
+        DebugResp::Pong => {}
         DebugResp::Disassembly { pc, adl, disasm } => {
-            println!("\t.assume adl={}", if *adl {1} else {0});
+            println!("\t.assume adl={}", if *adl { 1 } else { 0 });
             for inst in disasm {
-                print!("{} {:06x}: {:20} |",
-                       if inst.loc == *pc { "*" } else { " " },
-                       inst.loc,
-                       inst.asm);
+                print!(
+                    "{} {:06x}: {:20} |",
+                    if inst.loc == *pc { "*" } else { " " },
+                    inst.loc,
+                    inst.asm
+                );
                 for byte in &inst.bytes {
                     print!(" {:02x}", byte);
                 }
                 println!();
             }
         }
-        DebugResp::State { registers, stack, pc_instruction, .. } => {
+        DebugResp::State {
+            registers,
+            stack,
+            pc_instruction,
+            ..
+        } => {
             print!("* {:06x}: {:20} ", registers.pc, pc_instruction);
             print_registers(registers);
             if registers.adl {
@@ -185,11 +197,11 @@ const PAUSE_AT_START: bool = true;
 pub fn start(
     tx: Sender<DebugCmd>,
     rx: Receiver<DebugResp>,
-    emulator_shutdown: std::sync::Arc<std::sync::atomic::AtomicBool>
+    emulator_shutdown: std::sync::Arc<std::sync::atomic::AtomicBool>,
 ) {
     let state = EmuState {
         in_debugger: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(PAUSE_AT_START)),
-        emulator_shutdown
+        emulator_shutdown,
     };
     let tx_from_ctrlc = tx.clone();
 
@@ -210,7 +222,8 @@ pub fn start(
             println!("Interrupting execution.");
             tx_from_ctrlc.send(DebugCmd::Pause).unwrap();
             tx_from_ctrlc.send(DebugCmd::GetState).unwrap();
-        }).expect("Error setting Ctrl-C handler");
+        })
+        .expect("Error setting Ctrl-C handler");
     }
 
     // `()` can be used when no completer is required
@@ -230,21 +243,19 @@ pub fn start(
                         } else {
                             last_cmd = None;
                         }
-                    } else if let Some (ref l) = last_cmd {
+                    } else if let Some(ref l) = last_cmd {
                         eval_cmd(l, &tx, &rx, &state);
                         //line = rl.history().last();
                     }
-                },
-                Err(ReadlineError::Interrupted) => {
-                    break
-                },
+                }
+                Err(ReadlineError::Interrupted) => break,
                 Err(ReadlineError::Eof) => {
                     do_cmd(parser::Cmd::Core(DebugCmd::Continue), &tx, &rx, &state);
-                    break
-                },
+                    break;
+                }
                 Err(err) => {
                     println!("Error: {:?}", err);
-                    break
+                    break;
                 }
             }
         }

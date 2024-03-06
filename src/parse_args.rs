@@ -31,16 +31,16 @@ ADVANCED:
 #[derive(Debug, Copy, Clone)]
 #[allow(non_camel_case_types)]
 pub enum FirmwareVer {
-  quark103,
-  quark,
-  console8,
-  electron
+    quark103,
+    quark,
+    console8,
+    electron,
 }
 
 #[derive(Debug)]
 pub enum Renderer {
-  Software,
-  Accelerated
+    Software,
+    Accelerated,
 }
 
 #[derive(Debug)]
@@ -66,8 +66,8 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
 
     // for `make install`
     if pargs.contains("--prefix") {
-      print!("{}", option_env!("PREFIX").unwrap_or(""));
-      std::process::exit(0);
+        print!("{}", option_env!("PREFIX").unwrap_or(""));
+        std::process::exit(0);
     }
 
     if pargs.contains(["-h", "--help"]) {
@@ -92,33 +92,33 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         uart1_device: pargs.opt_value_from_str("--uart1-device")?,
         uart1_baud: pargs.opt_value_from_str("--uart1-baud")?,
         renderer: if let Some(r) = renderer {
-          match r.as_str() {
-            "hw" => Renderer::Accelerated,
-            "sw" => Renderer::Software,
-            _ => {
-              println!("Unknown --renderer value: {}. Valid values are: hw, sw", r);
-              std::process::exit(0);
+            match r.as_str() {
+                "hw" => Renderer::Accelerated,
+                "sw" => Renderer::Software,
+                _ => {
+                    println!("Unknown --renderer value: {}. Valid values are: hw, sw", r);
+                    std::process::exit(0);
+                }
             }
-          }
         } else {
-          Renderer::Accelerated
+            Renderer::Accelerated
         },
         firmware: if let Some(ver) = firmware_ver {
-          if ver == "1.03" {
-            FirmwareVer::quark103
-          } else if ver == "quark" {
-            FirmwareVer::quark
-          } else if ver == "console8" {
-            FirmwareVer::console8
-          } else if ver == "electron" {
-            FirmwareVer::electron
-          } else {
-            println!("Unknown --firmware value: {}. Valid values are: 1.03, quark, console8, electron", ver);
-            std::process::exit(0);
-          }
+            if ver == "1.03" {
+                FirmwareVer::quark103
+            } else if ver == "quark" {
+                FirmwareVer::quark
+            } else if ver == "console8" {
+                FirmwareVer::console8
+            } else if ver == "electron" {
+                FirmwareVer::electron
+            } else {
+                println!("Unknown --firmware value: {}. Valid values are: 1.03, quark, console8, electron", ver);
+                std::process::exit(0);
+            }
         } else {
-          FirmwareVer::console8
-        }
+            FirmwareVer::console8
+        },
     };
 
     let remaining = pargs.finish();

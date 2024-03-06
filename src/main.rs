@@ -1,17 +1,17 @@
-use agon_cpu_emulator::{ AgonMachine, AgonMachineConfig, RamInit, SerialLink, gpio };
-use agon_cpu_emulator::debugger::{ DebugCmd, DebugResp, DebuggerConnection, Trigger };
+use crate::parse_args::parse_args;
+use agon_cpu_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, Trigger};
+use agon_cpu_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
 use sdl2::event::Event;
 use std::sync::mpsc;
-use std::sync::mpsc::{Sender, Receiver};
-use std::sync::{ Arc, Mutex };
+use std::sync::mpsc::{Receiver, Sender};
+use std::sync::{Arc, Mutex};
 use std::thread;
-use crate::parse_args::parse_args;
-mod sdl2ps2;
-mod parse_args;
-mod vdp_interface;
 mod audio;
-mod joypad;
 mod ez80_serial_links;
+mod joypad;
+mod parse_args;
+mod sdl2ps2;
+mod vdp_interface;
 
 const AUDIO_BUFLEN: u16 = 256;
 const PREFIX: Option<&'static str> = option_env!("PREFIX");
@@ -19,12 +19,16 @@ const PREFIX: Option<&'static str> = option_env!("PREFIX");
 pub fn firmware_path(ver: parse_args::FirmwareVer, is_mos: bool) -> std::path::PathBuf {
     match PREFIX {
         None => std::path::Path::new(".").join("firmware"),
-        Some(prefix) => std::path::Path::new(prefix).join("share").join("fab-agon-emulator")
-    }.join(format!("{}_{:?}.{}", 
-                   if is_mos { "mos" } else { "vdp" },
-                   ver,
-                   if is_mos { "bin" } else { "so" },
-                   ))
+        Some(prefix) => std::path::Path::new(prefix)
+            .join("share")
+            .join("fab-agon-emulator"),
+    }
+    .join(format!(
+        "{}_{:?}.{}",
+        if is_mos { "mos" } else { "vdp" },
+        ver,
+        if is_mos { "bin" } else { "so" },
+    ))
 }
 
 pub fn main() -> Result<(), pico_args::Error> {
@@ -33,21 +37,27 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     unsafe { (*vdp_interface.setVdpDebugLogging)(args.verbose) }
 
-    let (tx_cmd_debugger, rx_cmd_debugger): (Sender<DebugCmd>, Receiver<DebugCmd>) = mpsc::channel();
-    let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) = mpsc::channel();
+    let (tx_cmd_debugger, rx_cmd_debugger): (Sender<DebugCmd>, Receiver<DebugCmd>) =
+        mpsc::channel();
+    let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) =
+        mpsc::channel();
 
     let gpios = Arc::new(Mutex::new(gpio::GpioSet::new()));
 
     if let Some(breakpoint) = args.breakpoint {
         if let Ok(breakpoint) = u32::from_str_radix(&breakpoint, 16) {
-            let trigger = Trigger{
-                    address: breakpoint,
-                    once: false,
-                    actions: vec![DebugCmd::Pause, DebugCmd::Message("CPU paused at initial breakpoint".to_owned()), DebugCmd::GetState],
-                };
+            let trigger = Trigger {
+                address: breakpoint,
+                once: false,
+                actions: vec![
+                    DebugCmd::Pause,
+                    DebugCmd::Message("CPU paused at initial breakpoint".to_owned()),
+                    DebugCmd::GetState,
+                ],
+            };
             let debug_cmd = DebugCmd::AddTrigger(trigger);
-            _  = tx_cmd_debugger.send(debug_cmd);
-            _  = tx_cmd_debugger.send(DebugCmd::Continue);
+            _ = tx_cmd_debugger.send(debug_cmd);
+            _ = tx_cmd_debugger.send(DebugCmd::Continue);
         } else {
             println!("Cannot parse breakpoint as hexadecimal. Ignoring.")
         }
@@ -64,9 +74,16 @@ pub fn main() -> Result<(), pico_args::Error> {
     let debugger_con = if args.debugger {
         let _emulator_shutdown = emulator_shutdown.clone();
         let _debugger_thread = thread::spawn(move || {
-            agon_light_emulator_debugger::start(tx_cmd_debugger, rx_resp_debugger, _emulator_shutdown);
+            agon_light_emulator_debugger::start(
+                tx_cmd_debugger,
+                rx_resp_debugger,
+                _emulator_shutdown,
+            );
         });
-        Some(DebuggerConnection { tx: tx_resp_debugger, rx: rx_cmd_debugger})
+        Some(DebuggerConnection {
+            tx: tx_resp_debugger,
+            rx: rx_cmd_debugger,
+        })
     } else {
         None
     };
@@ -75,66 +92,88 @@ pub fn main() -> Result<(), pico_args::Error> {
         let soft_reset_ez80 = soft_reset.clone();
         let gpios_ = gpios.clone();
 
-        thread::Builder::new().name("ez80".to_string()).spawn(move || {
-            let ez80_firmware = if let Some(mos_bin) = args.mos_bin {
-                mos_bin
-            } else {
-                firmware_path(args.firmware, true)
-            };
+        thread::Builder::new()
+            .name("ez80".to_string())
+            .spawn(move || {
+                let ez80_firmware = if let Some(mos_bin) = args.mos_bin {
+                    mos_bin
+                } else {
+                    firmware_path(args.firmware, true)
+                };
 
-            let sdcard_dir = if let Some(p) = args.sdcard {
-                std::path::PathBuf::from(p)
-            } else if let Some(home_dir) = home::home_dir() {
-                let p = home_dir.join(".agon-sdcard");
-                if p.exists() { p } else { std::path::PathBuf::from("sdcard".to_string()) }
-            } else {
-                std::path::PathBuf::from("sdcard".to_string())
-            };
+                let sdcard_dir = if let Some(p) = args.sdcard {
+                    std::path::PathBuf::from(p)
+                } else if let Some(home_dir) = home::home_dir() {
+                    let p = home_dir.join(".agon-sdcard");
+                    if p.exists() {
+                        p
+                    } else {
+                        std::path::PathBuf::from("sdcard".to_string())
+                    }
+                } else {
+                    std::path::PathBuf::from("sdcard".to_string())
+                };
 
-            if args.verbose {
-                eprintln!("EZ80 firmware: {:?}", ez80_firmware);
-                eprintln!("Emulated SDCard: {:?}", sdcard_dir);
-            }
-
-            let uart1_serial: Option<Box<dyn SerialLink>> = args.uart1_device.as_ref().and_then(|device| {
-                let baud = args.uart1_baud.unwrap_or(9600);
-                println!("Using uart1 device {:?}, baud rate {:?}", device, baud);
-                match ez80_serial_links::Ez80ToHostSerialLink::try_open(&device, baud) {
-                    Some(link) => Some(Box::new(link) as Box<dyn SerialLink>),
-                    None => None
+                if args.verbose {
+                    eprintln!("EZ80 firmware: {:?}", ez80_firmware);
+                    eprintln!("Emulated SDCard: {:?}", sdcard_dir);
                 }
-            });
-            let uart1_dummy: Box<dyn SerialLink> = Box::new(ez80_serial_links::DummySerialLink { name: "uart1".to_string() });
 
-            // Prepare the device
-            let mut machine = AgonMachine::new(AgonMachineConfig {
-                ram_init: if args.zero { RamInit::Zero} else {RamInit::Random},
-                uart0_link: Box::new(ez80_serial_links::Ez80ToVdpSerialLink {
-                    z80_send_to_vdp: vdp_interface.z80_send_to_vdp.clone(),
-                    z80_recv_from_vdp: vdp_interface.z80_recv_from_vdp.clone()
-                }),
-                uart1_link: uart1_serial.unwrap_or(uart1_dummy),
-                gpios: gpios_,
-                soft_reset: soft_reset_ez80,
-                clockspeed_hz: if args.unlimited_cpu { 1000_000_000 } else { 18_432_000 },
-                mos_bin: ez80_firmware,
-            });
-            machine.set_sdcard_directory(sdcard_dir);
-            machine.start(debugger_con);
-            panic!("ez80 cpu thread terminated");
-        })
+                let uart1_serial: Option<Box<dyn SerialLink>> =
+                    args.uart1_device.as_ref().and_then(|device| {
+                        let baud = args.uart1_baud.unwrap_or(9600);
+                        println!("Using uart1 device {:?}, baud rate {:?}", device, baud);
+                        match ez80_serial_links::Ez80ToHostSerialLink::try_open(&device, baud) {
+                            Some(link) => Some(Box::new(link) as Box<dyn SerialLink>),
+                            None => None,
+                        }
+                    });
+                let uart1_dummy: Box<dyn SerialLink> =
+                    Box::new(ez80_serial_links::DummySerialLink {
+                        name: "uart1".to_string(),
+                    });
+
+                // Prepare the device
+                let mut machine = AgonMachine::new(AgonMachineConfig {
+                    ram_init: if args.zero {
+                        RamInit::Zero
+                    } else {
+                        RamInit::Random
+                    },
+                    uart0_link: Box::new(ez80_serial_links::Ez80ToVdpSerialLink {
+                        z80_send_to_vdp: vdp_interface.z80_send_to_vdp.clone(),
+                        z80_recv_from_vdp: vdp_interface.z80_recv_from_vdp.clone(),
+                    }),
+                    uart1_link: uart1_serial.unwrap_or(uart1_dummy),
+                    gpios: gpios_,
+                    soft_reset: soft_reset_ez80,
+                    clockspeed_hz: if args.unlimited_cpu {
+                        1000_000_000
+                    } else {
+                        18_432_000
+                    },
+                    mos_bin: ez80_firmware,
+                });
+                machine.set_sdcard_directory(sdcard_dir);
+                machine.start(debugger_con);
+                panic!("ez80 cpu thread terminated");
+            })
     };
 
     // VDP thread
-    let _vdp_thread = thread::Builder::new().name("VDP".to_string()).spawn(move || {
-        unsafe {
+    let _vdp_thread = thread::Builder::new()
+        .name("VDP".to_string())
+        .spawn(move || unsafe {
             (*vdp_interface.vdp_setup)();
             (*vdp_interface.vdp_loop)();
-        }
-    });
+        });
 
     let sdl_context = sdl2::init().unwrap();
-    let native_resolution = sdl_context.video().unwrap().current_display_mode(0).unwrap();
+    let native_resolution = sdl_context
+        .video()
+        .unwrap()
+        .current_display_mode(0)
+        .unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let joystick_subsystem = sdl_context.joystick().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -155,7 +194,7 @@ pub fn main() -> Result<(), pico_args::Error> {
 
                 match audio_subsystem.open_playback(None, &desired_spec, |_spec| {
                     audio::VdpAudioStream {
-                        getAudioSamples: vdp_interface.getAudioSamples
+                        getAudioSamples: vdp_interface.getAudioSamples,
                     }
                 }) {
                     Ok(audio_device) => {
@@ -179,8 +218,10 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     let mut is_fullscreen = args.fullscreen;
     // large enough for any agon video mode
-    let mut vgabuf: Vec<u8> = Vec::with_capacity(1024*768*3);
-    unsafe { vgabuf.set_len(1024*768*3); }
+    let mut vgabuf: Vec<u8> = Vec::with_capacity(1024 * 768 * 3);
+    unsafe {
+        vgabuf.set_len(1024 * 768 * 3);
+    }
     let mut mode_w: u32 = 640;
     let mut mode_h: u32 = 480;
     let mut mouse_btn_state: u8 = 0;
@@ -194,15 +235,17 @@ pub fn main() -> Result<(), pico_args::Error> {
             } else if let Some(max_height) = args.perfect_scale {
                 let scale = u32::max(1, max_height as u32 / mode_h);
                 // deal with weird aspect ratios
-                match 10*mode_w / mode_h {
+                match 10 * mode_w / mode_h {
                     // 2.66 (640x240)
                     26 =>
-                        // scale & !1 keeps the scale divisible by 2, needed for the width scaling
-                        ((mode_w * (scale & !1)) >> 1, mode_h * (scale & !1)),
+                    // scale & !1 keeps the scale divisible by 2, needed for the width scaling
+                    {
+                        ((mode_w * (scale & !1)) >> 1, mode_h * (scale & !1))
+                    }
                     // 1.6 (320x200)
                     16 => (10 * mode_w * scale / 12, mode_h * scale),
                     // 1.33
-                    13 | _ => (mode_w * scale, mode_h * scale)
+                    13 | _ => (mode_w * scale, mode_h * scale),
                 }
             } else {
                 // only reached on startup
@@ -212,24 +255,35 @@ pub fn main() -> Result<(), pico_args::Error> {
 
         sdl_context.mouse().set_relative_mouse_mode(is_fullscreen);
 
-        let mut window = video_subsystem.window(&format!("Fab Agon Emulator {}", env!("CARGO_PKG_VERSION")), wx, wy)
+        let mut window = video_subsystem
+            .window(
+                &format!("Fab Agon Emulator {}", env!("CARGO_PKG_VERSION")),
+                wx,
+                wy,
+            )
             .resizable()
             .position_centered()
             .build()
             .unwrap();
 
         if is_fullscreen {
-            window.set_fullscreen(sdl2::video::FullscreenType::True).unwrap();
+            window
+                .set_fullscreen(sdl2::video::FullscreenType::True)
+                .unwrap();
         }
 
         let mut canvas = {
             match args.renderer {
                 parse_args::Renderer::Software => window.into_canvas().software(),
-                parse_args::Renderer::Accelerated => window.into_canvas().accelerated()
+                parse_args::Renderer::Accelerated => window.into_canvas().accelerated(),
             }
-        }.build().unwrap();
+        }
+        .build()
+        .unwrap();
         let texture_creator = canvas.texture_creator();
-        let mut texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
+        let mut texture = texture_creator
+            .create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h)
+            .unwrap();
 
         // clear the screen, so user isn't staring at garbage while things init
         canvas.present();
@@ -243,14 +297,15 @@ pub fn main() -> Result<(), pico_args::Error> {
             if elapsed_since_last_frame < frame_duration {
                 std::thread::sleep(std::time::Duration::from_millis(5));
                 continue;
-            }
-            else if elapsed_since_last_frame > std::time::Duration::from_millis(100) {
+            } else if elapsed_since_last_frame > std::time::Duration::from_millis(100) {
                 // don't let lots of frames queue up, due to system lag or whatever
                 last_frame_time = std::time::Instant::now();
             }
 
             // Present a frame
-            last_frame_time = last_frame_time.checked_add(frame_duration).unwrap_or(std::time::Instant::now());
+            last_frame_time = last_frame_time
+                .checked_add(frame_duration)
+                .unwrap_or(std::time::Instant::now());
 
             // signal vsync to ez80 via GPIO (pin 1 (from 0) of GPIO port B)
             {
@@ -266,10 +321,13 @@ pub fn main() -> Result<(), pico_args::Error> {
 
             for event in event_pump.poll_iter() {
                 match event {
-                    Event::Quit {..} => {
-                        break 'running
-                    },
-                    Event::KeyDown { keycode, scancode, keymod, .. } => {
+                    Event::Quit { .. } => break 'running,
+                    Event::KeyDown {
+                        keycode,
+                        scancode,
+                        keymod,
+                        ..
+                    } => {
                         // handle emulator shortcut keys
                         let consumed = if keymod.contains(sdl2::keyboard::Mod::RALTMOD) {
                             match keycode {
@@ -298,7 +356,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                                     soft_reset.store(true, std::sync::atomic::Ordering::Relaxed);
                                     true
                                 }
-                                _ => false
+                                _ => false,
                             }
                         } else {
                             false
@@ -325,7 +383,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                             sdl2::mouse::MouseButton::Left => !1,
                             sdl2::mouse::MouseButton::Right => !2,
                             sdl2::mouse::MouseButton::Middle => !4,
-                            _ => !0
+                            _ => !0,
                         };
                         let packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
                         unsafe {
@@ -337,7 +395,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                             sdl2::mouse::MouseButton::Left => 1,
                             sdl2::mouse::MouseButton::Right => 2,
                             sdl2::mouse::MouseButton::Middle => 4,
-                            _ => 0
+                            _ => 0,
                         };
                         let packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
                         unsafe {
@@ -369,20 +427,33 @@ pub fn main() -> Result<(), pico_args::Error> {
                             (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
                         }
                     }
-                    Event::JoyHatMotion { which, hat_idx, state, ..} => {
+                    Event::JoyHatMotion {
+                        which,
+                        hat_idx,
+                        state,
+                        ..
+                    } => {
                         joypad::on_hat_motion(&mut gpios.lock().unwrap(), which, hat_idx, state);
                     }
-                    Event::JoyButtonUp { which, button_idx, .. } => {
+                    Event::JoyButtonUp {
+                        which, button_idx, ..
+                    } => {
                         joypad::on_button(&mut gpios.lock().unwrap(), which, button_idx, false);
                     }
-                    Event::JoyButtonDown { which, button_idx, .. } => {
+                    Event::JoyButtonDown {
+                        which, button_idx, ..
+                    } => {
                         joypad::on_button(&mut gpios.lock().unwrap(), which, button_idx, true);
                     }
-                    Event::JoyAxisMotion { which, axis_idx, value, .. } => {
+                    Event::JoyAxisMotion {
+                        which,
+                        axis_idx,
+                        value,
+                        ..
+                    } => {
                         joypad::on_axis_motion(&mut gpios.lock().unwrap(), which, axis_idx, value);
                     }
-                    Event::JoyDeviceRemoved { .. } => {
-                    }
+                    Event::JoyDeviceRemoved { .. } => {}
                     Event::JoyDeviceAdded { .. } => {
                         open_joystick_devices(&mut joysticks, &joystick_subsystem);
                     }
@@ -394,14 +465,24 @@ pub fn main() -> Result<(), pico_args::Error> {
                 let mut w: u32 = 0;
                 let mut h: u32 = 0;
                 unsafe {
-                    (*vdp_interface.copyVgaFramebuffer)(&mut w as *mut u32, &mut h as *mut u32, &mut vgabuf[0] as *mut u8);
+                    (*vdp_interface.copyVgaFramebuffer)(
+                        &mut w as *mut u32,
+                        &mut h as *mut u32,
+                        &mut vgabuf[0] as *mut u8,
+                    );
                 }
 
                 if w != mode_w || h != mode_h {
                     //println!("Mode change to {} x {}", w, h);
                     mode_w = w;
                     mode_h = h;
-                    texture = texture_creator.create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h).unwrap();
+                    texture = texture_creator
+                        .create_texture_streaming(
+                            sdl2::pixels::PixelFormatEnum::RGB24,
+                            mode_w,
+                            mode_h,
+                        )
+                        .unwrap();
                     // may need to resize the window
                     if args.perfect_scale.is_some() && !is_fullscreen {
                         break 'inner;
@@ -410,10 +491,10 @@ pub fn main() -> Result<(), pico_args::Error> {
 
                 match args.renderer {
                     parse_args::Renderer::Software => {
-                        texture.update(None, &vgabuf, 3*w as usize);
+                        texture.update(None, &vgabuf, 3 * w as usize);
                     }
                     parse_args::Renderer::Accelerated => {
-                        texture.update(None, &vgabuf, 3*w as usize);
+                        texture.update(None, &vgabuf, 3 * w as usize);
                         /*
                          * This is how it's supposed to be done for a streaming texture,
                          * but it produces a black screen on some systems...
@@ -448,30 +529,29 @@ pub fn main() -> Result<(), pico_args::Error> {
     emulator_shutdown.store(true, std::sync::atomic::Ordering::Relaxed);
 
     // give vdp some time to shutdown
-    unsafe { (*vdp_interface.vdp_shutdown)(); }
+    unsafe {
+        (*vdp_interface.vdp_shutdown)();
+    }
     std::thread::sleep(std::time::Duration::from_millis(200));
 
     Ok(())
 }
 
-fn calc_4_3_output_rect<T: sdl2::render::RenderTarget>(canvas: &sdl2::render::Canvas<T>) -> sdl2::rect::Rect {
+fn calc_4_3_output_rect<T: sdl2::render::RenderTarget>(
+    canvas: &sdl2::render::Canvas<T>,
+) -> sdl2::rect::Rect {
     let (wx, wy) = canvas.output_size().unwrap();
-    if wx > 4*wy/3 {
-        sdl2::rect::Rect::new(
-            (wx as i32 - 4*wy as i32/3) >> 1,
-            0,
-            4*wy/3, wy
-        )
+    if wx > 4 * wy / 3 {
+        sdl2::rect::Rect::new((wx as i32 - 4 * wy as i32 / 3) >> 1, 0, 4 * wy / 3, wy)
     } else {
-        sdl2::rect::Rect::new(
-            0,
-            (wy as i32 - 3*wx as i32/4) >> 1,
-            wx, 3*wx/4
-        )
+        sdl2::rect::Rect::new(0, (wy as i32 - 3 * wx as i32 / 4) >> 1, wx, 3 * wx / 4)
     }
 }
 
-fn open_joystick_devices(joysticks: &mut Vec<sdl2::joystick::Joystick>, joystick_subsystem: &sdl2::JoystickSubsystem) {
+fn open_joystick_devices(
+    joysticks: &mut Vec<sdl2::joystick::Joystick>,
+    joystick_subsystem: &sdl2::JoystickSubsystem,
+) {
     joysticks.clear();
 
     for i in 0..joystick_subsystem.num_joysticks().unwrap() {

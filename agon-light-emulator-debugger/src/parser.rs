@@ -1,11 +1,11 @@
-use agon_cpu_emulator::debugger::{ DebugCmd, Trigger };
+use agon_cpu_emulator::debugger::{DebugCmd, Trigger};
 
 #[derive(Debug)]
 pub enum Cmd {
     Core(DebugCmd),
     UiHelp,
     UiExit,
-    End
+    End,
 }
 
 type Tokens<'a> = std::iter::Peekable<std::vec::IntoIter<&'a str>>;
@@ -15,26 +15,28 @@ pub fn tokenize(line: &str) -> Vec<&str> {
     //line.split_whitespace().collect::<Vec<&str>>().into_iter()
     let mut l = line;
     let mut v: Vec<&str> = vec![];
-    
+
     loop {
         let tok_start = match l.chars().position(|ch| !ch.is_whitespace()) {
             Some(p) => p,
-            None => break
+            None => break,
         };
 
         let tok_end = {
             match l.chars().nth(tok_start).unwrap() {
                 ':' => tok_start + 1,
-                '"' => {
-                    match l.chars().skip(tok_start+1).position(|ch| ch == '"') {
-                        Some(p) => tok_start + p + 2,
-                        None => l.len()
-                    }
-                }
+                '"' => match l.chars().skip(tok_start + 1).position(|ch| ch == '"') {
+                    Some(p) => tok_start + p + 2,
+                    None => l.len(),
+                },
                 _ => {
-                    match l.chars().skip(tok_start).position(|ch| ch.is_whitespace() || ch == ':') {
+                    match l
+                        .chars()
+                        .skip(tok_start)
+                        .position(|ch| ch.is_whitespace() || ch == ':')
+                    {
                         Some(p) => tok_start + p,
-                        None => l.len()
+                        None => l.len(),
                     }
                 }
             }
@@ -54,7 +56,7 @@ fn expect_end_of_cmd(tokens: &mut Tokens) -> Result<(), String> {
                 Err(format!("Expected end of command but found '{}'", t))
             }
         }
-        None => Ok(())
+        None => Ok(()),
     }
 }
 
@@ -80,15 +82,18 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
                             }
                         }
                         if let Some(&t) = tokens.peek() {
-                            if t != ":" { break }
-                            else { tokens.next(); }
+                            if t != ":" {
+                                break;
+                            } else {
+                                tokens.next();
+                            }
                         }
                     }
                     expect_end_of_cmd(tokens)?;
                     let trigger = DebugCmd::AddTrigger(Trigger {
                         address: addr,
                         once: false,
-                        actions
+                        actions,
                     });
                     Ok(Cmd::Core(trigger))
                 } else {
@@ -103,15 +108,13 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
                 expect_end_of_cmd(tokens)?;
                 Ok(Cmd::UiHelp)
             }
-            "info" => {
-                match tokens.next() {
-                    Some("breakpoints") => {
-                        expect_end_of_cmd(tokens)?;
-                        Ok(Cmd::Core(DebugCmd::ListTriggers))
-                    }
-                    _ => Err("Unknown info type".to_string())
+            "info" => match tokens.next() {
+                Some("breakpoints") => {
+                    expect_end_of_cmd(tokens)?;
+                    Ok(Cmd::Core(DebugCmd::ListTriggers))
                 }
-            }
+                _ => Err("Unknown info type".to_string()),
+            },
             "delete" => {
                 if let Some(addr) = parse_number(tokens) {
                     expect_end_of_cmd(tokens)?;
@@ -130,7 +133,7 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
                             DebugCmd::Pause,
                             DebugCmd::Message("CPU paused at breakpoint".to_string()),
                             DebugCmd::GetState,
-                        ]
+                        ],
                     })))
                 } else {
                     Err(format!("break <address>"))
@@ -152,12 +155,10 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
                 if parse_exact(tokens, "on") {
                     expect_end_of_cmd(tokens)?;
                     Ok(Cmd::Core(DebugCmd::SetTrace(true)))
-                }
-                else if parse_exact(tokens, "off") {
+                } else if parse_exact(tokens, "off") {
                     expect_end_of_cmd(tokens)?;
                     Ok(Cmd::Core(DebugCmd::SetTrace(false)))
-                }
-                else {
+                } else {
                     Err(format!("expected 'on' or 'off'"))
                 }
             }
@@ -183,7 +184,7 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
                 let adl = match mode {
                     "dis16" => Some(false),
                     "dis24" => Some(true),
-                    _ => None
+                    _ => None,
                 };
                 let start = parse_number(tokens);
                 if let Some(start) = start {
@@ -219,7 +220,7 @@ fn parse_exact(tokens: &mut Tokens, expected: &str) -> bool {
             tokens.next();
             true
         }
-        _ => false
+        _ => false,
     }
 }
 
@@ -227,9 +228,8 @@ fn parse_number(tokens: &mut Tokens) -> Option<u32> {
     if let Some(&s) = tokens.peek() {
         let num = if s.starts_with('&') || s.starts_with('$') {
             u32::from_str_radix(s.get(1..s.len()).unwrap_or(""), 16).ok()
-        }
-        else if s.ends_with('h') || s.ends_with('H') {
-            u32::from_str_radix(s.get(0..s.len()-1).unwrap_or(""), 16).ok()
+        } else if s.ends_with('h') || s.ends_with('H') {
+            u32::from_str_radix(s.get(0..s.len() - 1).unwrap_or(""), 16).ok()
         } else {
             u32::from_str_radix(s, 10).ok()
         };
@@ -247,6 +247,12 @@ fn parse_number(tokens: &mut Tokens) -> Option<u32> {
 fn test_tokenize() {
     assert_eq!(tokenize("   hello  world "), ["hello", "world"]);
     assert_eq!(tokenize(" &40cafe foo \n bar "), ["&40cafe", "foo", "bar"]);
-    assert_eq!(tokenize(" \"string literals!\" and other stuff."), ["\"string literals!\"", "and", "other", "stuff."]);
-    assert_eq!(tokenize("\"hello\":command :cmd2"), ["\"hello\"", ":", "command", ":", "cmd2"]);
+    assert_eq!(
+        tokenize(" \"string literals!\" and other stuff."),
+        ["\"string literals!\"", "and", "other", "stuff."]
+    );
+    assert_eq!(
+        tokenize("\"hello\":command :cmd2"),
+        ["\"hello\"", ":", "command", ":", "cmd2"]
+    );
 }

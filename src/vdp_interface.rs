@@ -2,17 +2,23 @@ use std::path::Path;
 
 #[allow(non_snake_case)]
 pub struct VdpInterface {
-    pub vdp_setup: libloading::Symbol<'static, unsafe extern fn() -> ()>,
-    pub vdp_loop: libloading::Symbol<'static, unsafe extern fn()>,
-    pub copyVgaFramebuffer: libloading::Symbol<'static, unsafe extern fn(outWidth: *mut u32, outHeight: *mut u32, buffer: *mut u8)>,
-    pub z80_send_to_vdp: libloading::Symbol<'static, unsafe extern fn(b: u8)>,
-    pub z80_recv_from_vdp: libloading::Symbol<'static, unsafe extern fn(out: *mut u8) -> bool>,
-    pub sendHostKbEventToFabgl: libloading::Symbol<'static, unsafe extern fn(ps2scancode: u16, isDown: u8)>,
-    pub sendHostMouseEventToFabgl: libloading::Symbol<'static, unsafe extern fn(mouse_packet: *const u8)>,
-    pub setVdpDebugLogging: libloading::Symbol<'static, unsafe extern fn(state: bool) -> ()>,
-    pub getAudioSamples: libloading::Symbol<'static, unsafe extern fn(out: *mut u8, length: u32)>,
-    pub dump_vdp_mem_stats: libloading::Symbol<'static, unsafe extern fn()>,
-    pub vdp_shutdown: libloading::Symbol<'static, unsafe extern fn()>,
+    pub vdp_setup: libloading::Symbol<'static, unsafe extern "C" fn() -> ()>,
+    pub vdp_loop: libloading::Symbol<'static, unsafe extern "C" fn()>,
+    pub copyVgaFramebuffer: libloading::Symbol<
+        'static,
+        unsafe extern "C" fn(outWidth: *mut u32, outHeight: *mut u32, buffer: *mut u8),
+    >,
+    pub z80_send_to_vdp: libloading::Symbol<'static, unsafe extern "C" fn(b: u8)>,
+    pub z80_recv_from_vdp: libloading::Symbol<'static, unsafe extern "C" fn(out: *mut u8) -> bool>,
+    pub sendHostKbEventToFabgl:
+        libloading::Symbol<'static, unsafe extern "C" fn(ps2scancode: u16, isDown: u8)>,
+    pub sendHostMouseEventToFabgl:
+        libloading::Symbol<'static, unsafe extern "C" fn(mouse_packet: *const u8)>,
+    pub setVdpDebugLogging: libloading::Symbol<'static, unsafe extern "C" fn(state: bool) -> ()>,
+    pub getAudioSamples:
+        libloading::Symbol<'static, unsafe extern "C" fn(out: *mut u8, length: u32)>,
+    pub dump_vdp_mem_stats: libloading::Symbol<'static, unsafe extern "C" fn()>,
+    pub vdp_shutdown: libloading::Symbol<'static, unsafe extern "C" fn()>,
 }
 
 impl VdpInterface {
@@ -30,7 +36,7 @@ impl VdpInterface {
                 getAudioSamples: lib.get(b"getAudioSamples").unwrap(),
                 dump_vdp_mem_stats: lib.get(b"dump_vdp_mem_stats").unwrap(),
                 vdp_shutdown: lib.get(b"vdp_shutdown").unwrap(),
-            }
+            };
         }
     }
 }
@@ -40,7 +46,7 @@ pub fn init(default_vdp: std::path::PathBuf, args: &crate::parse_args::AppArgs) 
 
     let vdp_dll_path = match args.vdp_dll {
         Some(ref p) => Path::new(".").join(p),
-        None => default_vdp
+        None => default_vdp,
     };
 
     if args.verbose {

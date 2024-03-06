@@ -1,25 +1,29 @@
 use agon_cpu_emulator::SerialLink;
 
 pub struct DummySerialLink {
-    pub name: String
+    pub name: String,
 }
 
 impl SerialLink for DummySerialLink {
     fn send(&mut self, byte: u8) {
         println!("{}_send: 0x{:02x}", self.name, byte);
     }
-    fn recv(&mut self) -> Option<u8> { None }
-    fn read_clear_to_send(&mut self) -> bool { true }
+    fn recv(&mut self) -> Option<u8> {
+        None
+    }
+    fn read_clear_to_send(&mut self) -> bool {
+        true
+    }
 }
 
 pub struct Ez80ToVdpSerialLink {
-    pub z80_send_to_vdp: libloading::Symbol<'static, unsafe extern fn(b: u8)>,
-    pub z80_recv_from_vdp: libloading::Symbol<'static, unsafe extern fn(out: *mut u8) -> bool>,
+    pub z80_send_to_vdp: libloading::Symbol<'static, unsafe extern "C" fn(b: u8)>,
+    pub z80_recv_from_vdp: libloading::Symbol<'static, unsafe extern "C" fn(out: *mut u8) -> bool>,
 }
 
 impl SerialLink for Ez80ToVdpSerialLink {
     fn send(&mut self, byte: u8) {
-        unsafe{(*self.z80_send_to_vdp)(byte)}
+        unsafe { (*self.z80_send_to_vdp)(byte) }
     }
     fn recv(&mut self) -> Option<u8> {
         let mut data: u8 = 0;
@@ -31,7 +35,9 @@ impl SerialLink for Ez80ToVdpSerialLink {
             }
         }
     }
-    fn read_clear_to_send(&mut self) -> bool { true }
+    fn read_clear_to_send(&mut self) -> bool {
+        true
+    }
 }
 
 pub struct Ez80ToHostSerialLink {
@@ -70,7 +76,7 @@ impl SerialLink for Ez80ToHostSerialLink {
                     None
                 }
             }
-            Err(_) => None
+            Err(_) => None,
         }
     }
     fn read_clear_to_send(&mut self) -> bool {
