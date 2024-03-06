@@ -29,14 +29,6 @@ pub fn firmware_path(ver: parse_args::FirmwareVer, is_mos: bool) -> std::path::P
 
 pub fn main() -> Result<(), pico_args::Error> {
     let args = parse_args()?;
-    let t = thread::Builder::new().name("UI".to_string()).spawn(move || {
-        mainloop(args);
-    }).unwrap();
-    t.join().unwrap();
-    Ok(())
-}
-
-fn mainloop(args: parse_args::AppArgs) {
     let vdp_interface = vdp_interface::init(firmware_path(args.firmware, false), &args);
 
     unsafe { (*vdp_interface.setVdpDebugLogging)(args.verbose) }
@@ -458,6 +450,8 @@ fn mainloop(args: parse_args::AppArgs) {
     // give vdp some time to shutdown
     unsafe { (*vdp_interface.vdp_shutdown)(); }
     std::thread::sleep(std::time::Duration::from_millis(200));
+
+    Ok(())
 }
 
 fn calc_4_3_output_rect<T: sdl2::render::RenderTarget>(canvas: &sdl2::render::Canvas<T>) -> sdl2::rect::Rect {
