@@ -7,7 +7,6 @@ vdu 23 0 &88 250 0 50 0 0
 
 - [ ] symbol support in debugger
 - [ ] uart1 host serial link
-- [ ] HardwareSerial.setTimeout implementation
 
 ## Mañana mañana
 
