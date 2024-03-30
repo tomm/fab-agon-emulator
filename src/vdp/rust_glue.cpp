@@ -12,10 +12,16 @@
 extern void delay(int ms);
 
 bool vdp_debug_logging = false;
+uint32_t startup_screen_mode = 1;
 
 extern "C" void setVdpDebugLogging(bool state)
 {
 	vdp_debug_logging = state;
+}
+
+extern "C" void set_startup_screen_mode(uint32_t mode)
+{
+	startup_screen_mode = mode;
 }
 
 /* ps2scancode is the set2 'make' code */

@@ -7,13 +7,13 @@ USAGE:
 OPTIONS:
   -d, --debugger        Enable the eZ80 debugger
   -b, --breakpoint      Set a breakpoint before starting
-  -z, --zero            Initialize ram with zeroes instead of random values
   -f, --fullscreen      Start in fullscreen mode
   -h, --help            Prints help information
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
   --firmware 1.03       Use quark 1.03 firmware (default is console8)
   --firmware quark      Use quark 1.04 firmware (default is console8)
   --firmware electron   Use ElectronOS firmware (default is console8)
+  --mode <n>            Start in a specific screen mode
   --sdcard <path>       Sets the path of the emulated SDCard
   --scale <max-height>  Use perfect (integer) video mode scaling, up to
                         a maximum window height of <max-height>
@@ -25,7 +25,8 @@ ADVANCED:
   --renderer hw         Use GL/D3D renderer (default)
   --uart1-device <dev>  Link ez80 uart1 to this host serial device
   --uart1-baud <rate>   Open --uart1-device with the given baud rate
-  --verbose             Verbose mode
+  --verbose             Verbose mode (includes VDP debug logs)
+  -z, --zero            Initialize ram with zeroes instead of random values
 ";
 
 #[derive(Debug, Copy, Clone)]
@@ -52,6 +53,7 @@ pub struct AppArgs {
     pub fullscreen: bool,
     pub verbose: bool,
     pub zero: bool,
+    pub scr_mode: Option<u32>,
     pub mos_bin: Option<std::path::PathBuf>,
     pub vdp_dll: Option<std::path::PathBuf>,
     pub firmware: FirmwareVer,
@@ -86,6 +88,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         fullscreen: pargs.contains(["-f", "--fullscreen"]),
         verbose: pargs.contains("--verbose"),
         zero: pargs.contains(["-z", "--zero"]),
+        scr_mode: pargs.opt_value_from_str("--mode")?,
         perfect_scale: pargs.opt_value_from_str("--scale")?,
         mos_bin: pargs.opt_value_from_str("--mos")?,
         vdp_dll: pargs.opt_value_from_str("--vdp")?,

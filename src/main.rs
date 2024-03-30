@@ -164,6 +164,9 @@ pub fn main() -> Result<(), pico_args::Error> {
     let _vdp_thread = thread::Builder::new()
         .name("VDP".to_string())
         .spawn(move || unsafe {
+            if let Some(scr_mode) = args.scr_mode {
+                (*vdp_interface.set_startup_screen_mode)(scr_mode);
+            }
             (*vdp_interface.vdp_setup)();
             (*vdp_interface.vdp_loop)();
         });
