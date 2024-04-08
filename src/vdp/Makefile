@@ -43,6 +43,10 @@ SRC_ALL = $(SRCS) vdp-1.03.cpp vdp-console8.cpp vdp-quark.cpp directcontroller_t
 depends: $(SRC_ALL)
 	$(CXX) -MM $(CFLAGS) $(SRC_ALL) > Makefile.dep
 
+lipo:
+	$(foreach file, $(wildcard *.x86_64.so), lipo -create -output $(notdir $(file:.x86_64.so=.so)) $(file) $(notdir $(file:.x86_64.so=.arm64.so));)
+
+
 ifneq (,$(wildcard Makefile.dep))
 include Makefile.dep
 endif
