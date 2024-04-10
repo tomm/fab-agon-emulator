@@ -15,11 +15,12 @@ vdp:
 ifeq ($(UNAME_S),Darwin)
 	EXTRA_FLAGS="-Wno-c++11-narrowing -arch x86_64" SUFFIX=.x86_64 $(MAKE) -C src/vdp
 	EXTRA_FLAGS="-Wno-c++11-narrowing -arch arm64" SUFFIX=.arm64 $(MAKE) -C src/vdp
-	$(foreach file, $(wildcard src/vdp/*.x86_64.so), lipo -create -output src/vdp/$(notdir $(file:.x86_64.so=.so)) $(file) src/vdp/$(notdir $(file:.x86_64.so=.arm64.so));)
+	$(MAKE) -C src/vdp lipo
+	find src/vdp -type f \( -name "*.so" -a ! -name "*.x86_64.so" -a ! -name "*.arm64.so" \) -exec cp {} firmware/ \;
 else
 	$(MAKE) -C src/vdp
-endif
 	cp src/vdp/*.so firmware/
+endif
 
 cargo:
 ifeq ($(OS),Windows_NT)
@@ -36,10 +37,16 @@ endif
 
 vdp-clean:
 	rm -f firmware/*.so
+ifeq ($(UNAME_S),Darwin)
+	EXTRA_FLAGS="-Wno-c++11-narrowing -arch x86_64" SUFFIX=.x86_64 $(MAKE) -C src/vdp clean
+	EXTRA_FLAGS="-Wno-c++11-narrowing -arch arm64" SUFFIX=.arm64 $(MAKE) -C src/vdp clean
+else
 	$(MAKE) -C src/vdp clean
+endif
 
 cargo-clean:
 	cargo clean
+	rm -f fab-agon-emulator
 
 clean: vdp-clean cargo-clean
 
