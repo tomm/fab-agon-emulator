@@ -5,6 +5,7 @@
 #include "vdp.h"
 
 // defined in video.ino, but used before definition!
+extern void processLoop(void * parameter);
 extern void wait_eZ80();
 extern void init_audio();
 extern void copy_font();
