@@ -219,16 +219,29 @@ vdp-console8.o: vdp-console8.cpp \
  vdp-console8/video/video.ino \
  userspace-vdp-gl/src/userspace-platform/WiFi.h vdp-console8/video/agon.h \
  vdp-console8/video/version.h vdp-console8/video/agon_ps2.h \
- vdp-console8/video/agon_audio.h vdp-console8/video/audio_channel.h \
- vdp-console8/video/types.h vdp-console8/video/envelopes/types.h \
+ vdp-console8/video/agon_screen.h vdp-console8/video/agon_palette.h \
+ vdp-console8/video/agon_ttxt.h vdp-console8/video/ttxtfont.h \
+ vdp-console8/video/types.h vdp-console8/video/agon_audio.h \
+ vdp-console8/video/audio_channel.h vdp-console8/video/envelopes/types.h \
  vdp-console8/video/audio_sample.h vdp-console8/video/buffer_stream.h \
  vdp-console8/video/enhanced_samples_generator.h \
- vdp-console8/video/agon_ttxt.h vdp-console8/video/ttxtfont.h \
- vdp-console8/video/agon_palette.h vdp-console8/video/agon_screen.h \
- vdp-console8/video/graphics.h vdp-console8/video/agon_fonts.h \
- vdp-console8/video/cursor.h vdp-console8/video/viewport.h \
- vdp-console8/video/vdp_protocol.h vdp-console8/video/sprites.h \
- vdp-console8/video/vdu_stream_processor.h vdp-console8/video/vdu.h \
+ vdp-console8/video/vdp_protocol.h \
+ vdp-console8/video/vdu_stream_processor.h vdp-console8/video/context.h \
+ vdp-console8/video/sprites.h vdp-console8/video/context/cursor.h \
+ vdp-console8/video/context/../agon_ps2.h \
+ vdp-console8/video/context/../vdp_protocol.h \
+ vdp-console8/video/context/../context.h \
+ vdp-console8/video/context/fonts.h \
+ vdp-console8/video/context/../agon_fonts.h \
+ vdp-console8/video/context/../buffers.h \
+ vdp-console8/video/context/../buffer_stream.h \
+ vdp-console8/video/context/../span.h \
+ vdp-console8/video/context/graphics.h \
+ vdp-console8/video/context/../agon_screen.h \
+ vdp-console8/video/context/../buffers.h \
+ vdp-console8/video/context/../sprites.h \
+ vdp-console8/video/context/viewport.h vdp-console8/video/context.h \
+ vdp-console8/video/span.h vdp-console8/video/vdu.h \
  vdp-console8/video/vdu_audio.h vdp-console8/video/buffers.h \
  vdp-console8/video/envelopes/adsr.h \
  vdp-console8/video/envelopes/./types.h \
@@ -236,7 +249,12 @@ vdp-console8.o: vdp-console8.cpp \
  vdp-console8/video/envelopes/frequency.h vdp-console8/video/vdu_sys.h \
  userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
  vdp-console8/video/vdu_buffered.h \
+ userspace-vdp-gl/src/userspace-platform/esp_heap_caps.h \
+ vdp-console8/video/compression.h \
+ userspace-vdp-gl/src/userspace-platform/esp32-hal-psram.h \
+ vdp-console8/video/mem_helpers.h \
  vdp-console8/video/multi_buffer_stream.h \
+ vdp-console8/video/vdu_context.h vdp-console8/video/vdu_fonts.h \
  vdp-console8/video/vdu_sprites.h vdp-console8/video/updater.h \
  userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
  vdp-console8/video/hexload.h
@@ -477,31 +495,61 @@ vdp_electron.o: vdp_electron.cpp \
  userspace-vdp-gl/src/devdrivers/mouse.h userspace-vdp-gl/src/scene.h \
  userspace-vdp-gl/src/collisiondetector.h vdp.h \
  AgonElectronHAL/src/main.cpp AgonElectronHAL/include/globals.h \
- AgonElectronHAL/include/hal.h AgonElectronHAL/include/zdi.h \
- AgonElectronHAL/include/eos.h AgonElectronHAL/include/tms9918.h \
- AgonElectronHAL/include/ay_3_8910.h AgonElectronHAL/include/sn76489an.h \
- AgonElectronHAL/src/ppi-8255.h AgonElectronHAL/include/audio_driver.h \
- AgonElectronHAL/include/updater.h AgonElectronHAL/src/sn76489an.cpp \
- AgonElectronHAL/include/audio_channel.h \
- AgonElectronHAL/include/audio_envelopes/volume.h \
- AgonElectronHAL/include/audio_envelopes/frequency.h \
- AgonElectronHAL/include/types.h AgonElectronHAL/src/tms9918.cpp \
- AgonElectronHAL/src/zdi.cpp \
- AgonElectronHAL/include/OneWire_direct_gpio.h \
- AgonElectronHAL/src/updater.cpp \
+ AgonElectronHAL/include/hal.h vdp-console8/video/zdi.h \
+ vdp-console8/video/OneWire_direct_gpio.h AgonElectronHAL/include/eos.h \
+ AgonElectronHAL/include/tms9918.h AgonElectronHAL/include/ay_3_8910.h \
+ AgonElectronHAL/include/sn76489an.h AgonElectronHAL/src/ppi-8255.h \
+ AgonElectronHAL/include/audio_driver.h vdp-console8/video/updater.h \
+ vdp-console8/video/vdu_stream_processor.h vdp-console8/video/agon.h \
+ vdp-console8/video/context.h vdp-console8/video/sprites.h \
+ vdp-console8/video/agon_ps2.h vdp-console8/video/agon_screen.h \
+ vdp-console8/video/agon_palette.h vdp-console8/video/agon_ttxt.h \
+ vdp-console8/video/ttxtfont.h vdp-console8/video/types.h \
+ vdp-console8/video/context/cursor.h \
+ vdp-console8/video/context/../agon_ps2.h \
+ vdp-console8/video/context/../vdp_protocol.h \
+ vdp-console8/video/context/../context.h \
+ vdp-console8/video/context/fonts.h \
+ vdp-console8/video/context/../agon_fonts.h \
+ vdp-console8/video/context/../buffers.h \
+ vdp-console8/video/context/../buffer_stream.h \
+ vdp-console8/video/context/../span.h \
+ vdp-console8/video/context/graphics.h \
+ vdp-console8/video/context/../agon_screen.h \
+ vdp-console8/video/context/../buffers.h \
+ vdp-console8/video/context/../sprites.h \
+ vdp-console8/video/context/viewport.h vdp-console8/video/context.h \
+ vdp-console8/video/buffer_stream.h vdp-console8/video/span.h \
+ vdp-console8/video/vdu.h vdp-console8/video/vdu_audio.h \
+ vdp-console8/video/agon_audio.h vdp-console8/video/audio_channel.h \
+ vdp-console8/video/envelopes/types.h vdp-console8/video/audio_sample.h \
+ vdp-console8/video/enhanced_samples_generator.h \
+ vdp-console8/video/buffers.h vdp-console8/video/envelopes/adsr.h \
+ vdp-console8/video/envelopes/./types.h \
+ vdp-console8/video/envelopes/multiphase_adsr.h \
+ vdp-console8/video/envelopes/frequency.h vdp-console8/video/vdu_sys.h \
+ userspace-vdp-gl/src/userspace-platform/ESP32Time.h \
+ vdp-console8/video/vdu_buffered.h \
+ userspace-vdp-gl/src/userspace-platform/esp_heap_caps.h \
+ vdp-console8/video/compression.h \
+ userspace-vdp-gl/src/userspace-platform/esp32-hal-psram.h \
+ vdp-console8/video/mem_helpers.h \
+ vdp-console8/video/multi_buffer_stream.h \
+ vdp-console8/video/vdu_context.h vdp-console8/video/vdu_fonts.h \
+ vdp-console8/video/vdu_sprites.h vdp-console8/video/updater.h \
  userspace-vdp-gl/src/userspace-platform/esp_ota_ops.h \
+ AgonElectronHAL/src/sn76489an.cpp vdp-console8/video/audio_channel.h \
+ AgonElectronHAL/src/tms9918.cpp AgonElectronHAL/src/zdi.cpp \
+ vdp-console8/video/OneWire_direct_gpio.h AgonElectronHAL/src/updater.cpp \
  AgonElectronHAL/src/ppi-8255.cpp AgonElectronHAL/src/mos.cpp \
  AgonElectronHAL/include/mos.h AgonElectronHAL/src/hal.cpp \
  AgonElectronHAL/src/eos.cpp AgonElectronHAL/src/ay_3_8910.cpp \
  AgonElectronHAL/src/ay_3_8910_noise.cpp \
  AgonElectronHAL/include/ay_3_8910_noise.h \
  AgonElectronHAL/src/audio_driver.cpp \
- AgonElectronHAL/include/audio_sample.h \
- AgonElectronHAL/include/audio_channel.h \
- AgonElectronHAL/src/audio_sample.cpp \
+ AgonElectronHAL/src/audio_sample.cpp vdp-console8/video/audio_sample.h \
  AgonElectronHAL/src/audio_enhanced_samples_generator.cpp \
  AgonElectronHAL/include/audio_enhanced_samples_generator.h \
- AgonElectronHAL/include/audio_sample.h \
  AgonElectronHAL/src/audio_channel.cpp \
  AgonElectronHAL/src/audio_envelopes/frequency.cpp \
  AgonElectronHAL/include/audio_envelopes/frequency.h \
