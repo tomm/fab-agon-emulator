@@ -235,23 +235,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         let (wx, wy): (u32, u32) = {
             if is_fullscreen {
                 (native_resolution.w as u32, native_resolution.h as u32)
-            } else if let Some(max_height) = args.perfect_scale {
-                let scale = u32::max(1, max_height as u32 / mode_h);
-                // deal with weird aspect ratios
-                match 10 * mode_w / mode_h {
-                    // 2.66 (640x240)
-                    26 =>
-                    // scale & !1 keeps the scale divisible by 2, needed for the width scaling
-                    {
-                        ((mode_w * (scale & !1)) >> 1, mode_h * (scale & !1))
-                    }
-                    // 1.6 (320x200)
-                    16 => (10 * mode_w * scale / 12, mode_h * scale),
-                    // 1.33
-                    13 | _ => (mode_w * scale, mode_h * scale),
-                }
             } else {
-                // only reached on startup
                 (640, 480)
             }
         };
@@ -486,10 +470,6 @@ pub fn main() -> Result<(), pico_args::Error> {
                             mode_h,
                         )
                         .unwrap();
-                    // may need to resize the window
-                    if args.perfect_scale.is_some() && !is_fullscreen {
-                        break 'inner;
-                    }
                 }
 
                 match args.renderer {
@@ -520,7 +500,11 @@ pub fn main() -> Result<(), pico_args::Error> {
             }
 
             /* Keep rendered output to 4:3 aspect ratio */
-            let dst = Some(calc_4_3_output_rect(&canvas));
+            let dst = Some(calc_4_3_output_rect(
+                &canvas,
+                (mode_w, mode_h),
+                args.screen_scale,
+            ));
 
             canvas.clear();
             canvas.copy(&texture, None, dst).unwrap();
@@ -542,12 +526,42 @@ pub fn main() -> Result<(), pico_args::Error> {
 
 fn calc_4_3_output_rect<T: sdl2::render::RenderTarget>(
     canvas: &sdl2::render::Canvas<T>,
+    agon_scr: (u32, u32),
+    scale: parse_args::ScreenScale,
 ) -> sdl2::rect::Rect {
-    let (wx, wy) = canvas.output_size().unwrap();
+    let (mut wx, mut wy) = canvas.output_size().unwrap();
+
+    if scale == parse_args::ScreenScale::StretchAny {
+        return sdl2::rect::Rect::new(0, 0, wx, wy);
+    }
+
+    let mut offx = 0i32;
+    let mut offy = 0i32;
+
+    if scale == parse_args::ScreenScale::ScaleInteger && wx >= agon_scr.0 && wy >= agon_scr.1 {
+        let scalex = wx / agon_scr.0;
+        let scaley = wy / agon_scr.1;
+
+        offx = ((wx - scalex * agon_scr.0) / 2) as i32;
+        offy = ((wy - scaley * agon_scr.1) / 2) as i32;
+
+        wx = scalex * agon_scr.0;
+        wy = scaley * agon_scr.1;
+    }
     if wx > 4 * wy / 3 {
-        sdl2::rect::Rect::new((wx as i32 - 4 * wy as i32 / 3) >> 1, 0, 4 * wy / 3, wy)
+        sdl2::rect::Rect::new(
+            offx + ((wx as i32 - 4 * wy as i32 / 3) >> 1),
+            offy,
+            4 * wy / 3,
+            wy,
+        )
     } else {
-        sdl2::rect::Rect::new(0, (wy as i32 - 3 * wx as i32 / 4) >> 1, wx, 3 * wx / 4)
+        sdl2::rect::Rect::new(
+            offx,
+            offy + ((wy as i32 - 3 * wx as i32 / 4) >> 1),
+            wx,
+            3 * wx / 4,
+        )
     }
 }
 

@@ -15,8 +15,9 @@ OPTIONS:
   --firmware electron   Use ElectronOS firmware (default is console8)
   --mode <n>            Start in a specific screen mode
   --sdcard <path>       Sets the path of the emulated SDCard
-  --scale <max-height>  Use perfect (integer) video mode scaling, up to
-                        a maximum window height of <max-height>
+  --scale 4:3           (default) Scale Agon screen to 4:3 aspect ratio
+  --scale integer       Scale Agon screen to an integer multiple
+  --scale stretch       Scale Agon screen to full window size
 
 ADVANCED:
   --mos PATH            Use a different MOS.bin firmware
@@ -44,6 +45,13 @@ pub enum Renderer {
     Accelerated,
 }
 
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum ScreenScale {
+    StretchAny,
+    Scale4_3,
+    ScaleInteger,
+}
+
 #[derive(Debug)]
 pub struct AppArgs {
     pub sdcard: Option<String>,
@@ -57,7 +65,7 @@ pub struct AppArgs {
     pub mos_bin: Option<std::path::PathBuf>,
     pub vdp_dll: Option<std::path::PathBuf>,
     pub firmware: FirmwareVer,
-    pub perfect_scale: Option<u32>,
+    pub screen_scale: ScreenScale,
     pub renderer: Renderer,
     pub uart1_device: Option<String>,
     pub uart1_baud: Option<u32>,
@@ -79,6 +87,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
 
     let firmware_ver: Option<String> = pargs.opt_value_from_str("--firmware")?;
     let renderer: Option<String> = pargs.opt_value_from_str("--renderer")?;
+    let scale: Option<String> = pargs.opt_value_from_str("--scale")?;
 
     let args = AppArgs {
         sdcard: pargs.opt_value_from_str("--sdcard")?,
@@ -89,7 +98,18 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         verbose: pargs.contains("--verbose"),
         zero: pargs.contains(["-z", "--zero"]),
         scr_mode: pargs.opt_value_from_str("--mode")?,
-        perfect_scale: pargs.opt_value_from_str("--scale")?,
+        screen_scale: match scale.unwrap_or("4:3".to_string()).as_str() {
+            "4:3" => ScreenScale::Scale4_3,
+            "stretch" => ScreenScale::StretchAny,
+            "integer" => ScreenScale::ScaleInteger,
+            s => {
+                println!(
+                    "Unknown --scale value: {}. Valid values are: 4:3, integer, stretch",
+                    s
+                );
+                std::process::exit(0);
+            }
+        },
         mos_bin: pargs.opt_value_from_str("--mos")?,
         vdp_dll: pargs.opt_value_from_str("--vdp")?,
         uart1_device: pargs.opt_value_from_str("--uart1-device")?,
