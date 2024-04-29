@@ -233,10 +233,11 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     'running: loop {
         let (wx, wy): (u32, u32) = {
+            let nat = (native_resolution.w as u32, native_resolution.h as u32);
             if is_fullscreen {
-                (native_resolution.w as u32, native_resolution.h as u32)
+                nat
             } else {
-                (640, 480)
+                calc_int_scale(nat, (mode_w, mode_h))
             }
         };
 
@@ -501,11 +502,17 @@ pub fn main() -> Result<(), pico_args::Error> {
 
             /* Keep rendered output to 4:3 aspect ratio */
             let dst = Some(calc_4_3_output_rect(
-                &canvas,
+                canvas.output_size().unwrap(),
                 (mode_w, mode_h),
                 args.screen_scale,
             ));
 
+            canvas.set_draw_color(sdl2::pixels::Color {
+                r: (args.border >> 16) as u8,
+                g: (args.border >> 8) as u8,
+                b: args.border as u8,
+                a: 0,
+            });
             canvas.clear();
             canvas.copy(&texture, None, dst).unwrap();
             canvas.present();
@@ -524,44 +531,42 @@ pub fn main() -> Result<(), pico_args::Error> {
     Ok(())
 }
 
-fn calc_4_3_output_rect<T: sdl2::render::RenderTarget>(
-    canvas: &sdl2::render::Canvas<T>,
+fn calc_int_scale(canvas_size: (u32, u32), agon_size: (u32, u32)) -> (u32, u32) {
+    // icky hack to make 640x240 mode stretch correctly
+    let agon_scr_adj = if agon_size == (640, 240) {
+        (640, 480)
+    } else {
+        agon_size
+    };
+    let int_scale = u32::min(
+        canvas_size.0 / agon_scr_adj.0,
+        canvas_size.1 / agon_scr_adj.1,
+    );
+    (int_scale * agon_scr_adj.0, int_scale * agon_scr_adj.1)
+}
+
+fn calc_4_3_output_rect(
+    window_size: (u32, u32),
     agon_scr: (u32, u32),
     scale: parse_args::ScreenScale,
 ) -> sdl2::rect::Rect {
-    let (mut wx, mut wy) = canvas.output_size().unwrap();
+    let (wx, wy) = window_size;
 
-    if scale == parse_args::ScreenScale::StretchAny {
-        return sdl2::rect::Rect::new(0, 0, wx, wy);
-    }
-
-    let mut offx = 0i32;
-    let mut offy = 0i32;
-
-    if scale == parse_args::ScreenScale::ScaleInteger && wx >= agon_scr.0 && wy >= agon_scr.1 {
-        let scalex = wx / agon_scr.0;
-        let scaley = wy / agon_scr.1;
-
-        offx = ((wx - scalex * agon_scr.0) / 2) as i32;
-        offy = ((wy - scaley * agon_scr.1) / 2) as i32;
-
-        wx = scalex * agon_scr.0;
-        wy = scaley * agon_scr.1;
-    }
-    if wx > 4 * wy / 3 {
-        sdl2::rect::Rect::new(
-            offx + ((wx as i32 - 4 * wy as i32 / 3) >> 1),
-            offy,
-            4 * wy / 3,
-            wy,
-        )
-    } else {
-        sdl2::rect::Rect::new(
-            offx,
-            offy + ((wy as i32 - 3 * wx as i32 / 4) >> 1),
-            wx,
-            3 * wx / 4,
-        )
+    match scale {
+        parse_args::ScreenScale::StretchAny => sdl2::rect::Rect::new(0, 0, wx, wy),
+        parse_args::ScreenScale::ScaleInteger if wx >= agon_scr.0 && wy >= agon_scr.1 => {
+            let scaled_size = calc_int_scale((wx, wy), agon_scr);
+            let offx = ((wx - scaled_size.0) / 2) as i32;
+            let offy = ((wy - scaled_size.1) / 2) as i32;
+            return sdl2::rect::Rect::new(offx, offy, scaled_size.0, scaled_size.1);
+        }
+        _ => {
+            if wx > 4 * wy / 3 {
+                sdl2::rect::Rect::new((wx as i32 - 4 * wy as i32 / 3) >> 1, 0, 4 * wy / 3, wy)
+            } else {
+                sdl2::rect::Rect::new(0, (wy as i32 - 3 * wx as i32 / 4) >> 1, wx, 3 * wx / 4)
+            }
+        }
     }
 }
 

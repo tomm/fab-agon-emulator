@@ -18,6 +18,7 @@ OPTIONS:
   --scale 4:3           (default) Scale Agon screen to 4:3 aspect ratio
   --scale integer       Scale Agon screen to an integer multiple
   --scale stretch       Scale Agon screen to full window size
+  --border #rrggbb      Colour of border around Agon screen (default #000000)
 
 ADVANCED:
   --mos PATH            Use a different MOS.bin firmware
@@ -67,6 +68,7 @@ pub struct AppArgs {
     pub firmware: FirmwareVer,
     pub screen_scale: ScreenScale,
     pub renderer: Renderer,
+    pub border: u32,
     pub uart1_device: Option<String>,
     pub uart1_baud: Option<u32>,
 }
@@ -88,6 +90,9 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
     let firmware_ver: Option<String> = pargs.opt_value_from_str("--firmware")?;
     let renderer: Option<String> = pargs.opt_value_from_str("--renderer")?;
     let scale: Option<String> = pargs.opt_value_from_str("--scale")?;
+    let border: String = pargs
+        .opt_value_from_str("--border")?
+        .unwrap_or("0".to_string());
 
     let args = AppArgs {
         sdcard: pargs.opt_value_from_str("--sdcard")?,
@@ -98,6 +103,13 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         verbose: pargs.contains("--verbose"),
         zero: pargs.contains(["-z", "--zero"]),
         scr_mode: pargs.opt_value_from_str("--mode")?,
+        border: match u32::from_str_radix(border.as_str(), 16) {
+            Ok(v) => v,
+            Err(_) => {
+                println!("Error parsing --border colour. Expected hex colour, eg #ff0070");
+                std::process::exit(0);
+            }
+        },
         screen_scale: match scale.unwrap_or("4:3".to_string()).as_str() {
             "4:3" => ScreenScale::Scale4_3,
             "stretch" => ScreenScale::StretchAny,
