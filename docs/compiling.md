@@ -35,9 +35,11 @@ sudo make install
 * Download the `msys-init.sh` script from this repo (making sure to download the raw version instead of the html from github).
 * Start MSYS2 in UCRT64 mode (there is a separate icon for each mode in the start menu, but you can just search for UCRT64).
 * Run the init script with bash: `bash msys-init.sh`. It will update MSYS2, and then install all the build dependencies for the emulator.
-* MSYS2 will probably want to restart after it installs the updates. If so, then run `msys-init.sh` again afterwards.
-* Run `cd fab-agon-emulator` and then `make` in the root of the project.
-* Run `./fab-agon-emulator.exe` in the root of the project.
+* MSYS2 will probably restart after it installs the updates. If so, then run `bash msys-init.sh` again afterwards.
+* Change to the project root: `cd fab-agon-emulator`
+* **First time only** initialization: `git submodule update --init`
+* Build the project: `make`
+* Run the executable: `./fab-agon-emulator.exe`
 
 ## Compiling for Mac
 
