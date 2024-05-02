@@ -4,11 +4,7 @@ COMPILER := $(filter g++ clang,$(shell $(CXX) --version))
 UNAME_S := $(shell uname)
 
 check:
-ifeq ($(OS),Windows_NT)
-	@if not exist ./src/vdp/userspace-vdp-gl/README.md ( echo Error: no source tree in ./src/vdp/userspace-vdp. && echo Maybe you forgot to run: git submodule update --init && exit /b 1 )
-else
 	@if [ ! -f ./src/vdp/userspace-vdp-gl/README.md ]; then echo "Error: no source tree in ./src/vdp/userspace-vdp."; echo "Maybe you forgot to run: git submodule update --init"; echo; exit 1; fi
-endif
 
 
 vdp:
