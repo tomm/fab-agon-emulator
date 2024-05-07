@@ -236,8 +236,12 @@ pub fn main() -> Result<(), pico_args::Error> {
             let nat = (native_resolution.w as u32, native_resolution.h as u32);
             if is_fullscreen {
                 nat
+            } else if nat.1 - 64 >= mode_h {
+                // pick an integer scale that fits screen height (minus 64, to give titlebar space)
+                calc_int_scale((nat.0, nat.1 - 64), (mode_w, mode_h))
             } else {
-                calc_int_scale(nat, (mode_w, mode_h))
+                // fall back to a window at least as large as the agon startup resolution (640x480)
+                (mode_w, mode_h)
             }
         };
 
