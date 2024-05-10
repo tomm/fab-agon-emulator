@@ -29,22 +29,17 @@ sudo make install
 
 ## Compiling for Windows
 
-### To build on Windows (mingw)
+### To build on Windows (MSYS2)
 
-* Install rustup from https://rustup.rs/
-* rustup toolchain install stable-x86_64-pc-windows-gnu
-* rustup default stable-x86_64-pc-windows-gnu
-* Install make winget install GnuWin32.Make
-* add C:\Program Files (x86)\GnuWin32\bin to path
-* Install mingw64 from https://github.com/brechtsanders/winlibs_mingw/releases/download/13.2.0mcf-16.0.6-11.0.1-ucrt-r2/winlibs-x86_64-mcf-seh-gcc-13.2.0-llvm-16.0.6-mingw-w64ucrt-11.0.1-r2.zip
-* extract to C:\mingw64 and add C:\mingw64\bin to path
-* Install CoreUtils for Windows from https://sourceforge.net/projects/gnuwin32/files/coreutils/5.3.0/coreutils-5.3.0-bin.zip
-* extract to C:\coreutils (or other location of your choice) and add C:\coreutils\bin to path
-* get SDL2 from https://github.com/libsdl-org/SDL/releases/download/release-2.28.3/SDL2-devel-2.28.3-mingw.zip
-* extract to C:\Users\<user>\.rustup\toolchains\stable-x86_64-pc-windows-gnu
-* copy SDL2.dll to the root of the project
-* run `make` in the root of the project
-* run `fab-agon-emulator.exe` in the root of the project
+* Download [MSYS2](https://www.msys2.org/) and follow the instructions to install it.
+* Download the `msys-init.sh` script from this repo (making sure to download the raw version instead of the html from github).
+* Start MSYS2 in UCRT64 mode (there is a separate icon for each mode in the start menu, but you can just search for UCRT64).
+* Run the init script with bash: `bash msys-init.sh`. It will update MSYS2, and then install all the build dependencies for the emulator.
+* MSYS2 will probably restart after it installs the updates. If so, then run `bash msys-init.sh` again afterwards.
+* Change to the project root: `cd fab-agon-emulator`
+* **First time only** initialization: `git submodule update --init`
+* Build the project: `make`
+* Run the executable: `./fab-agon-emulator.exe`
 
 ## Compiling for Mac
 
