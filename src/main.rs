@@ -320,8 +320,13 @@ pub fn main() -> Result<(), pico_args::Error> {
                         keymod,
                         ..
                     } => {
+                        let hostkey = if args.alternative_hostkey {
+                            sdl2::keyboard::Mod::RALTMOD
+                        } else {
+                            sdl2::keyboard::Mod::RCTRLMOD
+                        };
                         // handle emulator shortcut keys
-                        let consumed = if keymod.contains(sdl2::keyboard::Mod::RALTMOD) {
+                        let consumed = if keymod.contains(hostkey) {
                             match keycode {
                                 Some(sdl2::keyboard::Keycode::C) => {
                                     // caps-lock

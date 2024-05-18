@@ -12,13 +12,13 @@ Otherwise, read the [guide to compiling Fab Agon Emulator](./docs/compiling.md)
 
 ## Keyboard Shortcuts
 
-Emulator shortcuts are accessed with the *right alt* key (AltGr on some keyboards).
+Emulator shortcuts are accessed with the *right ctrl*.
 
- * RightAlt-C - Toggle caps-lock
- * RightAlt-F - Toggle fullscreen mode
- * RightAlt-M - Print ESP32 memory stats to the console
- * RightAlt-R - Soft-reset
- * RightAlt-Q - Quit
+ * RightCtrl-C - Toggle caps-lock
+ * RightCtrl-F - Toggle fullscreen mode
+ * RightCtrl-M - Print ESP32 memory stats to the console
+ * RightCtrl-R - Soft-reset
+ * RightCtrl-Q - Quit
 
 ## Emulated SDCard
 

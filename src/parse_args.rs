@@ -28,6 +28,7 @@ ADVANCED:
   --uart1-device <dev>  Link ez80 uart1 to this host serial device
   --uart1-baud <rate>   Open --uart1-device with the given baud rate
   --verbose             Verbose mode (includes VDP debug logs)
+  --ralt-hostkey        Use right-alt (AltGr) as the emulator host key
   -z, --zero            Initialize ram with zeroes instead of random values
 ";
 
@@ -71,6 +72,7 @@ pub struct AppArgs {
     pub border: u32,
     pub uart1_device: Option<String>,
     pub uart1_baud: Option<u32>,
+    pub alternative_hostkey: bool,
 }
 
 pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
@@ -100,6 +102,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         breakpoint: pargs.opt_value_from_str(["-b", "--breakpoint"])?,
         unlimited_cpu: pargs.contains(["-u", "--unlimited_cpu"]),
         fullscreen: pargs.contains(["-f", "--fullscreen"]),
+        alternative_hostkey: pargs.contains("--ralt-hostkey"),
         verbose: pargs.contains("--verbose"),
         zero: pargs.contains(["-z", "--zero"]),
         scr_mode: pargs.opt_value_from_str("--mode")?,
