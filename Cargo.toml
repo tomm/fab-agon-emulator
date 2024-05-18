@@ -2,7 +2,7 @@
 members = ["agon-light-emulator-debugger"]
 
 [workspace.package]
-version = "0.9.49"
+version = "0.9.50"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"
@@ -41,4 +41,4 @@ raw_tty = "0.1.0"
 
 [workspace.dependencies]
 #agon-cpu-emulator = { path = "../agon-cpu-emulator" }
-agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="70f4502ae6295717571447b5d5607060808ed6eb"}
+agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="d0c581882b09599f2033e6f552c1afc7c15f1c1e"}
