@@ -6,6 +6,7 @@ use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
+mod ascii2vk;
 mod audio;
 mod ez80_serial_links;
 mod joypad;
@@ -178,6 +179,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         .current_display_mode(0)
         .unwrap();
     let video_subsystem = sdl_context.video().unwrap();
+    video_subsystem.text_input().start();
     let joystick_subsystem = sdl_context.joystick().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut joysticks = vec![];
@@ -314,6 +316,9 @@ pub fn main() -> Result<(), pico_args::Error> {
             for event in event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. } => break 'running,
+                    Event::TextInput { ref text, .. } => {
+                        println!("you said '{}'", text);
+                    }
                     Event::KeyDown {
                         keycode,
                         scancode,
