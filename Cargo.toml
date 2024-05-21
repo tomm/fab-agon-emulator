@@ -2,7 +2,7 @@
 members = ["agon-light-emulator-debugger"]
 
 [workspace.package]
-version = "0.9.50"
+version = "0.9.51"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"
@@ -25,6 +25,7 @@ system-deps = "6.2.0"
 sdl2 = "0.36.0"
 
 [dependencies]
+sdl2-sys = "*"
 sdl2 = "0.36.0"
 pico-args = "0.5.0"
 agon-cpu-emulator = { workspace = true }

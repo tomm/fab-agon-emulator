@@ -273,9 +273,8 @@ pub fn main() -> Result<(), pico_args::Error> {
         .build()
         .unwrap();
         let texture_creator = canvas.texture_creator();
-        let mut texture = texture_creator
-            .create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h)
-            .unwrap();
+        let (mut agon_texture, mut upscale_texture) =
+            make_agon_screen_textures(&texture_creator, (wx, wy), (mode_w, mode_h));
 
         // clear the screen, so user isn't staring at garbage while things init
         canvas.present();
@@ -473,25 +472,20 @@ pub fn main() -> Result<(), pico_args::Error> {
                     //println!("Mode change to {} x {}", w, h);
                     mode_w = w;
                     mode_h = h;
-                    texture = texture_creator
-                        .create_texture_streaming(
-                            sdl2::pixels::PixelFormatEnum::RGB24,
-                            mode_w,
-                            mode_h,
-                        )
-                        .unwrap();
+                    (agon_texture, upscale_texture) =
+                        make_agon_screen_textures(&texture_creator, (wx, wy), (mode_w, mode_h));
                 }
 
                 match args.renderer {
                     parse_args::Renderer::Software => {
-                        texture.update(None, &vgabuf, 3 * w as usize);
+                        agon_texture.update(None, &vgabuf, 3 * w as usize);
                     }
                     parse_args::Renderer::Accelerated => {
-                        texture.update(None, &vgabuf, 3 * w as usize);
+                        agon_texture.update(None, &vgabuf, 3 * w as usize);
                         /*
                          * This is how it's supposed to be done for a streaming texture,
                          * but it produces a black screen on some systems...
-                        texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, pitch| {
+                        agon_texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, pitch| {
                             let mut i = 0;
                             for y in 0..h {
                                 let row = y as usize * pitch;
@@ -523,7 +517,22 @@ pub fn main() -> Result<(), pico_args::Error> {
                 a: 0,
             });
             canvas.clear();
-            canvas.copy(&texture, None, dst).unwrap();
+
+            if args.screen_scale == parse_args::ScreenScale::ScaleInteger {
+                // render directly from agon texture, with no filtering (ScaleModeNearest)
+                // to dst that is already calculated as an integer scaling
+                canvas.copy(&agon_texture, None, dst).unwrap();
+            } else {
+                // first perform integer upscale of the agon_texture to upscale_texture
+                canvas
+                    .with_texture_canvas(&mut upscale_texture, |c| {
+                        c.copy(&agon_texture, None, None).unwrap();
+                    })
+                    .unwrap();
+                // then draw upscaled texture to screen (with bilinear/anisotropic filtering)
+                // with dst at arbitrary scaling
+                canvas.copy(&upscale_texture, None, dst).unwrap();
+            }
             canvas.present();
         }
     }
@@ -547,9 +556,12 @@ fn calc_int_scale(canvas_size: (u32, u32), agon_size: (u32, u32)) -> (u32, u32) 
     } else {
         agon_size
     };
-    let int_scale = u32::min(
-        canvas_size.0 / agon_scr_adj.0,
-        canvas_size.1 / agon_scr_adj.1,
+    let int_scale = u32::max(
+        1,
+        u32::min(
+            canvas_size.0 / agon_scr_adj.0,
+            canvas_size.1 / agon_scr_adj.1,
+        ),
     );
     (int_scale * agon_scr_adj.0, int_scale * agon_scr_adj.1)
 }
@@ -588,4 +600,41 @@ fn open_joystick_devices(
     for i in 0..joystick_subsystem.num_joysticks().unwrap() {
         joysticks.push(joystick_subsystem.open(i).unwrap());
     }
+}
+
+/**
+ * Make 2 textures:
+ * @return.0 the size of the agon screen (to copy the agon framebuffer to directly)
+ * @return.1 and another an integer scaling of this, to provide a clean upscale for subsequent
+ *           bilinear-filtered rendering to the SDL screen.
+ */
+fn make_agon_screen_textures(
+    texture_creator: &sdl2::render::TextureCreator<sdl2::video::WindowContext>,
+    native_size: (u32, u32),
+    agon_size: (u32, u32),
+) -> (sdl2::render::Texture, sdl2::render::Texture) {
+    let texture = texture_creator
+        .create_texture_streaming(
+            sdl2::pixels::PixelFormatEnum::RGB24,
+            agon_size.0,
+            agon_size.1,
+        )
+        .unwrap();
+    let int_scale_size = calc_int_scale(native_size, agon_size);
+    let mut upscale_texture = texture_creator
+        .create_texture_target(
+            sdl2::pixels::PixelFormatEnum::RGB24,
+            int_scale_size.0,
+            int_scale_size.1,
+        )
+        .unwrap();
+    // enable filtering of final blit from integer-upscaled agon screen to the SDL screen
+    unsafe {
+        sdl2_sys::SDL_SetTextureScaleMode(
+            upscale_texture.raw(),
+            sdl2_sys::SDL_ScaleMode::SDL_ScaleModeBest,
+        );
+    }
+
+    (texture, upscale_texture)
 }
