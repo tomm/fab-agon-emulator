@@ -493,10 +493,10 @@ pub fn main() -> Result<(), pico_args::Error> {
 
                 match args.renderer {
                     parse_args::Renderer::Software => {
-                        agon_texture.update(None, &vgabuf, 3 * w as usize);
+                        agon_texture.update(None, &vgabuf, 3 * w as usize).unwrap();
                     }
                     parse_args::Renderer::Accelerated => {
-                        agon_texture.update(None, &vgabuf, 3 * w as usize);
+                        agon_texture.update(None, &vgabuf, 3 * w as usize).unwrap();
                         /*
                          * This is how it's supposed to be done for a streaming texture,
                          * but it produces a black screen on some systems...
@@ -636,7 +636,7 @@ fn make_agon_screen_textures(
         )
         .unwrap();
     let int_scale_size = calc_int_scale(native_size, agon_size);
-    let mut upscale_texture = texture_creator
+    let upscale_texture = texture_creator
         .create_texture_target(
             sdl2::pixels::PixelFormatEnum::RGB24,
             int_scale_size.0,
