@@ -219,6 +219,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         }
     };
 
+    let mut screen_scale = args.screen_scale;
     let mut is_fullscreen = args.fullscreen;
     // large enough for any agon video mode
     let mut vgabuf: Vec<u8> = Vec::with_capacity(1024 * 768 * 3);
@@ -350,6 +351,20 @@ pub fn main() -> Result<(), pico_args::Error> {
                                 }
                                 Some(sdl2::keyboard::Keycode::R) => {
                                     soft_reset.store(true, std::sync::atomic::Ordering::Relaxed);
+                                    true
+                                }
+                                Some(sdl2::keyboard::Keycode::S) => {
+                                    screen_scale = match screen_scale {
+                                        parse_args::ScreenScale::StretchAny => {
+                                            parse_args::ScreenScale::Scale4_3
+                                        }
+                                        parse_args::ScreenScale::Scale4_3 => {
+                                            parse_args::ScreenScale::ScaleInteger
+                                        }
+                                        parse_args::ScreenScale::ScaleInteger => {
+                                            parse_args::ScreenScale::StretchAny
+                                        }
+                                    };
                                     true
                                 }
                                 _ => false,
@@ -507,7 +522,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             let dst = Some(calc_4_3_output_rect(
                 canvas.output_size().unwrap(),
                 (mode_w, mode_h),
-                args.screen_scale,
+                screen_scale,
             ));
 
             canvas.set_draw_color(sdl2::pixels::Color {
@@ -518,7 +533,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             });
             canvas.clear();
 
-            if args.screen_scale == parse_args::ScreenScale::ScaleInteger {
+            if screen_scale == parse_args::ScreenScale::ScaleInteger {
                 // render directly from agon texture, with no filtering (ScaleModeNearest)
                 // to dst that is already calculated as an integer scaling
                 canvas.copy(&agon_texture, None, dst).unwrap();

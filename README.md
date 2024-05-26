@@ -18,6 +18,7 @@ Emulator shortcuts are accessed with the *right ctrl*.
  * RightCtrl-F - Toggle fullscreen mode
  * RightCtrl-M - Print ESP32 memory stats to the console
  * RightCtrl-R - Soft-reset
+ * RightCtrl-S - Cycle screen scaling methods (see --scale command line option)
  * RightCtrl-Q - Quit
 
 ## Emulated SDCard
