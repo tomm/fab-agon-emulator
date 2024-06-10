@@ -2,7 +2,7 @@
 members = ["agon-light-emulator-debugger"]
 
 [workspace.package]
-version = "0.9.52"
+version = "0.9.53"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"
@@ -33,6 +33,7 @@ agon-light-emulator-debugger = { path = "agon-light-emulator-debugger" }
 libloading = "0.8.0"
 home = "0.5.9"
 serialport = "4.3.0"
+rand = "*"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 sdl2 = { version = "0.36.0", features = ["bundled", "static-link"] }
