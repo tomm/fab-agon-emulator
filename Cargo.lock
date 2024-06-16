@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "agon-light-emulator-debugger"
-version = "0.9.53"
+version = "0.9.54"
 dependencies = [
  "agon-cpu-emulator",
  "ctrlc",
@@ -196,14 +196,13 @@ source = "git+https://github.com/tomm/ez80.git?rev=64558c2acda1464248193f2f10804
 
 [[package]]
 name = "fab-agon-emulator"
-version = "0.9.53"
+version = "0.9.54"
 dependencies = [
  "agon-cpu-emulator",
  "agon-light-emulator-debugger",
  "home",
  "libloading",
  "pico-args",
- "rand",
  "raw_tty",
  "sdl2",
  "sdl2-sys",
