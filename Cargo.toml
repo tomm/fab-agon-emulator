@@ -17,16 +17,12 @@ authors.workspace = true
 edition.workspace = true
 license.workspace = true
 
-[build-dependencies]
-# system-deps does platform searches for dependencies and sets -L and -l appropriately
-system-deps = "6.2.0"
-
-[package.metadata.system-deps.'cfg(not(target_os = "windows"))']
-sdl2 = "0.36.0"
+#[package.metadata.system-deps.'cfg(not(target_os = "windows"))']
+#sdl3 = "0.14.36"
 
 [dependencies]
-sdl2-sys = "*"
-sdl2 = "0.36.0"
+sdl3 = "0.14.36"
+sdl3-sys = "*"
 pico-args = "0.5.0"
 agon-ez80-emulator = { workspace = true }
 agon-light-emulator-debugger = { workspace = true }
@@ -34,8 +30,8 @@ libloading = "0.8.0"
 home = "0.5.9"
 serialport = "4.3.0"
 
-[target.'cfg(target_os = "macos")'.dependencies]
-sdl2 = { version = "0.36.0", features = ["bundled", "static-link"] }
+#[target.'cfg(target_os = "macos")'.dependencies]
+#sdl3 = { version = "*", features = ["bundled", "static-link"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 raw_tty = "0.1.0"

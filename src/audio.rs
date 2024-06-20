@@ -1,5 +1,6 @@
-use sdl2::audio::AudioCallback;
+use sdl3::audio::AudioCallback;
 
+/*
 #[allow(non_snake_case)]
 pub struct VdpAudioStream {
     pub getAudioSamples:
@@ -15,3 +16,4 @@ impl AudioCallback for VdpAudioStream {
         }
     }
 }
+*/

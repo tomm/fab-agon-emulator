@@ -1,8 +1,9 @@
 use crate::parse_args::parse_args;
-use agon_ez80_emulator::debugger;
-use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, Trigger};
+use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, PauseReason, Trigger};
 use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
-use sdl2::event::Event;
+use sdl3 as sdl2;
+use sdl3::event::Event;
+use sdl3_sys::everything::{SDL_ScaleMode, SDL_SetTextureScaleMode};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
@@ -88,7 +89,7 @@ pub fn main_loop() -> i32 {
             address: *breakpoint,
             once: false,
             actions: vec![
-                DebugCmd::Pause(debugger::PauseReason::DebuggerBreakpoint),
+                DebugCmd::Pause(PauseReason::DebuggerBreakpoint),
                 DebugCmd::GetState,
             ],
         };
@@ -222,23 +223,30 @@ pub fn main_loop() -> i32 {
         });
 
     let sdl_context = sdl2::init().unwrap();
-    let native_resolution = sdl_context
-        .video()
+    let video_subsystem = sdl_context.video().unwrap();
+    let native_resolution = video_subsystem
+        .get_primary_display()
         .unwrap()
-        .current_display_mode(0)
+        .get_bounds()
         .unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    if args.osk {
-        video_subsystem.text_input().start();
-    }
     let joystick_subsystem = sdl_context.joystick().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut joysticks = vec![];
+    let scale = video_subsystem
+        .get_primary_display()
+        .unwrap()
+        .get_content_scale()
+        .unwrap();
 
     open_joystick_devices(&mut joysticks, &joystick_subsystem);
 
-    //println!("Detected {}x{} native resolution", native_resolution.w, native_resolution.h);
+    println!(
+        "Detected {}x{} native resolution, scale {}",
+        native_resolution.w, native_resolution.h, scale
+    );
 
+    /*
     let _audio_device = {
         match sdl_context.audio() {
             Ok(audio_subsystem) => {
@@ -271,6 +279,7 @@ pub fn main_loop() -> i32 {
             }
         }
     };
+    */
 
     let mut screen_scale = args.screen_scale;
     let mut is_fullscreen = args.fullscreen;
@@ -288,7 +297,7 @@ pub fn main_loop() -> i32 {
 
     'running: loop {
         let (wx, wy): (u32, u32) = {
-            let nat = (native_resolution.w as u32, native_resolution.h as u32);
+            let nat = (1920, 1080); //(native_resolution.w as u32, native_resolution.h as u32);
             if is_fullscreen {
                 nat
             } else if nat.1 - 64 >= mode_h {
@@ -299,8 +308,7 @@ pub fn main_loop() -> i32 {
                 (mode_w, mode_h)
             }
         };
-
-        sdl_context.mouse().set_relative_mouse_mode(is_fullscreen);
+        println!("wx,wy: {}, {}", wx, wy);
 
         let mut window = video_subsystem
             .window(
@@ -308,25 +316,40 @@ pub fn main_loop() -> i32 {
                 wx,
                 wy,
             )
+            .high_pixel_density()
             .resizable()
             .position_centered()
             .build()
             .unwrap();
 
+        println!(
+            "Window size in pixels: {:?}, scale {:?}",
+            window.size_in_pixels(),
+            window.display_scale()
+        );
+
+        if args.osk {
+            video_subsystem.text_input().start(&window);
+        }
+
+        sdl_context
+            .mouse()
+            .set_relative_mouse_mode(&window, is_fullscreen);
+
         if is_fullscreen {
-            window
-                .set_fullscreen(sdl2::video::FullscreenType::True)
-                .unwrap();
+            window.set_fullscreen(true).unwrap();
         }
 
         let mut canvas = {
             match args.renderer {
-                parse_args::Renderer::Software => window.into_canvas().software(),
-                parse_args::Renderer::Accelerated => window.into_canvas().accelerated(),
+                // TODO
+                parse_args::Renderer::Software => window.into_canvas(),
+                parse_args::Renderer::Accelerated => window.into_canvas(),
             }
-        }
-        .build()
-        .unwrap();
+        };
+
+        let output_size = canvas.output_size().unwrap();
+        println!("output_size: {:?}", output_size);
         let texture_creator = canvas.texture_creator();
         let (mut agon_texture, mut upscale_texture) =
             make_agon_screen_textures(&texture_creator, (wx, wy), (mode_w, mode_h));
@@ -495,13 +518,13 @@ pub fn main_loop() -> i32 {
                     }
                     Event::MouseMotion { xrel, yrel, .. } => {
                         let mut packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
-                        if xrel >= 0 {
+                        if xrel >= 0.0 {
                             packet[1] = xrel as u8;
                         } else {
                             packet[1] = xrel as u8;
                             packet[0] |= 0x10;
                         }
-                        if yrel <= 0 {
+                        if yrel <= 0.0 {
                             packet[2] = -yrel as u8;
                         } else {
                             packet[2] = -yrel as u8;
@@ -613,11 +636,9 @@ pub fn main_loop() -> i32 {
                 canvas.copy(&agon_texture, None, dst).unwrap();
             } else {
                 // first perform integer upscale of the agon_texture to upscale_texture
-                canvas
-                    .with_texture_canvas(&mut upscale_texture, |c| {
-                        c.copy(&agon_texture, None, None).unwrap();
-                    })
-                    .unwrap();
+                canvas.with_texture_canvas(&mut upscale_texture, |c| {
+                    c.copy(&agon_texture, None, None).unwrap();
+                });
                 // then draw upscaled texture to screen (with bilinear/anisotropic filtering)
                 // with dst at arbitrary scaling
                 canvas.copy(&upscale_texture, None, dst).unwrap();
@@ -659,22 +680,39 @@ fn calc_4_3_output_rect(
     window_size: (u32, u32),
     agon_scr: (u32, u32),
     scale: parse_args::ScreenScale,
-) -> sdl2::rect::Rect {
+) -> sdl2::render::FRect {
     let (wx, wy) = window_size;
 
     match scale {
-        parse_args::ScreenScale::StretchAny => sdl2::rect::Rect::new(0, 0, wx, wy),
+        parse_args::ScreenScale::StretchAny => {
+            sdl2::render::FRect::new(0.0, 0.0, wx as f32, wy as f32)
+        }
         parse_args::ScreenScale::ScaleInteger if wx >= agon_scr.0 && wy >= agon_scr.1 => {
             let scaled_size = calc_int_scale((wx, wy), agon_scr);
             let offx = ((wx - scaled_size.0) / 2) as i32;
             let offy = ((wy - scaled_size.1) / 2) as i32;
-            return sdl2::rect::Rect::new(offx, offy, scaled_size.0, scaled_size.1);
+            return sdl2::render::FRect::new(
+                offx as f32,
+                offy as f32,
+                scaled_size.0 as f32,
+                scaled_size.1 as f32,
+            );
         }
         _ => {
             if wx > 4 * wy / 3 {
-                sdl2::rect::Rect::new((wx as i32 - 4 * wy as i32 / 3) >> 1, 0, 4 * wy / 3, wy)
+                sdl2::render::FRect::new(
+                    ((wx as i32 - 4 * wy as i32 / 3) >> 1) as f32,
+                    0.0,
+                    (4 * wy / 3) as f32,
+                    wy as f32,
+                )
             } else {
-                sdl2::rect::Rect::new(0, (wy as i32 - 3 * wx as i32 / 4) >> 1, wx, 3 * wx / 4)
+                sdl2::render::FRect::new(
+                    0.0,
+                    ((wy as i32 - 3 * wx as i32 / 4) >> 1) as f32,
+                    wx as f32,
+                    (3 * wx / 4) as f32,
+                )
             }
         }
     }
@@ -686,9 +724,11 @@ fn open_joystick_devices(
 ) {
     joysticks.clear();
 
+    /*
     for i in 0..joystick_subsystem.num_joysticks().unwrap() {
         joysticks.push(joystick_subsystem.open(i).unwrap());
     }
+    */
 }
 
 /**
@@ -704,25 +744,28 @@ fn make_agon_screen_textures(
 ) -> (sdl2::render::Texture, sdl2::render::Texture) {
     let texture = texture_creator
         .create_texture_streaming(
-            sdl2::pixels::PixelFormatEnum::RGB24,
+            unsafe {
+                sdl3::pixels::PixelFormat::from_ll(sdl3_sys::everything::SDL_PixelFormat::RGB24)
+            },
             agon_size.0,
             agon_size.1,
         )
         .unwrap();
+    println!("native size {:?}", native_size);
     let int_scale_size = calc_int_scale(native_size, agon_size);
+    println!("texture int scale {:?}", int_scale_size);
     let upscale_texture = texture_creator
         .create_texture_target(
-            sdl2::pixels::PixelFormatEnum::RGB24,
+            unsafe {
+                sdl3::pixels::PixelFormat::from_ll(sdl3_sys::everything::SDL_PixelFormat::RGB24)
+            },
             int_scale_size.0,
             int_scale_size.1,
         )
         .unwrap();
     // enable filtering of final blit from integer-upscaled agon screen to the SDL screen
     unsafe {
-        sdl2_sys::SDL_SetTextureScaleMode(
-            upscale_texture.raw(),
-            sdl2_sys::SDL_ScaleMode::SDL_ScaleModeBest,
-        );
+        SDL_SetTextureScaleMode(upscale_texture.raw(), SDL_ScaleMode::LINEAR);
     }
 
     (texture, upscale_texture)

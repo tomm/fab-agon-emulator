@@ -1,3 +1,5 @@
+use sdl3 as sdl2;
+
 pub fn is_not_ascii(scancode: sdl2::keyboard::Scancode) -> bool {
     match scancode {
         sdl2::keyboard::Scancode::Backspace |
@@ -45,16 +47,16 @@ pub fn is_not_ascii(scancode: sdl2::keyboard::Scancode) -> bool {
 pub fn sdl2ps2(scancode: sdl2::keyboard::Scancode) -> u16 {
     match scancode {
         sdl2::keyboard::Scancode::Grave => 0x0e,
-        sdl2::keyboard::Scancode::Num1 => 0x16,
-        sdl2::keyboard::Scancode::Num2 => 0x1e,
-        sdl2::keyboard::Scancode::Num3 => 0x26,
-        sdl2::keyboard::Scancode::Num4 => 0x25,
-        sdl2::keyboard::Scancode::Num5 => 0x2e,
-        sdl2::keyboard::Scancode::Num6 => 0x36,
-        sdl2::keyboard::Scancode::Num7 => 0x3d,
-        sdl2::keyboard::Scancode::Num8 => 0x3e,
-        sdl2::keyboard::Scancode::Num9 => 0x46,
-        sdl2::keyboard::Scancode::Num0 => 0x45,
+        sdl2::keyboard::Scancode::_1 => 0x16,
+        sdl2::keyboard::Scancode::_2 => 0x1e,
+        sdl2::keyboard::Scancode::_3 => 0x26,
+        sdl2::keyboard::Scancode::_4 => 0x25,
+        sdl2::keyboard::Scancode::_5 => 0x2e,
+        sdl2::keyboard::Scancode::_6 => 0x36,
+        sdl2::keyboard::Scancode::_7 => 0x3d,
+        sdl2::keyboard::Scancode::_8 => 0x3e,
+        sdl2::keyboard::Scancode::_9 => 0x46,
+        sdl2::keyboard::Scancode::_0 => 0x45,
         sdl2::keyboard::Scancode::Minus => 0x4e,
         sdl2::keyboard::Scancode::Equals => 0x55,
         sdl2::keyboard::Scancode::Backspace => 0x66,

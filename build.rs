@@ -8,7 +8,7 @@ fn main() {
     }
 
     if target_os != "windows" && target_os != "macos" {
-        system_deps::Config::new().probe().unwrap();
+        //system_deps::Config::new().probe().unwrap();
     }
     if std::env::var("FORCE").is_err() {
         eprintln!(

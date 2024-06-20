@@ -6,6 +6,10 @@
 - [ ] ez80f92 PRT gpio-b pin 1 source (vblank) not implemented
 - [ ] hostfs should accept filename/paths terminated by any character <= 0x1f
 
+## EZ80 flaws and omissions
+- [ ] ldir, otirx, etc have wrong timing
+- [ ] memory wait states are not honoured
+
 ## VDP flaws and omissions
 - [ ] ESP32 RAM is unlimited. Figure out ESP32 PSRAM accounting issues (C++ custom allocators)
 - [ ] vdp audio sample rate setting not implemented
