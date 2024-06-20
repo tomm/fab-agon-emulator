@@ -1,3 +1,4 @@
+use sdl3 as sdl2;
 /**
  * Convert SDL scancodes to PS/2 set 2 scancodes.
  */

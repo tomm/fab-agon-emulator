@@ -1,7 +1,9 @@
 use crate::parse_args::parse_args;
 use agon_cpu_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, Trigger};
 use agon_cpu_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
-use sdl2::event::Event;
+use sdl3 as sdl2;
+use sdl3::event::Event;
+use sdl3_sys as sdl2_sys;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
@@ -260,9 +262,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             .unwrap();
 
         if is_fullscreen {
-            window
-                .set_fullscreen(sdl2::video::FullscreenType::True)
-                .unwrap();
+            window.set_fullscreen(true).unwrap();
         }
 
         let mut canvas = {
@@ -422,13 +422,13 @@ pub fn main() -> Result<(), pico_args::Error> {
                     }
                     Event::MouseMotion { xrel, yrel, .. } => {
                         let mut packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
-                        if xrel >= 0 {
+                        if xrel >= 0.0 {
                             packet[1] = xrel as u8;
                         } else {
                             packet[1] = xrel as u8;
                             packet[0] |= 0x10;
                         }
-                        if yrel <= 0 {
+                        if yrel <= 0.0 {
                             packet[2] = -yrel as u8;
                         } else {
                             packet[2] = -yrel as u8;
@@ -539,11 +539,9 @@ pub fn main() -> Result<(), pico_args::Error> {
                 canvas.copy(&agon_texture, None, dst).unwrap();
             } else {
                 // first perform integer upscale of the agon_texture to upscale_texture
-                canvas
-                    .with_texture_canvas(&mut upscale_texture, |c| {
-                        c.copy(&agon_texture, None, None).unwrap();
-                    })
-                    .unwrap();
+                canvas.with_texture_canvas(&mut upscale_texture, |c| {
+                    c.copy(&agon_texture, None, None).unwrap();
+                });
                 // then draw upscaled texture to screen (with bilinear/anisotropic filtering)
                 // with dst at arbitrary scaling
                 canvas.copy(&upscale_texture, None, dst).unwrap();
@@ -585,22 +583,39 @@ fn calc_4_3_output_rect(
     window_size: (u32, u32),
     agon_scr: (u32, u32),
     scale: parse_args::ScreenScale,
-) -> sdl2::rect::Rect {
+) -> sdl2::render::FRect {
     let (wx, wy) = window_size;
 
     match scale {
-        parse_args::ScreenScale::StretchAny => sdl2::rect::Rect::new(0, 0, wx, wy),
+        parse_args::ScreenScale::StretchAny => {
+            sdl2::render::FRect::new(0.0, 0.0, wx as f32, wy as f32)
+        }
         parse_args::ScreenScale::ScaleInteger if wx >= agon_scr.0 && wy >= agon_scr.1 => {
             let scaled_size = calc_int_scale((wx, wy), agon_scr);
             let offx = ((wx - scaled_size.0) / 2) as i32;
             let offy = ((wy - scaled_size.1) / 2) as i32;
-            return sdl2::rect::Rect::new(offx, offy, scaled_size.0, scaled_size.1);
+            return sdl2::render::FRect::new(
+                offx as f32,
+                offy as f32,
+                scaled_size.0 as f32,
+                scaled_size.1 as f32,
+            );
         }
         _ => {
             if wx > 4 * wy / 3 {
-                sdl2::rect::Rect::new((wx as i32 - 4 * wy as i32 / 3) >> 1, 0, 4 * wy / 3, wy)
+                sdl2::render::FRect::new(
+                    ((wx as i32 - 4 * wy as i32 / 3) >> 1) as f32,
+                    0.0,
+                    (4 * wy / 3) as f32,
+                    wy as f32,
+                )
             } else {
-                sdl2::rect::Rect::new(0, (wy as i32 - 3 * wx as i32 / 4) >> 1, wx, 3 * wx / 4)
+                sdl2::render::FRect::new(
+                    0.0,
+                    ((wy as i32 - 3 * wx as i32 / 4) >> 1) as f32,
+                    wx as f32,
+                    (3 * wx / 4) as f32,
+                )
             }
         }
     }
@@ -647,7 +662,7 @@ fn make_agon_screen_textures(
     unsafe {
         sdl2_sys::SDL_SetTextureScaleMode(
             upscale_texture.raw(),
-            sdl2_sys::SDL_ScaleMode::SDL_ScaleModeBest,
+            sdl2_sys::SDL_ScaleMode::SDL_SCALEMODE_BEST,
         );
     }
 
