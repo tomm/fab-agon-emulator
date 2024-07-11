@@ -88,6 +88,21 @@ pub fn main() -> Result<(), pico_args::Error> {
         None
     };
 
+    let sdcard_img_file =
+        args.sdcard_img.as_ref().and_then(|filename| {
+            match std::fs::File::options()
+                .read(true)
+                .write(true)
+                .open(filename)
+            {
+                Ok(file) => Some(file),
+                Err(e) => {
+                    eprintln!("Could not open sdcard image '{}': {:?}", filename, e);
+                    std::process::exit(-1);
+                }
+            }
+        });
+
     let _cpu_thread = {
         let soft_reset_ez80 = soft_reset.clone();
         let gpios_ = gpios.clone();
@@ -155,6 +170,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                     mos_bin: ez80_firmware,
                 });
                 machine.set_sdcard_directory(sdcard_dir);
+                machine.set_sdcard_image(sdcard_img_file);
                 machine.start(debugger_con);
                 panic!("ez80 cpu thread terminated");
             })

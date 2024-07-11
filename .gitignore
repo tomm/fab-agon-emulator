@@ -5,6 +5,6 @@ src/vdp/*.so
 firmware/*.so
 fab-agon-emulator
 *.exe
-SDL2.dll
 fab-agon-emulator-v*
 .vscode
+*.dll

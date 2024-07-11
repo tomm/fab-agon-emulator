@@ -28,6 +28,8 @@ be used as the emulated SDCard. Otherwise, the `.agon-sdcard/` directory in your
 home directory will be used if present, and if not then `sdcard/` in the current
 directory is used.
 
+Alternatively you can use raw SDCard images, with the --sdcard-img option.
+
 ## Changing VDP version
 
 By default, Fab Agon Emulator boots with Console8 firmware. To start up
