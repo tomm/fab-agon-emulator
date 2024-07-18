@@ -1,5 +1,5 @@
 CXX ?= g++
-CFLAGS = -Wall -fmax-errors=1 -std=c++11 $(EXTRA_FLAGS) -DUSERSPACE -fPIC -g -I.. -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers -I./userspace-vdp-gl/src/userspace-platform/matrix
+CFLAGS = -Wall -O2 -fmax-errors=1 -std=c++11 $(EXTRA_FLAGS) -DUSERSPACE -fPIC -g -I.. -I. -I./dispdrivers -I./userspace-vdp-gl/src -I./userspace-vdp-gl/src/userspace-platform -I./userspace-vdp-gl/src/dispdrivers -I./userspace-vdp-gl/src/userspace-platform/matrix
 OPTIONS = 
 
 ELECTRONHAL_CFLAGS = -I./AgonElectronHAL/include 
