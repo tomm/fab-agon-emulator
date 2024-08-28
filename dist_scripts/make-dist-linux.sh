@@ -1,6 +1,6 @@
 #!/bin/bash
 make clean
-make
+make -j8
 
 VERSION=`cargo tree --depth 0 | awk '{print $2;}'`
 ARCH=`uname -m`
