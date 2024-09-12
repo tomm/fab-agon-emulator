@@ -4,6 +4,7 @@ use std::path::Path;
 pub struct VdpInterface {
     pub vdp_setup: libloading::Symbol<'static, unsafe extern "C" fn() -> ()>,
     pub vdp_loop: libloading::Symbol<'static, unsafe extern "C" fn()>,
+    pub signal_vblank: libloading::Symbol<'static, unsafe extern "C" fn() -> ()>,
     pub copyVgaFramebuffer: libloading::Symbol<
         'static,
         unsafe extern "C" fn(outWidth: *mut u32, outHeight: *mut u32, buffer: *mut u8),
@@ -28,6 +29,7 @@ impl VdpInterface {
             return VdpInterface {
                 vdp_setup: lib.get(b"vdp_setup").unwrap(),
                 vdp_loop: lib.get(b"vdp_loop").unwrap(),
+                signal_vblank: lib.get(b"signal_vblank").unwrap(),
                 copyVgaFramebuffer: lib.get(b"copyVgaFramebuffer").unwrap(),
                 z80_send_to_vdp: lib.get(b"z80_send_to_vdp").unwrap(),
                 z80_recv_from_vdp: lib.get(b"z80_recv_from_vdp").unwrap(),

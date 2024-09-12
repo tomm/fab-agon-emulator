@@ -321,6 +321,10 @@ pub fn main() -> Result<(), pico_args::Error> {
                 gpios.b.set_input_pin(1, true);
                 gpios.b.set_input_pin(1, false);
             }
+            // signal vblank to VDP
+            unsafe {
+                (*vdp_interface.signal_vblank)();
+            }
 
             // shutdown if requested (atomic could be set from the debugger)
             if emulator_shutdown.load(std::sync::atomic::Ordering::Relaxed) {

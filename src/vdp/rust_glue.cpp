@@ -1,6 +1,7 @@
 #include "fabutils.h"
 #include "fake_fabgl.h"
 #include "fabgl.h"
+#include "userspace-vdp-gl/src/displaycontroller.h"
 #include "userspace-vdp-gl/src/dispdrivers/vgabasecontroller.h"
 #include "userspace-vdp-gl/src/userspace-platform/fake_fabgl.h"
 #include "vdp.h"
@@ -13,6 +14,11 @@ extern void delay(int ms);
 
 bool vdp_debug_logging = false;
 uint32_t startup_screen_mode = 0;
+
+extern "C" void signal_vblank(void)
+{
+	fabgl::BaseDisplayController::vblankSignal.store(true);
+}
 
 extern "C" void setVdpDebugLogging(bool state)
 {
