@@ -21,7 +21,7 @@
 
 make clean
 cd src/vdp
-CXX=x86_64-w64-mingw32-g++-posix make
+CXX=x86_64-w64-mingw32-g++-posix make -j8
 cp *.so ../../firmware
 cd ../..
 

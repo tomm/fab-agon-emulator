@@ -12,13 +12,14 @@ Otherwise, read the [guide to compiling Fab Agon Emulator](./docs/compiling.md)
 
 ## Keyboard Shortcuts
 
-Emulator shortcuts are accessed with the *right alt* key (AltGr on some keyboards).
+Emulator shortcuts are accessed with the *right ctrl*.
 
- * RightAlt-C - Toggle caps-lock
- * RightAlt-F - Toggle fullscreen mode
- * RightAlt-M - Print ESP32 memory stats to the console
- * RightAlt-R - Soft-reset
- * RightAlt-Q - Quit
+ * RightCtrl-C - Toggle caps-lock
+ * RightCtrl-F - Toggle fullscreen mode
+ * RightCtrl-M - Print ESP32 memory stats to the console
+ * RightCtrl-R - Soft-reset
+ * RightCtrl-S - Cycle screen scaling methods (see --scale command line option)
+ * RightCtrl-Q - Quit
 
 ## Emulated SDCard
 
@@ -26,6 +27,8 @@ If a directory is specified with `fab-agon-emulator --sdcard <dir>` then that wi
 be used as the emulated SDCard. Otherwise, the `.agon-sdcard/` directory in your
 home directory will be used if present, and if not then `sdcard/` in the current
 directory is used.
+
+Alternatively you can use raw SDCard images, with the --sdcard-img option.
 
 ## Changing VDP version
 

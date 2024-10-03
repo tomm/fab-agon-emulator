@@ -28,7 +28,7 @@ pub fn on_axis_motion(gpios: &mut GpioSet, joystick_num: u32, axis_idx: u8, valu
     gpios.c.set_input_pin(2 + pin_offset, value < 16384);
 }
 
-pub fn on_hat_motion(gpios: &mut GpioSet, joystick_num: u32, hat_idx: u8, state: HatState) {
+pub fn on_hat_motion(gpios: &mut GpioSet, joystick_num: u32, _hat_idx: u8, state: HatState) {
     // The pins of joystick port2 can be retrieved by subtracting 1 from the corresponding
     // pin of joystick port1. The pin_offset should toggle between 0 and 1 for increasing
     // joystick_nums, so every second joystick_num input registers for player2.

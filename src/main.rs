@@ -89,6 +89,21 @@ pub fn main() -> Result<(), pico_args::Error> {
         None
     };
 
+    let sdcard_img_file =
+        args.sdcard_img.as_ref().and_then(|filename| {
+            match std::fs::File::options()
+                .read(true)
+                .write(true)
+                .open(filename)
+            {
+                Ok(file) => Some(file),
+                Err(e) => {
+                    eprintln!("Could not open sdcard image '{}': {:?}", filename, e);
+                    std::process::exit(-1);
+                }
+            }
+        });
+
     let _cpu_thread = {
         let soft_reset_ez80 = soft_reset.clone();
         let gpios_ = gpios.clone();
@@ -156,6 +171,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                     mos_bin: ez80_firmware,
                 });
                 machine.set_sdcard_directory(sdcard_dir);
+                machine.set_sdcard_image(sdcard_img_file);
                 machine.start(debugger_con);
                 panic!("ez80 cpu thread terminated");
             })
@@ -221,6 +237,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         }
     };
 
+    let mut screen_scale = args.screen_scale;
     let mut is_fullscreen = args.fullscreen;
     // large enough for any agon video mode
     let mut vgabuf: Vec<u8> = Vec::with_capacity(1024 * 768 * 3);
@@ -275,9 +292,8 @@ pub fn main() -> Result<(), pico_args::Error> {
         .build()
         .unwrap();
         let texture_creator = canvas.texture_creator();
-        let mut texture = texture_creator
-            .create_texture_streaming(sdl2::pixels::PixelFormatEnum::RGB24, mode_w, mode_h)
-            .unwrap();
+        let (mut agon_texture, mut upscale_texture) =
+            make_agon_screen_textures(&texture_creator, (wx, wy), (mode_w, mode_h));
 
         // clear the screen, so user isn't staring at garbage while things init
         canvas.present();
@@ -307,6 +323,10 @@ pub fn main() -> Result<(), pico_args::Error> {
                 gpios.b.set_input_pin(1, true);
                 gpios.b.set_input_pin(1, false);
             }
+            // signal vblank to VDP
+            unsafe {
+                (*vdp_interface.signal_vblank)();
+            }
 
             // shutdown if requested (atomic could be set from the debugger)
             if emulator_shutdown.load(std::sync::atomic::Ordering::Relaxed) {
@@ -325,8 +345,13 @@ pub fn main() -> Result<(), pico_args::Error> {
                         keymod,
                         ..
                     } => {
+                        let hostkey = if args.alternative_hostkey {
+                            sdl2::keyboard::Mod::RALTMOD
+                        } else {
+                            sdl2::keyboard::Mod::RCTRLMOD
+                        };
                         // handle emulator shortcut keys
-                        let consumed = if keymod.contains(sdl2::keyboard::Mod::RALTMOD) {
+                        let consumed = if keymod.contains(hostkey) {
                             match keycode {
                                 Some(sdl2::keyboard::Keycode::C) => {
                                     // caps-lock
@@ -351,6 +376,20 @@ pub fn main() -> Result<(), pico_args::Error> {
                                 }
                                 Some(sdl2::keyboard::Keycode::R) => {
                                     soft_reset.store(true, std::sync::atomic::Ordering::Relaxed);
+                                    true
+                                }
+                                Some(sdl2::keyboard::Keycode::S) => {
+                                    screen_scale = match screen_scale {
+                                        parse_args::ScreenScale::StretchAny => {
+                                            parse_args::ScreenScale::Scale4_3
+                                        }
+                                        parse_args::ScreenScale::Scale4_3 => {
+                                            parse_args::ScreenScale::ScaleInteger
+                                        }
+                                        parse_args::ScreenScale::ScaleInteger => {
+                                            parse_args::ScreenScale::StretchAny
+                                        }
+                                    };
                                     true
                                 }
                                 _ => false,
@@ -473,25 +512,20 @@ pub fn main() -> Result<(), pico_args::Error> {
                     //println!("Mode change to {} x {}", w, h);
                     mode_w = w;
                     mode_h = h;
-                    texture = texture_creator
-                        .create_texture_streaming(
-                            sdl2::pixels::PixelFormatEnum::RGB24,
-                            mode_w,
-                            mode_h,
-                        )
-                        .unwrap();
+                    (agon_texture, upscale_texture) =
+                        make_agon_screen_textures(&texture_creator, (wx, wy), (mode_w, mode_h));
                 }
 
                 match args.renderer {
                     parse_args::Renderer::Software => {
-                        texture.update(None, &vgabuf, 3 * w as usize);
+                        agon_texture.update(None, &vgabuf, 3 * w as usize).unwrap();
                     }
                     parse_args::Renderer::Accelerated => {
-                        texture.update(None, &vgabuf, 3 * w as usize);
+                        agon_texture.update(None, &vgabuf, 3 * w as usize).unwrap();
                         /*
                          * This is how it's supposed to be done for a streaming texture,
                          * but it produces a black screen on some systems...
-                        texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, pitch| {
+                        agon_texture.with_lock(Some(sdl2::rect::Rect::new(0, 0, w, h)), |data, pitch| {
                             let mut i = 0;
                             for y in 0..h {
                                 let row = y as usize * pitch;
@@ -513,7 +547,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             let dst = Some(calc_4_3_output_rect(
                 canvas.output_size().unwrap(),
                 (mode_w, mode_h),
-                args.screen_scale,
+                screen_scale,
             ));
 
             canvas.set_draw_color(sdl2::pixels::Color {
@@ -523,7 +557,22 @@ pub fn main() -> Result<(), pico_args::Error> {
                 a: 0,
             });
             canvas.clear();
-            canvas.copy(&texture, None, dst).unwrap();
+
+            if screen_scale == parse_args::ScreenScale::ScaleInteger {
+                // render directly from agon texture, with no filtering (ScaleModeNearest)
+                // to dst that is already calculated as an integer scaling
+                canvas.copy(&agon_texture, None, dst).unwrap();
+            } else {
+                // first perform integer upscale of the agon_texture to upscale_texture
+                canvas
+                    .with_texture_canvas(&mut upscale_texture, |c| {
+                        c.copy(&agon_texture, None, None).unwrap();
+                    })
+                    .unwrap();
+                // then draw upscaled texture to screen (with bilinear/anisotropic filtering)
+                // with dst at arbitrary scaling
+                canvas.copy(&upscale_texture, None, dst).unwrap();
+            }
             canvas.present();
         }
     }
@@ -547,9 +596,12 @@ fn calc_int_scale(canvas_size: (u32, u32), agon_size: (u32, u32)) -> (u32, u32) 
     } else {
         agon_size
     };
-    let int_scale = u32::min(
-        canvas_size.0 / agon_scr_adj.0,
-        canvas_size.1 / agon_scr_adj.1,
+    let int_scale = u32::max(
+        1,
+        u32::min(
+            canvas_size.0 / agon_scr_adj.0,
+            canvas_size.1 / agon_scr_adj.1,
+        ),
     );
     (int_scale * agon_scr_adj.0, int_scale * agon_scr_adj.1)
 }
@@ -588,4 +640,41 @@ fn open_joystick_devices(
     for i in 0..joystick_subsystem.num_joysticks().unwrap() {
         joysticks.push(joystick_subsystem.open(i).unwrap());
     }
+}
+
+/**
+ * Make 2 textures:
+ * @return.0 the size of the agon screen (to copy the agon framebuffer to directly)
+ * @return.1 and another an integer scaling of this, to provide a clean upscale for subsequent
+ *           bilinear-filtered rendering to the SDL screen.
+ */
+fn make_agon_screen_textures(
+    texture_creator: &sdl2::render::TextureCreator<sdl2::video::WindowContext>,
+    native_size: (u32, u32),
+    agon_size: (u32, u32),
+) -> (sdl2::render::Texture, sdl2::render::Texture) {
+    let texture = texture_creator
+        .create_texture_streaming(
+            sdl2::pixels::PixelFormatEnum::RGB24,
+            agon_size.0,
+            agon_size.1,
+        )
+        .unwrap();
+    let int_scale_size = calc_int_scale(native_size, agon_size);
+    let upscale_texture = texture_creator
+        .create_texture_target(
+            sdl2::pixels::PixelFormatEnum::RGB24,
+            int_scale_size.0,
+            int_scale_size.1,
+        )
+        .unwrap();
+    // enable filtering of final blit from integer-upscaled agon screen to the SDL screen
+    unsafe {
+        sdl2_sys::SDL_SetTextureScaleMode(
+            upscale_texture.raw(),
+            sdl2_sys::SDL_ScaleMode::SDL_ScaleModeBest,
+        );
+    }
+
+    (texture, upscale_texture)
 }
