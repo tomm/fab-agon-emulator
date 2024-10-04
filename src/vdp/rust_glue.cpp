@@ -31,10 +31,17 @@ extern "C" void set_startup_screen_mode(uint32_t mode)
 }
 
 /* ps2scancode is the set2 'make' code */
-extern "C" void sendHostKbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
+extern "C" void sendPS2KbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 {
 	if (fabgl::PS2Controller::keyboard() != nullptr) {
 		fabgl::PS2Controller::keyboard()->injectScancode(ps2scancode, isDown);
+	}
+}
+
+extern "C" void sendVKeyEventToFabgl(uint32_t vkey, uint8_t isDown)
+{
+	if (fabgl::PS2Controller::keyboard() != nullptr) {
+		fabgl::PS2Controller::keyboard()->injectVirtualKey((fabgl::VirtualKey)vkey, isDown);
 	}
 }
 

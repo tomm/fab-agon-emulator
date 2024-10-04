@@ -1,3 +1,44 @@
+pub fn is_not_ascii(scancode: sdl2::keyboard::Scancode) -> bool {
+    match scancode {
+        sdl2::keyboard::Scancode::Backspace |
+        sdl2::keyboard::Scancode::Tab |
+        sdl2::keyboard::Scancode::CapsLock |
+        sdl2::keyboard::Scancode::Return |
+        sdl2::keyboard::Scancode::LShift |
+        sdl2::keyboard::Scancode::RShift |
+        sdl2::keyboard::Scancode::LCtrl |
+        sdl2::keyboard::Scancode::LAlt |
+        sdl2::keyboard::Scancode::RAlt |
+        sdl2::keyboard::Scancode::RCtrl |
+        sdl2::keyboard::Scancode::Insert |
+        sdl2::keyboard::Scancode::Delete |
+        sdl2::keyboard::Scancode::Left |
+        sdl2::keyboard::Scancode::Home |
+        sdl2::keyboard::Scancode::End |
+        sdl2::keyboard::Scancode::Up |
+        sdl2::keyboard::Scancode::Down |
+        sdl2::keyboard::Scancode::PageUp |
+        sdl2::keyboard::Scancode::PageDown |
+        sdl2::keyboard::Scancode::Right |
+        // numlock
+        sdl2::keyboard::Scancode::KpEnter |
+        sdl2::keyboard::Scancode::Escape |
+        sdl2::keyboard::Scancode::F1 |
+        sdl2::keyboard::Scancode::F2 |
+        sdl2::keyboard::Scancode::F3 |
+        sdl2::keyboard::Scancode::F4 |
+        sdl2::keyboard::Scancode::F5 |
+        sdl2::keyboard::Scancode::F6 |
+        sdl2::keyboard::Scancode::F7 |
+        sdl2::keyboard::Scancode::F8 |
+        sdl2::keyboard::Scancode::F9 |
+        sdl2::keyboard::Scancode::F10 |
+        sdl2::keyboard::Scancode::F11 |
+        sdl2::keyboard::Scancode::F12 => true,
+        _ => false,
+    }
+}
+
 /**
  * Convert SDL scancodes to PS/2 set 2 scancodes.
  */

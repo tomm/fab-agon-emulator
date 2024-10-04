@@ -24,6 +24,7 @@ pub fn ascii2vk(chr: char) -> u32 {
         '-' => VirtualKey::VK_MINUS,
         '.' => VirtualKey::VK_PERIOD,
         '/' => VirtualKey::VK_SLASH,
+        '\\' => VirtualKey::VK_BACKSLASH,
         '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => unsafe {
             std::mem::transmute(VirtualKey::VK_0 as u32 + (chr as u32 - 48))
         },
@@ -39,7 +40,8 @@ pub fn ascii2vk(chr: char) -> u32 {
             std::mem::transmute(VirtualKey::VK_A as u32 + (chr as u32 - 65))
         },
         '[' => VirtualKey::VK_LEFTBRACKET,
-        '^' => VirtualKey::VK_ACUTEACCENT,
+        ']' => VirtualKey::VK_RIGHTBRACKET,
+        '^' => VirtualKey::VK_CARET,
         '_' => VirtualKey::VK_UNDERSCORE,
         '`' => VirtualKey::VK_GRAVEACCENT,
         'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o'
@@ -57,7 +59,7 @@ pub fn ascii2vk(chr: char) -> u32 {
 
 /* From FabGL */
 #[repr(u32)]
-#[allow(non_snake_case, non_camel_case_types)]
+#[allow(non_snake_case, non_camel_case_types, dead_code)]
 enum VirtualKey {
     VK_NONE,
     /**< No character (marks the first virtual key) */

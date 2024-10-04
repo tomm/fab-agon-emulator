@@ -12,7 +12,9 @@ pub struct VdpInterface {
     pub set_startup_screen_mode: libloading::Symbol<'static, unsafe extern "C" fn(m: u32)>,
     pub z80_send_to_vdp: libloading::Symbol<'static, unsafe extern "C" fn(b: u8)>,
     pub z80_recv_from_vdp: libloading::Symbol<'static, unsafe extern "C" fn(out: *mut u8) -> bool>,
-    pub sendHostKbEventToFabgl:
+    pub sendVKeyEventToFabgl:
+        libloading::Symbol<'static, unsafe extern "C" fn(vkey: u32, isDown: u8)>,
+    pub sendPS2KbEventToFabgl:
         libloading::Symbol<'static, unsafe extern "C" fn(ps2scancode: u16, isDown: u8)>,
     pub sendHostMouseEventToFabgl:
         libloading::Symbol<'static, unsafe extern "C" fn(mouse_packet: *const u8)>,
@@ -34,7 +36,8 @@ impl VdpInterface {
                 z80_send_to_vdp: lib.get(b"z80_send_to_vdp").unwrap(),
                 z80_recv_from_vdp: lib.get(b"z80_recv_from_vdp").unwrap(),
                 set_startup_screen_mode: lib.get(b"set_startup_screen_mode").unwrap(),
-                sendHostKbEventToFabgl: lib.get(b"sendHostKbEventToFabgl").unwrap(),
+                sendVKeyEventToFabgl: lib.get(b"sendVKeyEventToFabgl").unwrap(),
+                sendPS2KbEventToFabgl: lib.get(b"sendPS2KbEventToFabgl").unwrap(),
                 sendHostMouseEventToFabgl: lib.get(b"sendHostMouseEventToFabgl").unwrap(),
                 setVdpDebugLogging: lib.get(b"setVdpDebugLogging").unwrap(),
                 getAudioSamples: lib.get(b"getAudioSamples").unwrap(),

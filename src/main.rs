@@ -195,7 +195,9 @@ pub fn main() -> Result<(), pico_args::Error> {
         .current_display_mode(0)
         .unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    video_subsystem.text_input().start();
+    if args.osk {
+        video_subsystem.text_input().start();
+    }
     let joystick_subsystem = sdl_context.joystick().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut joysticks = vec![];
@@ -336,8 +338,16 @@ pub fn main() -> Result<(), pico_args::Error> {
             for event in event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. } => break 'running,
-                    Event::TextInput { ref text, .. } => {
-                        println!("you said '{}'", text);
+                    Event::TextInput { ref text, .. } if args.osk => {
+                        for b in text.chars() {
+                            let vk = ascii2vk::ascii2vk(b);
+                            if vk > 0 {
+                                unsafe {
+                                    (*vdp_interface.sendVKeyEventToFabgl)(vk, 1);
+                                    (*vdp_interface.sendVKeyEventToFabgl)(vk, 0);
+                                }
+                            }
+                        }
                     }
                     Event::KeyDown {
                         keycode,
@@ -356,8 +366,8 @@ pub fn main() -> Result<(), pico_args::Error> {
                                 Some(sdl2::keyboard::Keycode::C) => {
                                     // caps-lock
                                     unsafe {
-                                        (*vdp_interface.sendHostKbEventToFabgl)(0x58, 1);
-                                        (*vdp_interface.sendHostKbEventToFabgl)(0x58, 0);
+                                        (*vdp_interface.sendPS2KbEventToFabgl)(0x58, 1);
+                                        (*vdp_interface.sendPS2KbEventToFabgl)(0x58, 0);
                                     }
                                     true
                                 }
@@ -400,8 +410,10 @@ pub fn main() -> Result<(), pico_args::Error> {
                         if !consumed {
                             let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
                             if ps2scancode > 0 {
-                                unsafe {
-                                    (*vdp_interface.sendHostKbEventToFabgl)(ps2scancode, 1);
+                                if sdl2ps2::is_not_ascii(scancode.unwrap()) || !args.osk {
+                                    unsafe {
+                                        (*vdp_interface.sendPS2KbEventToFabgl)(ps2scancode, 1);
+                                    }
                                 }
                             }
                         }
@@ -410,7 +422,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                         let ps2scancode = sdl2ps2::sdl2ps2(scancode.unwrap());
                         if ps2scancode > 0 {
                             unsafe {
-                                (*vdp_interface.sendHostKbEventToFabgl)(ps2scancode, 0);
+                                (*vdp_interface.sendPS2KbEventToFabgl)(ps2scancode, 0);
                             }
                         }
                     }

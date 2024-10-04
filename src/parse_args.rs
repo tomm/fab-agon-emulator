@@ -14,6 +14,7 @@ OPTIONS:
   --firmware quark      Use quark 1.04 firmware (default is console8)
   --firmware electron   Use ElectronOS firmware (default is console8)
   --mode <n>            Start in a specific screen mode
+  --osk                 Enable on-screen-keyboard input (requires OS osk)
   --sdcard <path>       Sets the path of the emulated SDCard
   --sdcard-img <file>   Use a raw SDCard image rather than the host filesystem
   --scale 4:3           (default) Scale Agon screen to 4:3 aspect ratio
@@ -65,6 +66,7 @@ pub struct AppArgs {
     pub fullscreen: bool,
     pub verbose: bool,
     pub zero: bool,
+    pub osk: bool,
     pub scr_mode: Option<u32>,
     pub mos_bin: Option<std::path::PathBuf>,
     pub vdp_dll: Option<std::path::PathBuf>,
@@ -108,6 +110,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         alternative_hostkey: pargs.contains("--ralt-hostkey"),
         verbose: pargs.contains("--verbose"),
         zero: pargs.contains(["-z", "--zero"]),
+        osk: pargs.contains("--osk"),
         scr_mode: pargs.opt_value_from_str("--mode")?,
         border: match u32::from_str_radix(border.as_str(), 16) {
             Ok(v) => v,
