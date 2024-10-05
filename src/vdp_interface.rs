@@ -54,14 +54,19 @@ pub fn init(firmware_paths: Vec<std::path::PathBuf>, verbose: bool) -> VdpInterf
     }
 
     for p in &firmware_paths {
-        if let Ok(ref lib) = unsafe { libloading::Library::new(p) } {
-            unsafe {
-                VDP_DLL = lib;
+        match unsafe { libloading::Library::new(p) } {
+            Ok(ref lib) => {
+                unsafe {
+                    VDP_DLL = lib;
+                }
+                return VdpInterface::new(unsafe { VDP_DLL.as_ref() }.unwrap());
             }
-            return VdpInterface::new(unsafe { VDP_DLL.as_ref() }.unwrap());
+            Err(e) => {
+                eprintln!("Error loading VDP firmware: {:?}, {:?}", p, e);
+            }
         }
     }
-    println!("Fatal error: Could not open VDP firmware. Tried {:?}", firmware_paths);
+    println!("Fatal error: Could not find any VDP firmware.");
     std::process::exit(-1);
 }
 
