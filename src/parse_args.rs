@@ -13,6 +13,7 @@ OPTIONS:
   --firmware 1.03       Use quark 1.03 firmware (default is console8)
   --firmware quark      Use quark 1.04 firmware (default is console8)
   --firmware electron   Use ElectronOS firmware (default is console8)
+  --firmware rainbow    Use Rainbow firmware (default is console8)
   --mode <n>            Start in a specific screen mode
   --osk                 Enable on-screen-keyboard input (requires OS osk)
   --sdcard <path>       Sets the path of the emulated SDCard
@@ -40,6 +41,7 @@ pub enum FirmwareVer {
     quark103,
     quark,
     console8,
+    rainbow,
     electron,
 }
 
@@ -154,10 +156,12 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
                 FirmwareVer::quark
             } else if ver == "console8" {
                 FirmwareVer::console8
+            } else if ver == "rainbow" {
+                FirmwareVer::rainbow
             } else if ver == "electron" {
                 FirmwareVer::electron
             } else {
-                println!("Unknown --firmware value: {}. Valid values are: 1.03, quark, console8, electron", ver);
+                println!("Unknown --firmware value: {}. Valid values are: 1.03, quark, console8, rainbow, electron", ver);
                 std::process::exit(0);
             }
         } else {

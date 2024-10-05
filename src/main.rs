@@ -17,24 +17,39 @@ mod vdp_interface;
 const AUDIO_BUFLEN: u16 = 256;
 const PREFIX: Option<&'static str> = option_env!("PREFIX");
 
-pub fn firmware_path(ver: parse_args::FirmwareVer, is_mos: bool) -> std::path::PathBuf {
-    match PREFIX {
-        None => std::path::Path::new(".").join("firmware"),
-        Some(prefix) => std::path::Path::new(prefix)
-            .join("share")
-            .join("fab-agon-emulator"),
+/**
+ * Return firmware paths in priority order.
+ */
+pub fn firmware_paths(ver: parse_args::FirmwareVer, explicit_path: Option<std::path::PathBuf>, is_mos: bool) -> Vec<std::path::PathBuf> {
+    let mut paths: Vec<std::path::PathBuf> = vec![];
+
+    if let Some(ref p) = explicit_path {
+        paths.push(p.clone());
     }
-    .join(format!(
-        "{}_{:?}.{}",
-        if is_mos { "mos" } else { "vdp" },
-        ver,
-        if is_mos { "bin" } else { "so" },
-    ))
+
+    let base_path = match PREFIX {
+            None => std::path::Path::new(".").join("firmware"),
+            Some(prefix) => std::path::Path::new(prefix)
+                .join("share")
+                .join("fab-agon-emulator"),
+        };
+
+
+    for v in [ver, parse_args::FirmwareVer::console8] {
+        paths.push(
+            base_path.join(
+                format!("{}_{:?}.{}", if is_mos { "mos" } else { "vdp" }, v, if is_mos { "bin" } else { "so" }
+                        )
+                )
+        );
+    }
+
+    paths
 }
 
 pub fn main() -> Result<(), pico_args::Error> {
     let args = parse_args()?;
-    let vdp_interface = vdp_interface::init(firmware_path(args.firmware, false), &args);
+    let vdp_interface = vdp_interface::init(firmware_paths(args.firmware, args.vdp_dll, false), args.verbose);
 
     unsafe { (*vdp_interface.setVdpDebugLogging)(args.verbose) }
 
@@ -111,11 +126,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         thread::Builder::new()
             .name("ez80".to_string())
             .spawn(move || {
-                let ez80_firmware = if let Some(mos_bin) = args.mos_bin {
-                    mos_bin
-                } else {
-                    firmware_path(args.firmware, true)
-                };
+                let ez80_firmware = firmware_paths(args.firmware, args.mos_bin, true).remove(0);
 
                 let sdcard_dir = if let Some(p) = args.sdcard {
                     std::path::PathBuf::from(p)

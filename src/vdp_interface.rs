@@ -1,5 +1,3 @@
-use std::path::Path;
-
 #[allow(non_snake_case)]
 pub struct VdpInterface {
     pub vdp_setup: libloading::Symbol<'static, unsafe extern "C" fn() -> ()>,
@@ -48,21 +46,23 @@ impl VdpInterface {
     }
 }
 
-pub fn init(default_vdp: std::path::PathBuf, args: &crate::parse_args::AppArgs) -> VdpInterface {
+pub fn init(firmware_paths: Vec<std::path::PathBuf>, verbose: bool) -> VdpInterface {
     assert!(unsafe { VDP_DLL == std::ptr::null() });
 
-    let vdp_dll_path = match args.vdp_dll {
-        Some(ref p) => Path::new(".").join(p),
-        None => default_vdp,
-    };
-
-    if args.verbose {
-        eprintln!("VDP firmware: {:?}", vdp_dll_path);
+    if verbose {
+        eprintln!("VDP firmware: {:?}", firmware_paths);
     }
 
-    unsafe {
-        VDP_DLL = Box::leak(Box::new(libloading::Library::new(vdp_dll_path).unwrap()));
+    for p in &firmware_paths {
+        if let Ok(ref lib) = unsafe { libloading::Library::new(p) } {
+            unsafe {
+                VDP_DLL = lib;
+            }
+            return VdpInterface::new(unsafe { VDP_DLL.as_ref() }.unwrap());
+        }
     }
-    VdpInterface::new(unsafe { VDP_DLL.as_ref() }.unwrap())
+    println!("Fatal error: Could not open VDP firmware. Tried {:?}", firmware_paths);
+    std::process::exit(-1);
 }
+
 static mut VDP_DLL: *const libloading::Library = std::ptr::null();
