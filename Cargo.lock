@@ -3,9 +3,8 @@
 version = 3
 
 [[package]]
-name = "agon-cpu-emulator"
-version = "0.11.0"
-source = "git+https://github.com/tomm/agon-cpu-emulator.git?rev=35ac7193d415ef834ac34640d99127375b989dc5#35ac7193d415ef834ac34640d99127375b989dc5"
+name = "agon-ez80-emulator"
+version = "0.9.66"
 dependencies = [
  "chrono",
  "ez80",
@@ -17,7 +16,7 @@ dependencies = [
 name = "agon-light-emulator-debugger"
 version = "0.9.66"
 dependencies = [
- "agon-cpu-emulator",
+ "agon-ez80-emulator",
  "ctrlc",
  "rustyline",
 ]
@@ -198,7 +197,7 @@ source = "git+https://github.com/tomm/ez80.git?rev=64558c2acda1464248193f2f10804
 name = "fab-agon-emulator"
 version = "0.9.66"
 dependencies = [
- "agon-cpu-emulator",
+ "agon-ez80-emulator",
  "agon-light-emulator-debugger",
  "home",
  "libloading",

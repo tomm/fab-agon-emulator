@@ -1,4 +1,4 @@
-use agon_cpu_emulator::debugger::{DebugCmd, Trigger};
+use agon_ez80_emulator::debugger::{DebugCmd, Trigger};
 
 #[derive(Debug)]
 pub enum Cmd {

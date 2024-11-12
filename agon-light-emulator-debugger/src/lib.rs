@@ -4,7 +4,7 @@ use std::sync::mpsc::{Receiver, Sender};
 
 mod parser;
 
-use agon_cpu_emulator::debugger::{DebugCmd, DebugResp, Reg16, Registers};
+use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, Reg16, Registers};
 
 #[derive(Clone)]
 struct EmuState {

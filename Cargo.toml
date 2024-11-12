@@ -2,7 +2,7 @@
 members = ["agon-light-emulator-debugger"]
 
 [workspace.package]
-version = "0.9.66"
+version = "0.9.67"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"
@@ -28,7 +28,7 @@ sdl2 = "0.36.0"
 sdl2-sys = "*"
 sdl2 = "0.36.0"
 pico-args = "0.5.0"
-agon-cpu-emulator = { workspace = true }
+agon-ez80-emulator = { workspace = true }
 agon-light-emulator-debugger = { path = "agon-light-emulator-debugger" }
 libloading = "0.8.0"
 home = "0.5.9"
@@ -41,5 +41,4 @@ sdl2 = { version = "0.36.0", features = ["bundled", "static-link"] }
 raw_tty = "0.1.0"
 
 [workspace.dependencies]
-#agon-cpu-emulator = { path = "../agon-cpu-emulator" }
-agon-cpu-emulator = { git = "https://github.com/tomm/agon-cpu-emulator.git", rev="35ac7193d415ef834ac34640d99127375b989dc5"}
+agon-ez80-emulator = { path = "agon-ez80-emulator" }

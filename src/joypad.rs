@@ -1,4 +1,4 @@
-use agon_cpu_emulator::gpio::GpioSet;
+use agon_ez80_emulator::gpio::GpioSet;
 use sdl2::joystick::HatState;
 
 const PIN_PORT1_DPAD_UP: u8 = 1;

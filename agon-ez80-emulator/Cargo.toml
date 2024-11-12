@@ -1,5 +1,5 @@
 [package]
-name = "agon-light-emulator-debugger"
+name = "agon-ez80-emulator"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -8,6 +8,8 @@ license.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ctrlc = "3.4.1"
-rustyline = "12.0.0"
-agon-ez80-emulator = { workspace = true }
+ez80 = { git = "https://github.com/tomm/ez80.git", rev="64558c2acda1464248193f2f10804c2765b7478a"}
+#ez80 = { path = "../../ez80" }
+rand = "*"
+filetime = "0.2"
+chrono = "0.4.38"

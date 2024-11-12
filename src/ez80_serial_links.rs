@@ -1,4 +1,4 @@
-use agon_cpu_emulator::SerialLink;
+use agon_ez80_emulator::SerialLink;
 
 pub struct DummySerialLink {
     pub name: String,

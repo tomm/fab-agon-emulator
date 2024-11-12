@@ -1,0 +1,43 @@
+copy regression_suite/sample.txt temp.txt
+type temp.txt
+ftruncate temp.txt
+type temp.txt
+load mos
+ez80asm regression_suite/timerirq.asm
+load regression_suite/timerirq.bin
+run
+ez80asm regression_suite/hostfs.asm
+load regression_suite/hostfs.bin
+run
+cd regression_suite
+ez80asm helloworld.asm
+ez80asm helloworld16.asm
+cd /
+load regression_suite/helloworld.bin
+run
+load regression_suite/helloworld16.bin
+run
+disassemble &b0050 100
+cd regression_suite
+load ../bbcbasic24.bin
+run
+LOAD "animal.bbc"
+LIST
+SAVE "animal2.bas"
+SAVE "animal2.bbc"
+SAVE "animal2.bbc"
+*BYE 
+cd ..
+RUN
+LIST
+LOAD "regression_suite/animal2.bbc"
+LIST
+NEW
+LIST
+LOAD "regression_suite/animal2.bas"
+LIST
+NEW
+LOAD "regression_suite/sin_cos.bbc"
+LIST
+RUN
+*BYE

@@ -1,6 +1,6 @@
 use crate::parse_args::parse_args;
-use agon_cpu_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, Trigger};
-use agon_cpu_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
+use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, Trigger};
+use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
 use sdl2::event::Event;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};

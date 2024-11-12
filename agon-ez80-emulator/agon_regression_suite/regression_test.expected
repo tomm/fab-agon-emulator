@@ -1,0 +1,595 @@
+Tom's Fake VDP Version 1.03
+unknown packet VDU 0x17, 0, 0x94
+
+Agon Rainbow MOS Version 2.2.3
+
+/ *copy regression_suite/sample.txt temp.txt
+Copying regression_suite/sample.txt to temp.txt
+/ *type temp.txt
+The quick
+brown fox
+jumped over
+the lazy dog.
+/ *ftruncate temp.txt
+/ *type temp.txt
+/ *load mos
+
+Could not find file
+/ *ez80asm regression_suite/timerirq.asm
+Assembling regression_suite/timerirq.asm
+Pass 1...
+Pass 2...
+Done
+/ *load regression_suite/timerirq.bin
+/ *run
+Timer CTL read back: 41
+Value set from timer interrupt: C0
+Timer CTL read back: 51
+IRQ counter: 05
+Value set from timer interrupt: D1
+/ *ez80asm regression_suite/hostfs.asm
+Assembling regression_suite/hostfs.asm
+Pass 1...
+Pass 2...
+Done
+/ *load regression_suite/hostfs.bin
+/ *run
+quick
+brown
+sample.txt
+hostfs test passed
+/ *cd regression_suite
+/regression_suite *ez80asm helloworld.asm
+Assembling helloworld.asm
+Pass 1...
+Pass 2...
+Done
+/regression_suite *ez80asm helloworld16.asm
+Assembling helloworld16.asm
+Pass 1...
+Pass 2...
+Done
+/regression_suite *cd /
+/ *load regression_suite/helloworld.bin
+/ *run
+Hello world ADL!
+/ *load regression_suite/helloworld16.bin
+/ *run
+Hello world Z80!
+/ *disassemble &b0050 100
+0B0050 0B                .      DEC BC
+0B0051 E1                .      POP HL
+0B0052 DD 21 04 34 0B    .!.4.  LD IX,&0B3404
+0B0057 DD E5             ..     PUSH IX
+0B0059 CD 8D 00 0B       ....   CALL &0B008D
+0B005D 06 00             ..     LD B,&00
+0B005F C5                .      PUSH BC
+0B0060 CD F9 00 0B       ....   CALL &0B00F9
+0B0064 D1                .      POP DE
+0B0065 D1                .      POP DE
+0B0066 FD E1             ..     POP IY
+0B0068 DD E1             ..     POP IX
+0B006A D1                .      POP DE
+0B006B C1                .      POP BC
+0B006C F1                .      POP AF
+0B006D C9                .      RET
+0B006E 01 2D 00 00       .-..   LD BC,&00002D
+0B0072 3E 00             >.     LD A,&00
+0B0074 B1                .      OR A,C
+0B0075 B0                .      OR A,B
+0B0076 C8                .      RET Z
+0B0077 AF                .      XOR A,A
+0B0078 32 FB 3A 0B       2.:.   LD (&0B3AFB),A
+0B007C ED 62             .b     SBC HL,HL
+0B007E 0B                .      DEC BC
+0B007F ED 42             .B     SBC HL,BC
+0B0081 C8                .      RET Z
+0B0082 21 FB 3A 0B       !.:.   LD HL,&0B3AFB
+0B0086 11 FC 3A 0B       ..:.   LD DE,&0B3AFC
+0B008A ED B0             ..     LDIR
+0B008C C9                .      RET
+0B008D 01 04 00 0B       ....   LD BC,&0B0004
+0B0091 DD 0F 00          ...    LD (IX+0),BC
+0B0094 DD 23             .#     INC IX
+0B0096 DD 23             .#     INC IX
+0B0098 DD 23             .#     INC IX
+0B009A CD D5 00 0B       ....   CALL &0B00D5
+0B009E 01 01 00 00       ....   LD BC,&000001
+0B00A2 06 0F             ..     LD B,&0F
+0B00A4 C5                .      PUSH BC
+0B00A5 E5                .      PUSH HL
+0B00A6 CD C6 00 0B       ....   CALL &0B00C6
+0B00AA 79                y      LD A,C
+0B00AB D1                .      POP DE
+0B00AC C1                .      POP BC
+0B00AD B7                .      OR A,A
+0B00AE C8                .      RET Z
+0B00AF DD 1F 00          ...    LD (IX+0),DE
+0B00B2 E5                .      PUSH HL
+0B00B3 D1                .      POP DE
+/ *cd regression_suite
+/regression_suite *load ../bbcbasic24.bin
+/regression_suite *run
+BBC BASIC (Agon ADL) Version 1.03
+BBC BASIC (Z80) Version 3.00
+(C) Copyright R.T.Russell 1987
+
+>LOAD "animal.bbc"
+>LIST
+   10 CLS:@%=10:WIDTH 0:PRINT TAB(15)"ANIMAL"
+   20 PRINT "Creative Computing Morristown New Jersey"''
+   30 REM by Nathan Teichholtz & Steve North
+   40 REM from an original idea by Arthur Luehrmann.
+   50 REM Modified by Chris Atkinson and Richard Russell.
+   60 :
+   70 ON ERROR IF ERR=17 THEN 830 ELSE PRINT:REPORT:PRINT" at line ";ERL:END
+   80 MAX=(HIMEM-TOP)/40
+   90 DIM A$(MAX)
+  100 PRINT "Play 'Guess the Animal'"
+  110 :
+  120 X=OPENIN("ANIMAL.DAT")
+  130 IF X<>0 PROCread ELSE FOR I=0 TO 3:READ A$(I):NEXT I
+  140 N=VAL(A$(0))
+  150 :
+  160 REM ***
+  170 REM MAIN CONTROL SECTION
+  180 REM ***
+  190 REPEAT
+  200   IF FNquery("Are you thinking of an animal ")="N" THEN 830
+  210   K=1
+  220   REPEAT
+  230     PROCquestion
+  240   UNTIL LEFT$(A$(K),2)<>"\Q"
+  250   A$=FNquery("Is it "+FNart(MID$(A$(K),3)))
+  260   IF A$="Y" THEN PRINT "Why not try another one?"'' ELSE PROCnew
+  270 UNTIL FALSE
+  280 ;
+  290 REM ***
+  300 REM NEW ANIMAL
+  310 REM ***
+  320 DEF PROCnew
+  330 INPUT "OK, I give up."'"Tell me what animal you were thinking"'"of ",V$
+  340 V$=FNstrip(FNconvlc(V$))
+  350 PRINT "Please tell me a question that would"'"distinguish ";
+  360 PRINT FNart(V$);" from ";FNart(MID$(A$(K),3))
+  370 INPUT X$:X$=FNcapital(X$)
+  380 IF RIGHT$(X$,1)="?" THEN X$=LEFT$(X$,LEN(X$)-1)
+  390 A$=FNquery("For "+FNart(V$)+" the answer would be ")
+  400 IF A$="Y" THEN B$="N"
+  410 IF A$="N" THEN B$="Y"
+  420 Z1=VAL(A$(0))
+  430 A$(0)=STR$(Z1+2)
+  440 A$(Z1)=A$(K)
+  450 A$(Z1+1)="\A"+V$
+  460 A$(K)="\Q"+X$+"\"+A$+STR$(Z1+1)+"\"+B$+STR$(Z1)+"\"
+  470 ENDPROC
+  480 ;
+  490 REM ***
+  500 REM PRINT QUESTIONS
+  510 REM ***
+  520 DEF PROCquestion
+  530 Q$=A$(K)
+  540 C$=FNquery(MID$(Q$,3,INSTR(Q$,"\",3)-3))
+  550 T$="\"+C$
+  560 X=INSTR(Q$,T$,3)
+  570 Y=INSTR(Q$,"\",X+1)
+  580 K=VAL(MID$(Q$,X+2,Y-X-2))
+  590 ENDPROC
+  600 ;
+  610 REM ***
+  620 REM READ DATA FILE
+  630 REM ***
+  640 DEF PROCread
+  650 PRINT "Just let me refresh my memory"
+  660 Z=0
+  670 REPEAT INPUT #X,A$(Z):Z=Z+1
+  680 UNTIL EOF#X OR Z=MAX+1 OR A$(Z-1)=""
+  690 CLOSE #X
+  700 ENDPROC
+  710 ;
+  720 REM ***
+  730 REM PRINT NAME OF ANIMAL
+  740 REM ***
+  750 DEF PROCprint
+  760 PRINT TAB(10*X);MID$(A$(I),3);
+  770 X=(X+1) MOD 4
+  780 ENDPROC
+  790 ;
+  800 REM ***
+  810 REM LIST CONTENTS
+  820 REM ***
+  830 ON ERROR OFF
+  840 PRINT ' "Animals I already know are:"
+  850 X=0:I=0
+  860 REPEAT I=I+1
+  870   IF LEFT$(A$(I),2)="\A" THEN PROCprint
+  880 UNTIL A$(I)="" OR I=MAX
+  890 PRINT ' "Room for ";INT((MAX-I)/3);" more."
+  900 IF FNquery("Do you want to save these on disk")<>"Y" THEN END
+  910 :
+  920 REM ***
+  930 REM DUMP FILE IF REQUESTED
+  940 REM ***
+  950 IF OPENIN"ANIMAL.DAT" THEN *ERA ANIMAL.DAT
+  960 X=OPENOUT"ANIMAL.DAT":Z=0:IF X=0 PRINT "Directory full":END
+  970 REPEAT PRINT# X,A$(Z):Z=Z+1
+  980 UNTIL A$(Z)="" OR Z=MAX+1
+  990 CLOSE# 0
+ 1000 END
+ 1010 ;
+ 1020 DATA 4,\QDoes it fly\N2\Y3\,\Agoldfish,\Asparrow,
+ 1030 ;
+ 1040 REM. NOW THE FUNCTIONS
+ 1050 ;
+ 1060 DEF FNart(noun$):REM Indefinite article appender
+ 1070 IF INSTR("AEIOUaeiou",LEFT$(noun$,1)) THEN ="an "+noun$ ELSE ="a "+noun$
+ 1080 ;
+ 1090 DEF FNstrip(name$):REM Article stripper
+ 1100 name$=FNnospace(name$)
+ 1110 LOCAL AT$,Z
+ 1120 RESTORE 1170
+ 1130 REPEAT Z=Z+1:READ AT$
+ 1140 UNTIL AT$=LEFT$(name$,LEN(AT$)) OR Z=10
+ 1150 IF Z<10 THEN name$=MID$(name$,1+LEN(AT$))
+ 1160 =FNnospace(name$)
+ 1170 DATA A ,AN ,THE ,a ,an ,the ,An ,The ,THe ,,
+ 1180 ;
+ 1190 DEF FNnospace(name$)
+ 1200 name$=" "+name$
+ 1210 REPEAT name$=MID$(name$,2)
+ 1220 UNTIL LEFT$(name$,1)<>" "
+ 1230 =name$
+ 1240 ;
+ 1250 DEF FNconvlc(name$)
+ 1260 LOCAL L%,A%,B$
+ 1270 FOR L%=1 TO LEN(name$)
+ 1280   A%=ASC(MID$(name$,L%))
+ 1290   IF A%<97 AND A%>64 THEN A%=A%+32
+ 1300   B$=B$+CHR$(A%):NEXT L%
+ 1310 =B$
+ 1320 ;
+ 1330 DEF FNcapital(name$)
+ 1340 LOCAL A$
+ 1350 name$=FNnospace(FNconvlc(name$))
+ 1360 IF ASC(name$)<97 THEN =name$
+ 1370 A$=CHR$(ASC(name$)-32)
+ 1380 A$=A$+MID$(name$,2)
+ 1390 =A$
+ 1400 ;
+ 1410 DEF FNquery(prompt$)
+ 1420 LOCAL A$
+ 1430 REPEAT
+ 1440   PRINT prompt$;:INPUT A$:A$=LEFT$(FNcapital(A$),1)
+ 1450 UNTIL A$="Y" OR A$="N"
+ 1460 =A$
+>SAVE "animal2.bas"
+>SAVE "animal2.bbc"
+>SAVE "animal2.bbc"
+
+Access denied
+>*BYE 
+/regression_suite *cd ..
+/ *RUN
+BBC BASIC (Agon ADL) Version 1.03
+BBC BASIC (Z80) Version 3.00
+(C) Copyright R.T.Russell 1987
+
+>LIST
+>LOAD "regression_suite/animal2.bbc"
+>LIST
+   10 CLS:@%=10:WIDTH 0:PRINT TAB(15)"ANIMAL"
+   20 PRINT "Creative Computing Morristown New Jersey"''
+   30 REM by Nathan Teichholtz & Steve North
+   40 REM from an original idea by Arthur Luehrmann.
+   50 REM Modified by Chris Atkinson and Richard Russell.
+   60 :
+   70 ON ERROR IF ERR=17 THEN 830 ELSE PRINT:REPORT:PRINT" at line ";ERL:END
+   80 MAX=(HIMEM-TOP)/40
+   90 DIM A$(MAX)
+  100 PRINT "Play 'Guess the Animal'"
+  110 :
+  120 X=OPENIN("ANIMAL.DAT")
+  130 IF X<>0 PROCread ELSE FOR I=0 TO 3:READ A$(I):NEXT I
+  140 N=VAL(A$(0))
+  150 :
+  160 REM ***
+  170 REM MAIN CONTROL SECTION
+  180 REM ***
+  190 REPEAT
+  200   IF FNquery("Are you thinking of an animal ")="N" THEN 830
+  210   K=1
+  220   REPEAT
+  230     PROCquestion
+  240   UNTIL LEFT$(A$(K),2)<>"\Q"
+  250   A$=FNquery("Is it "+FNart(MID$(A$(K),3)))
+  260   IF A$="Y" THEN PRINT "Why not try another one?"'' ELSE PROCnew
+  270 UNTIL FALSE
+  280 ;
+  290 REM ***
+  300 REM NEW ANIMAL
+  310 REM ***
+  320 DEF PROCnew
+  330 INPUT "OK, I give up."'"Tell me what animal you were thinking"'"of ",V$
+  340 V$=FNstrip(FNconvlc(V$))
+  350 PRINT "Please tell me a question that would"'"distinguish ";
+  360 PRINT FNart(V$);" from ";FNart(MID$(A$(K),3))
+  370 INPUT X$:X$=FNcapital(X$)
+  380 IF RIGHT$(X$,1)="?" THEN X$=LEFT$(X$,LEN(X$)-1)
+  390 A$=FNquery("For "+FNart(V$)+" the answer would be ")
+  400 IF A$="Y" THEN B$="N"
+  410 IF A$="N" THEN B$="Y"
+  420 Z1=VAL(A$(0))
+  430 A$(0)=STR$(Z1+2)
+  440 A$(Z1)=A$(K)
+  450 A$(Z1+1)="\A"+V$
+  460 A$(K)="\Q"+X$+"\"+A$+STR$(Z1+1)+"\"+B$+STR$(Z1)+"\"
+  470 ENDPROC
+  480 ;
+  490 REM ***
+  500 REM PRINT QUESTIONS
+  510 REM ***
+  520 DEF PROCquestion
+  530 Q$=A$(K)
+  540 C$=FNquery(MID$(Q$,3,INSTR(Q$,"\",3)-3))
+  550 T$="\"+C$
+  560 X=INSTR(Q$,T$,3)
+  570 Y=INSTR(Q$,"\",X+1)
+  580 K=VAL(MID$(Q$,X+2,Y-X-2))
+  590 ENDPROC
+  600 ;
+  610 REM ***
+  620 REM READ DATA FILE
+  630 REM ***
+  640 DEF PROCread
+  650 PRINT "Just let me refresh my memory"
+  660 Z=0
+  670 REPEAT INPUT #X,A$(Z):Z=Z+1
+  680 UNTIL EOF#X OR Z=MAX+1 OR A$(Z-1)=""
+  690 CLOSE #X
+  700 ENDPROC
+  710 ;
+  720 REM ***
+  730 REM PRINT NAME OF ANIMAL
+  740 REM ***
+  750 DEF PROCprint
+  760 PRINT TAB(10*X);MID$(A$(I),3);
+  770 X=(X+1) MOD 4
+  780 ENDPROC
+  790 ;
+  800 REM ***
+  810 REM LIST CONTENTS
+  820 REM ***
+  830 ON ERROR OFF
+  840 PRINT ' "Animals I already know are:"
+  850 X=0:I=0
+  860 REPEAT I=I+1
+  870   IF LEFT$(A$(I),2)="\A" THEN PROCprint
+  880 UNTIL A$(I)="" OR I=MAX
+  890 PRINT ' "Room for ";INT((MAX-I)/3);" more."
+  900 IF FNquery("Do you want to save these on disk")<>"Y" THEN END
+  910 :
+  920 REM ***
+  930 REM DUMP FILE IF REQUESTED
+  940 REM ***
+  950 IF OPENIN"ANIMAL.DAT" THEN *ERA ANIMAL.DAT
+  960 X=OPENOUT"ANIMAL.DAT":Z=0:IF X=0 PRINT "Directory full":END
+  970 REPEAT PRINT# X,A$(Z):Z=Z+1
+  980 UNTIL A$(Z)="" OR Z=MAX+1
+  990 CLOSE# 0
+ 1000 END
+ 1010 ;
+ 1020 DATA 4,\QDoes it fly\N2\Y3\,\Agoldfish,\Asparrow,
+ 1030 ;
+ 1040 REM. NOW THE FUNCTIONS
+ 1050 ;
+ 1060 DEF FNart(noun$):REM Indefinite article appender
+ 1070 IF INSTR("AEIOUaeiou",LEFT$(noun$,1)) THEN ="an "+noun$ ELSE ="a "+noun$
+ 1080 ;
+ 1090 DEF FNstrip(name$):REM Article stripper
+ 1100 name$=FNnospace(name$)
+ 1110 LOCAL AT$,Z
+ 1120 RESTORE 1170
+ 1130 REPEAT Z=Z+1:READ AT$
+ 1140 UNTIL AT$=LEFT$(name$,LEN(AT$)) OR Z=10
+ 1150 IF Z<10 THEN name$=MID$(name$,1+LEN(AT$))
+ 1160 =FNnospace(name$)
+ 1170 DATA A ,AN ,THE ,a ,an ,the ,An ,The ,THe ,,
+ 1180 ;
+ 1190 DEF FNnospace(name$)
+ 1200 name$=" "+name$
+ 1210 REPEAT name$=MID$(name$,2)
+ 1220 UNTIL LEFT$(name$,1)<>" "
+ 1230 =name$
+ 1240 ;
+ 1250 DEF FNconvlc(name$)
+ 1260 LOCAL L%,A%,B$
+ 1270 FOR L%=1 TO LEN(name$)
+ 1280   A%=ASC(MID$(name$,L%))
+ 1290   IF A%<97 AND A%>64 THEN A%=A%+32
+ 1300   B$=B$+CHR$(A%):NEXT L%
+ 1310 =B$
+ 1320 ;
+ 1330 DEF FNcapital(name$)
+ 1340 LOCAL A$
+ 1350 name$=FNnospace(FNconvlc(name$))
+ 1360 IF ASC(name$)<97 THEN =name$
+ 1370 A$=CHR$(ASC(name$)-32)
+ 1380 A$=A$+MID$(name$,2)
+ 1390 =A$
+ 1400 ;
+ 1410 DEF FNquery(prompt$)
+ 1420 LOCAL A$
+ 1430 REPEAT
+ 1440   PRINT prompt$;:INPUT A$:A$=LEFT$(FNcapital(A$),1)
+ 1450 UNTIL A$="Y" OR A$="N"
+ 1460 =A$
+>NEW
+>LIST
+>LOAD "regression_suite/animal2.bas"
+>LIST
+   10 CLS:@%=10:WIDTH 0:PRINT TAB(15)"ANIMAL"
+   20 PRINT "Creative Computing Morristown New Jersey"''
+   30 REM by Nathan Teichholtz & Steve North
+   40 REM from an original idea by Arthur Luehrmann.
+   50 REM Modified by Chris Atkinson and Richard Russell.
+   60 :
+   70 ON ERROR IF ERR=17 THEN 830 ELSE PRINT:REPORT:PRINT" at line ";ERL:END
+   80 MAX=(HIMEM-TOP)/40
+   90 DIM A$(MAX)
+  100 PRINT "Play 'Guess the Animal'"
+  110 :
+  120 X=OPENIN("ANIMAL.DAT")
+  130 IF X<>0 PROCread ELSE FOR I=0 TO 3:READ A$(I):NEXT I
+  140 N=VAL(A$(0))
+  150 :
+  160 REM ***
+  170 REM MAIN CONTROL SECTION
+  180 REM ***
+  190 REPEAT
+  200   IF FNquery("Are you thinking of an animal ")="N" THEN 830
+  210   K=1
+  220   REPEAT
+  230     PROCquestion
+  240   UNTIL LEFT$(A$(K),2)<>"\Q"
+  250   A$=FNquery("Is it "+FNart(MID$(A$(K),3)))
+  260   IF A$="Y" THEN PRINT "Why not try another one?"'' ELSE PROCnew
+  270 UNTIL FALSE
+  280 ;
+  290 REM ***
+  300 REM NEW ANIMAL
+  310 REM ***
+  320 DEF PROCnew
+  330 INPUT "OK, I give up."'"Tell me what animal you were thinking"'"of ",V$
+  340 V$=FNstrip(FNconvlc(V$))
+  350 PRINT "Please tell me a question that would"'"distinguish ";
+  360 PRINT FNart(V$);" from ";FNart(MID$(A$(K),3))
+  370 INPUT X$:X$=FNcapital(X$)
+  380 IF RIGHT$(X$,1)="?" THEN X$=LEFT$(X$,LEN(X$)-1)
+  390 A$=FNquery("For "+FNart(V$)+" the answer would be ")
+  400 IF A$="Y" THEN B$="N"
+  410 IF A$="N" THEN B$="Y"
+  420 Z1=VAL(A$(0))
+  430 A$(0)=STR$(Z1+2)
+  440 A$(Z1)=A$(K)
+  450 A$(Z1+1)="\A"+V$
+  460 A$(K)="\Q"+X$+"\"+A$+STR$(Z1+1)+"\"+B$+STR$(Z1)+"\"
+  470 ENDPROC
+  480 ;
+  490 REM ***
+  500 REM PRINT QUESTIONS
+  510 REM ***
+  520 DEF PROCquestion
+  530 Q$=A$(K)
+  540 C$=FNquery(MID$(Q$,3,INSTR(Q$,"\",3)-3))
+  550 T$="\"+C$
+  560 X=INSTR(Q$,T$,3)
+  570 Y=INSTR(Q$,"\",X+1)
+  580 K=VAL(MID$(Q$,X+2,Y-X-2))
+  590 ENDPROC
+  600 ;
+  610 REM ***
+  620 REM READ DATA FILE
+  630 REM ***
+  640 DEF PROCread
+  650 PRINT "Just let me refresh my memory"
+  660 Z=0
+  670 REPEAT INPUT #X,A$(Z):Z=Z+1
+  680 UNTIL EOF#X OR Z=MAX+1 OR A$(Z-1)=""
+  690 CLOSE #X
+  700 ENDPROC
+  710 ;
+  720 REM ***
+  730 REM PRINT NAME OF ANIMAL
+  740 REM ***
+  750 DEF PROCprint
+  760 PRINT TAB(10*X);MID$(A$(I),3);
+  770 X=(X+1) MOD 4
+  780 ENDPROC
+  790 ;
+  800 REM ***
+  810 REM LIST CONTENTS
+  820 REM ***
+  830 ON ERROR OFF
+  840 PRINT ' "Animals I already know are:"
+  850 X=0:I=0
+  860 REPEAT I=I+1
+  870   IF LEFT$(A$(I),2)="\A" THEN PROCprint
+  880 UNTIL A$(I)="" OR I=MAX
+  890 PRINT ' "Room for ";INT((MAX-I)/3);" more."
+  900 IF FNquery("Do you want to save these on disk")<>"Y" THEN END
+  910 :
+  920 REM ***
+  930 REM DUMP FILE IF REQUESTED
+  940 REM ***
+  950 IF OPENIN"ANIMAL.DAT" THEN *ERA ANIMAL.DAT
+  960 X=OPENOUT"ANIMAL.DAT":Z=0:IF X=0 PRINT "Directory full":END
+  970 REPEAT PRINT# X,A$(Z):Z=Z+1
+  980 UNTIL A$(Z)="" OR Z=MAX+1
+  990 CLOSE# 0
+ 1000 END
+ 1010 ;
+ 1020 DATA 4,\QDoes it fly\N2\Y3\,\Agoldfish,\Asparrow,
+ 1030 ;
+ 1040 REM. NOW THE FUNCTIONS
+ 1050 ;
+ 1060 DEF FNart(noun$):REM Indefinite article appender
+ 1070 IF INSTR("AEIOUaeiou",LEFT$(noun$,1)) THEN ="an "+noun$ ELSE ="a "+noun$
+ 1080 ;
+ 1090 DEF FNstrip(name$):REM Article stripper
+ 1100 name$=FNnospace(name$)
+ 1110 LOCAL AT$,Z
+ 1120 RESTORE 1170
+ 1130 REPEAT Z=Z+1:READ AT$
+ 1140 UNTIL AT$=LEFT$(name$,LEN(AT$)) OR Z=10
+ 1150 IF Z<10 THEN name$=MID$(name$,1+LEN(AT$))
+ 1160 =FNnospace(name$)
+ 1170 DATA A ,AN ,THE ,a ,an ,the ,An ,The ,THe ,,
+ 1180 ;
+ 1190 DEF FNnospace(name$)
+ 1200 name$=" "+name$
+ 1210 REPEAT name$=MID$(name$,2)
+ 1220 UNTIL LEFT$(name$,1)<>" "
+ 1230 =name$
+ 1240 ;
+ 1250 DEF FNconvlc(name$)
+ 1260 LOCAL L%,A%,B$
+ 1270 FOR L%=1 TO LEN(name$)
+ 1280   A%=ASC(MID$(name$,L%))
+ 1290   IF A%<97 AND A%>64 THEN A%=A%+32
+ 1300   B$=B$+CHR$(A%):NEXT L%
+ 1310 =B$
+ 1320 ;
+ 1330 DEF FNcapital(name$)
+ 1340 LOCAL A$
+ 1350 name$=FNnospace(FNconvlc(name$))
+ 1360 IF ASC(name$)<97 THEN =name$
+ 1370 A$=CHR$(ASC(name$)-32)
+ 1380 A$=A$+MID$(name$,2)
+ 1390 =A$
+ 1400 ;
+ 1410 DEF FNquery(prompt$)
+ 1420 LOCAL A$
+ 1430 REPEAT
+ 1440   PRINT prompt$;:INPUT A$:A$=LEFT$(FNcapital(A$),1)
+ 1450 UNTIL A$="Y" OR A$="N"
+ 1460 =A$
+>NEW
+>LOAD "regression_suite/sin_cos.bbc"
+>LIST
+   10 FOR I = 0 TO 10
+   20   PRINT "SIN("; I; ")="; SIN(I), "COS("; I; ")="; COS(I)
+   30 NEXT I
+>RUN
+SIN(0)=0  COS(0)=1
+SIN(1)=0.841470985  COS(1)=0.540302306
+SIN(2)=0.909297427  COS(2)=-0.416146837
+SIN(3)=0.141120008  COS(3)=-0.989992496
+SIN(4)=-0.756802495 COS(4)=-0.653643621
+SIN(5)=-0.958924275 COS(5)=0.283662185
+SIN(6)=-0.279415498 COS(6)=0.960170287
+SIN(7)=0.656986598  COS(7)=0.753902254
+SIN(8)=0.989358247  COS(8)=-0.145500034
+SIN(9)=0.412118485  COS(9)=-0.911130262
+SIN(10)=-0.544021111COS(10)=-0.839071529
+>*BYE
+/ *
