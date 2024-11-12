@@ -1,4 +1,4 @@
-use std::io::{ Seek, SeekFrom, Read, Write };
+use std::io::{Read, Seek, SeekFrom, Write};
 
 pub struct SpiSdcard {
     in_buf: Vec<u8>,
@@ -48,9 +48,11 @@ impl SpiSdcard {
                     self.next_write_started = false;
                     self.next_write_sector = None;
                     //println!("WRITE!!!!!!!!! sector {}, {:?}", sector, self.in_buf);
-                    match image.seek(SeekFrom::Start(sector as u64 * 512))
-                        .and_then(|_| image.write_all(&self.in_buf)) {
-                        Ok(_) => {},
+                    match image
+                        .seek(SeekFrom::Start(sector as u64 * 512))
+                        .and_then(|_| image.write_all(&self.in_buf))
+                    {
+                        Ok(_) => {}
                         Err(e) => {
                             eprintln!("Error reading SDcard image: {:?}", e);
                         }
@@ -80,19 +82,17 @@ impl SpiSdcard {
                     // CMD0 (go to idle. part of init)
                     [CMD0, _a3, _a2, _a1, _a0, _crc, ..] => {
                         self.in_buf.drain(0..6);
-                        self.out_buf.push(1); // OK 
+                        self.out_buf.push(1); // OK
                     }
                     // CMD8 (interface condition)
                     [CMD8, _a3, _a2, _a1, check_pattern, _crc, ..] => {
                         self.check_pattern = check_pattern;
                         self.in_buf.drain(0..6);
-                        self.out_buf.extend_from_slice(
-                            &[1, 0, 0, 1, check_pattern]
-                        );
+                        self.out_buf.extend_from_slice(&[1, 0, 0, 1, check_pattern]);
                     }
                     // CMD55
                     [CMD55, _a3, _a2, _a1, _a0, _crc, ..] => {
-                        self.out_buf.push(1); // OK 
+                        self.out_buf.push(1); // OK
                         self.in_buf.drain(0..6);
                     }
                     // ACMD41
@@ -107,15 +107,20 @@ impl SpiSdcard {
                     }
                     // CMD17
                     [CMD17, sec3, sec2, sec1, sec0, _crc, ..] => {
-                        let sector = sec0 as usize + ((sec1 as usize)<<8) + ((sec2 as usize)<<16) + ((sec3 as usize)<<24);
+                        let sector = sec0 as usize
+                            + ((sec1 as usize) << 8)
+                            + ((sec2 as usize) << 16)
+                            + ((sec3 as usize) << 24);
                         //println!("GOT CMD17. read sector {}", sector);
                         self.in_buf.drain(0..6);
                         self.out_buf.push(0);
                         self.out_buf.push(0xfe);
                         let mut buf = [0u8; 512];
-                        match image.seek(SeekFrom::Start(sector as u64 * 512))
-                            .and_then(|_| image.read_exact(&mut buf)) {
-                            Ok(_) => {},
+                        match image
+                            .seek(SeekFrom::Start(sector as u64 * 512))
+                            .and_then(|_| image.read_exact(&mut buf))
+                        {
+                            Ok(_) => {}
                             Err(e) => {
                                 eprintln!("Error reading SDcard image: {:?}", e);
                             }
@@ -127,7 +132,10 @@ impl SpiSdcard {
                     }
                     // CMD24
                     [CMD24, sec3, sec2, sec1, sec0, _crc, ..] => {
-                        let sector = sec0 as usize + ((sec1 as usize)<<8) + ((sec2 as usize)<<16) + ((sec3 as usize)<<24);
+                        let sector = sec0 as usize
+                            + ((sec1 as usize) << 8)
+                            + ((sec2 as usize) << 16)
+                            + ((sec3 as usize) << 24);
                         self.next_write_sector = Some(sector);
                         self.next_write_started = false;
                         self.in_buf.drain(0..6);
@@ -135,7 +143,11 @@ impl SpiSdcard {
                         self.out_buf.push(0);
                     }
                     _ => {
-                        eprintln!("Unknown SDcard command {:?}: {:?}", self.in_buf.get(0).and_then(|v| Some(*v & !0x40)), self.in_buf);
+                        eprintln!(
+                            "Unknown SDcard command {:?}: {:?}",
+                            self.in_buf.get(0).and_then(|v| Some(*v & !0x40)),
+                            self.in_buf
+                        );
                         // drop the command
                         self.in_buf.clear();
                     }

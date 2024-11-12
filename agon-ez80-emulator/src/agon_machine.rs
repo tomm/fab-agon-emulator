@@ -1,10 +1,10 @@
+use crate::{debugger, gpio, i2c, mos, prt_timer, spi_sdcard, uart};
+use chrono::{Datelike, Timelike};
 use ez80::*;
-use std::collections::HashMap;
-use std::io::{ Seek, SeekFrom, Read, Write };
-use crate::{ mos, debugger, prt_timer, gpio, uart, spi_sdcard, i2c };
-use std::sync::{ Arc, Mutex };
 use rand::Rng;
-use chrono::{ Datelike, Timelike };
+use std::collections::HashMap;
+use std::io::{Read, Seek, SeekFrom, Write};
+use std::sync::{Arc, Mutex};
 
 const ROM_SIZE: usize = 0x20000; // 128 KiB flash
 const EXTERNAL_RAM_SIZE: usize = 0x80000; // 512 KiB
@@ -12,13 +12,13 @@ const ONCHIP_RAM_SIZE: u32 = 0x2000; // 8KiB
 
 pub enum RamInit {
     Zero,
-    Random
+    Random,
 }
 
 pub struct AgonMachine {
     mem_external: [u8; EXTERNAL_RAM_SIZE], // 512k external RAM
-    mem_rom: [u8; ROM_SIZE], // 128K ROM
-    mem_internal: [u8; ONCHIP_RAM_SIZE as usize],  // 8K SRAM on the EZ80F92
+    mem_rom: [u8; ROM_SIZE],               // 128K ROM
+    mem_internal: [u8; ONCHIP_RAM_SIZE as usize], // 8K SRAM on the EZ80F92
     uart0: uart::Uart,
     uart1: uart::Uart,
     i2c: i2c::I2c,
@@ -48,7 +48,7 @@ pub struct AgonMachine {
     pub last_pc: u32,
     pub mem_out_of_bounds: std::cell::Cell<Option<u32>>, // address
     pub paused: bool,
-    pub cycle_counter: std::cell::Cell<u32>
+    pub cycle_counter: std::cell::Cell<u32>,
 }
 
 // a path relative to the hostfs_root_dir
@@ -118,38 +118,78 @@ impl Machine for AgonMachine {
             0x90 => self.prt_timers[5].read_counter_low(),
             0x91 => self.prt_timers[5].read_counter_high(),
 
-            0x9a => { let gpios = self.gpios.lock().unwrap(); gpios.b.get_dr() }
-            0x9b => { let gpios = self.gpios.lock().unwrap(); gpios.b.get_ddr() }
-            0x9c => { let gpios = self.gpios.lock().unwrap(); gpios.b.get_alt1() }
-            0x9d => { let gpios = self.gpios.lock().unwrap(); gpios.b.get_alt2() }
+            0x9a => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.b.get_dr()
+            }
+            0x9b => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.b.get_ddr()
+            }
+            0x9c => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.b.get_alt1()
+            }
+            0x9d => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.b.get_alt2()
+            }
 
             0x9e => {
                 let gpios = self.gpios.lock().unwrap();
                 /* set bit 3 of gpio if uart1 is NOT CTS */
-                let uart1_cts = if self.uart1.read_modem_status_register() & 0x10 != 0 { 0 } else { 8 };
+                let uart1_cts = if self.uart1.read_modem_status_register() & 0x10 != 0 {
+                    0
+                } else {
+                    8
+                };
                 gpios.c.get_dr() | uart1_cts
             }
-            0x9f => { let gpios = self.gpios.lock().unwrap(); gpios.c.get_ddr() }
-            0xa0 => { let gpios = self.gpios.lock().unwrap(); gpios.c.get_alt1() }
-            0xa1 => { let gpios = self.gpios.lock().unwrap(); gpios.c.get_alt2() }
+            0x9f => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.c.get_ddr()
+            }
+            0xa0 => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.c.get_alt1()
+            }
+            0xa1 => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.c.get_alt2()
+            }
 
             0xa2 => {
                 let gpios = self.gpios.lock().unwrap();
                 /* set bit 3 of gpio if uart0 is NOT CTS */
-                let uart0_cts = if self.uart0.read_modem_status_register() & 0x10 != 0 { 0 } else { 8 };
+                let uart0_cts = if self.uart0.read_modem_status_register() & 0x10 != 0 {
+                    0
+                } else {
+                    8
+                };
                 gpios.d.get_dr() | uart0_cts
             }
-            0xa3 => { let gpios = self.gpios.lock().unwrap(); gpios.d.get_ddr() }
-            0xa4 => { let gpios = self.gpios.lock().unwrap(); gpios.d.get_alt1() }
-            0xa5 => { let gpios = self.gpios.lock().unwrap(); gpios.d.get_alt2() }
+            0xa3 => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.d.get_ddr()
+            }
+            0xa4 => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.d.get_alt1()
+            }
+            0xa5 => {
+                let gpios = self.gpios.lock().unwrap();
+                gpios.d.get_alt2()
+            }
 
             0xb4 => {
-                if self.onchip_mem_enable { 0x80 } else { 0 }
+                if self.onchip_mem_enable {
+                    0x80
+                } else {
+                    0
+                }
             }
 
-            0xb5 => {
-                self.onchip_mem_segment
-            }
+            0xb5 => self.onchip_mem_segment,
 
             0xba => {
                 // SPI control register
@@ -185,12 +225,11 @@ impl Machine for AgonMachine {
             }
             0xc2 => {
                 // UART0_IIR
-                if self.uart0.ier & 0x02 != 0 {    
+                if self.uart0.ier & 0x02 != 0 {
                     self.uart0.ier = self.uart0.ier & 0b11111101;
-                    0x02   
-                }
-                else {    
-                    0x04    
+                    0x02
+                } else {
+                    0x04
                 }
             }
             0xc3 => self.uart0.lctl,
@@ -219,12 +258,11 @@ impl Machine for AgonMachine {
             }
             0xd2 => {
                 // UART1_IIR
-                if self.uart1.ier & 0x02 != 0 {    
+                if self.uart1.ier & 0x02 != 0 {
                     self.uart1.ier = self.uart1.ier & 0b11111101;
-                    0x02   
-                }
-                else {    
-                    0x04    
+                    0x02
+                } else {
+                    0x04
                 }
             }
             0xd3 => self.uart1.lctl,
@@ -267,20 +305,68 @@ impl Machine for AgonMachine {
             0x90 => self.prt_timers[5].write_reload_low(value),
             0x91 => self.prt_timers[5].write_reload_high(value),
 
-            0x9a => { let mut gpios = self.gpios.lock().unwrap(); gpios.b.set_dr(value); gpios.b.update(); }
-            0x9b => { let mut gpios = self.gpios.lock().unwrap(); gpios.b.set_ddr(value); gpios.b.update(); }
-            0x9c => { let mut gpios = self.gpios.lock().unwrap(); gpios.b.set_alt1(value); gpios.b.update(); }
-            0x9d => { let mut gpios = self.gpios.lock().unwrap(); gpios.b.set_alt2(value); gpios.b.update(); }
+            0x9a => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.b.set_dr(value);
+                gpios.b.update();
+            }
+            0x9b => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.b.set_ddr(value);
+                gpios.b.update();
+            }
+            0x9c => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.b.set_alt1(value);
+                gpios.b.update();
+            }
+            0x9d => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.b.set_alt2(value);
+                gpios.b.update();
+            }
 
-            0x9e => { let mut gpios = self.gpios.lock().unwrap(); gpios.c.set_dr(value); gpios.c.update(); }
-            0x9f => { let mut gpios = self.gpios.lock().unwrap(); gpios.c.set_ddr(value); gpios.c.update(); }
-            0xa0 => { let mut gpios = self.gpios.lock().unwrap(); gpios.c.set_alt1(value); gpios.c.update(); }
-            0xa1 => { let mut gpios = self.gpios.lock().unwrap(); gpios.c.set_alt2(value); gpios.c.update(); }
+            0x9e => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.c.set_dr(value);
+                gpios.c.update();
+            }
+            0x9f => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.c.set_ddr(value);
+                gpios.c.update();
+            }
+            0xa0 => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.c.set_alt1(value);
+                gpios.c.update();
+            }
+            0xa1 => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.c.set_alt2(value);
+                gpios.c.update();
+            }
 
-            0xa2 => { let mut gpios = self.gpios.lock().unwrap(); gpios.d.set_dr(value); gpios.d.update(); }
-            0xa3 => { let mut gpios = self.gpios.lock().unwrap(); gpios.d.set_ddr(value); gpios.d.update(); }
-            0xa4 => { let mut gpios = self.gpios.lock().unwrap(); gpios.d.set_alt1(value); gpios.d.update(); }
-            0xa5 => { let mut gpios = self.gpios.lock().unwrap(); gpios.d.set_alt2(value); gpios.d.update(); }
+            0xa2 => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.d.set_dr(value);
+                gpios.d.update();
+            }
+            0xa3 => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.d.set_ddr(value);
+                gpios.d.update();
+            }
+            0xa4 => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.d.set_alt1(value);
+                gpios.d.update();
+            }
+            0xa5 => {
+                let mut gpios = self.gpios.lock().unwrap();
+                gpios.d.set_alt2(value);
+                gpios.d.update();
+            }
 
             // chip selects
             0xa8 => self.cs0_lbr = value,
@@ -425,28 +511,43 @@ impl AgonMachine {
             onchip_mem_segment: 0xff,
             flash_addr_u: 0,
             cs0_lbr: 0,
-            cs0_ubr: 0xff
+            cs0_ubr: 0xff,
         }
     }
 
     #[inline]
     fn get_rom_address(&self, address: u32) -> Option<u32> {
         let a: u32 = address.wrapping_sub((self.flash_addr_u as u32) << 16);
-        if a < ROM_SIZE as u32 { Some(a) } else { None }
+        if a < ROM_SIZE as u32 {
+            Some(a)
+        } else {
+            None
+        }
     }
 
     #[inline]
     fn get_internal_ram_address(&self, address: u32) -> Option<u32> {
-        if !self.onchip_mem_enable { return None };
+        if !self.onchip_mem_enable {
+            return None;
+        };
         let offset = address.wrapping_sub(((self.onchip_mem_segment as u32) << 16) + 0xe000);
-        if offset < ONCHIP_RAM_SIZE { Some(offset) } else { None }
+        if offset < ONCHIP_RAM_SIZE {
+            Some(offset)
+        } else {
+            None
+        }
     }
 
     #[inline]
     fn get_external_ram_address(&self, address: u32) -> Option<u32> {
         if address >> 16 >= self.cs0_lbr as u32 && address >> 16 <= self.cs0_ubr as u32 {
-            let offset = (address & 0xffff) | (((address >> 16) & (self.cs0_ubr.wrapping_sub(self.cs0_lbr) as u32)) << 16);
-            if offset < EXTERNAL_RAM_SIZE as u32 { Some(offset) } else { None }
+            let offset = (address & 0xffff)
+                | (((address >> 16) & (self.cs0_ubr.wrapping_sub(self.cs0_lbr) as u32)) << 16);
+            if offset < EXTERNAL_RAM_SIZE as u32 {
+                Some(offset)
+            } else {
+                None
+            }
         } else {
             None
         }
@@ -469,7 +570,7 @@ impl AgonMachine {
                 std::process::exit(-1);
             }
         };
-        
+
         for (i, e) in code.iter().enumerate() {
             self.mem_rom[i] = *e;
         }
@@ -477,19 +578,25 @@ impl AgonMachine {
         let mos_map = self.mos_bin.with_extension("map");
 
         match crate::symbol_map::read_zds_map_file(mos_map.to_str().unwrap()) {
-            Ok(map) => {
-                match mos::MosMap::from_symbol_map(map) {
-                    Ok(mos_map) => {
-                        self.mos_map = mos_map;
-                    }
-                    Err(e) => {
-                        println!("Error reading {}. hostfs integration disabled: {}", mos_map.display(), e);
-                        self.enable_hostfs = false;
-                    }
+            Ok(map) => match mos::MosMap::from_symbol_map(map) {
+                Ok(mos_map) => {
+                    self.mos_map = mos_map;
                 }
-            }
+                Err(e) => {
+                    println!(
+                        "Error reading {}. hostfs integration disabled: {}",
+                        mos_map.display(),
+                        e
+                    );
+                    self.enable_hostfs = false;
+                }
+            },
             Err(e) => {
-                println!("Error reading {}. hostfs integration disabled: {}", mos_map.display(), e);
+                println!(
+                    "Error reading {}. hostfs integration disabled: {}",
+                    mos_map.display(),
+                    e
+                );
                 self.enable_hostfs = false;
             }
         }
@@ -555,20 +662,22 @@ impl AgonMachine {
                 for _ in 0..max_len {
                     let n_read = match f.read(host_buf.as_mut_slice()) {
                         Ok(n_read) => n_read,
-                        Err(_) => break 'outer mos::FR_DISK_ERR
+                        Err(_) => break 'outer mos::FR_DISK_ERR,
                     };
 
                     if n_read == 0 {
-                        break 'outer mos::FR_DISK_ERR // EOF
+                        break 'outer mos::FR_DISK_ERR; // EOF
                     }
                     line.push(host_buf[0]);
 
-                    if host_buf[0] == 10 || host_buf[0] == 0 { break; }
+                    if host_buf[0] == 10 || host_buf[0] == 0 {
+                        break;
+                    }
                 }
                 // no f.tell()...
                 let fpos = match f.seek(SeekFrom::Current(0)) {
                     Ok(n) => n,
-                    Err(_) => break 'outer mos::FR_DISK_ERR
+                    Err(_) => break 'outer mos::FR_DISK_ERR,
                 };
 
                 // save file position to FIL.fptr U32
@@ -585,10 +694,9 @@ impl AgonMachine {
                 mos::FR_DISK_ERR
             }
         };
-        if fresult==mos::FR_OK {
+        if fresult == mos::FR_OK {
             cpu.state.reg.set24(Reg16::HL, buf);
-        }
-        else {
+        } else {
             cpu.state.reg.set24(Reg16::HL, 0);
         }
         let mut env = Environment::new(&mut cpu.state, self);
@@ -608,7 +716,7 @@ impl AgonMachine {
                 // no f.tell()...
                 let fpos = match f.seek(SeekFrom::Current(0)) {
                     Ok(n) => n,
-                    Err(_) => break 'outer mos::FR_DISK_ERR
+                    Err(_) => break 'outer mos::FR_DISK_ERR,
                 };
                 // save file position to FIL.fptr
                 self._poke24(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
@@ -635,13 +743,15 @@ impl AgonMachine {
             if let Some(mut f) = self.open_files.get(&fptr) {
                 for i in 0..num {
                     let byte = self.peek(buf + i);
-                    if f.write(&[byte]).is_err() { break 'outer mos::FR_DISK_ERR }
+                    if f.write(&[byte]).is_err() {
+                        break 'outer mos::FR_DISK_ERR;
+                    }
                 }
 
                 // no f.tell()...
                 let fpos = match f.seek(SeekFrom::Current(0)) {
                     Ok(n) => n,
-                    Err(_) => break 'outer mos::FR_DISK_ERR
+                    Err(_) => break 'outer mos::FR_DISK_ERR,
                 };
                 // save file position to FIL.fptr
                 self._poke24(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
@@ -674,9 +784,9 @@ impl AgonMachine {
                     // no f.tell()...
                     let fpos = match f.seek(SeekFrom::Current(0)) {
                         Ok(fpos) => fpos,
-                        Err(_) => break 'outer mos::FR_DISK_ERR
+                        Err(_) => break 'outer mos::FR_DISK_ERR,
                     };
-                    // copy to agon ram 
+                    // copy to agon ram
                     for b in host_buf {
                         self.poke(buf, b);
                         buf += 1;
@@ -712,21 +822,36 @@ impl AgonMachine {
         env.subroutine_return();
     }
 
-    fn hostfs_set_filinfo_from_metadata(&mut self, z80_filinfo_ptr: u32, path: &std::path::PathBuf, metadata: &std::fs::Metadata) {
+    fn hostfs_set_filinfo_from_metadata(
+        &mut self,
+        z80_filinfo_ptr: u32,
+        path: &std::path::PathBuf,
+        metadata: &std::fs::Metadata,
+    ) {
         // XXX to_str can fail if not utf-8
         // write file name
         z80_mem_tools::memcpy_to_z80(
-            self, z80_filinfo_ptr + mos::FILINFO_MEMBER_FNAME_256BYTES,
-            path.file_name().unwrap().to_str().unwrap().as_bytes()
+            self,
+            z80_filinfo_ptr + mos::FILINFO_MEMBER_FNAME_256BYTES,
+            path.file_name().unwrap().to_str().unwrap().as_bytes(),
         );
 
         // write file length (U32)
-        self._poke24(z80_filinfo_ptr + mos::FILINFO_MEMBER_FSIZE_U32, metadata.len() as u32);
-        self.poke(z80_filinfo_ptr + mos::FILINFO_MEMBER_FSIZE_U32 + 3, (metadata.len() >> 24) as u8);
+        self._poke24(
+            z80_filinfo_ptr + mos::FILINFO_MEMBER_FSIZE_U32,
+            metadata.len() as u32,
+        );
+        self.poke(
+            z80_filinfo_ptr + mos::FILINFO_MEMBER_FSIZE_U32 + 3,
+            (metadata.len() >> 24) as u8,
+        );
 
         // is directory?
         if metadata.is_dir() {
-            self.poke(z80_filinfo_ptr + mos::FILINFO_MEMBER_FATTRIB_U8, 0x10 /* AM_DIR */);
+            self.poke(
+                z80_filinfo_ptr + mos::FILINFO_MEMBER_FATTRIB_U8,
+                0x10, /* AM_DIR */
+            );
         }
 
         // set fdate, ftime
@@ -744,10 +869,22 @@ impl AgonMachine {
             fil_time |= local_mtime.second() as u16;
         }
 
-        self.poke(z80_filinfo_ptr + mos::FILINFO_MEMBER_FDATE_U16, fil_date as u8);
-        self.poke(z80_filinfo_ptr + mos::FILINFO_MEMBER_FDATE_U16 + 1, (fil_date >> 8) as u8);
-        self.poke(z80_filinfo_ptr + mos::FILINFO_MEMBER_FTIME_U16, fil_time as u8);
-        self.poke(z80_filinfo_ptr + mos::FILINFO_MEMBER_FTIME_U16 + 1, (fil_time >> 8) as u8);
+        self.poke(
+            z80_filinfo_ptr + mos::FILINFO_MEMBER_FDATE_U16,
+            fil_date as u8,
+        );
+        self.poke(
+            z80_filinfo_ptr + mos::FILINFO_MEMBER_FDATE_U16 + 1,
+            (fil_date >> 8) as u8,
+        );
+        self.poke(
+            z80_filinfo_ptr + mos::FILINFO_MEMBER_FTIME_U16,
+            fil_time as u8,
+        );
+        self.poke(
+            z80_filinfo_ptr + mos::FILINFO_MEMBER_FTIME_U16 + 1,
+            (fil_time >> 8) as u8,
+        );
     }
 
     fn hostfs_mos_f_readdir(&mut self, cpu: &mut Cpu) {
@@ -759,7 +896,6 @@ impl AgonMachine {
 
         match self.open_dirs.get_mut(&dir_ptr) {
             Some(dir) => {
-
                 match dir.next() {
                     Some(Ok(dir_entry)) => {
                         let path = dir_entry.path();
@@ -771,8 +907,9 @@ impl AgonMachine {
                         } else {
                             // hm. why might std::fs::metadata fail?
                             z80_mem_tools::memcpy_to_z80(
-                                self, file_info_ptr + mos::FILINFO_MEMBER_FNAME_256BYTES,
-                                "<error reading file metadata>".as_bytes()
+                                self,
+                                file_info_ptr + mos::FILINFO_MEMBER_FNAME_256BYTES,
+                                "<error reading file metadata>".as_bytes(),
                             );
                             cpu.state.reg.set24(Reg16::HL, 0);
                         }
@@ -800,7 +937,10 @@ impl AgonMachine {
 
     fn hostfs_mos_f_mkdir(&mut self, cpu: &mut Cpu) {
         let dir_name = unsafe {
-            String::from_utf8_unchecked(mos::get_mos_path_string(self, self._peek24(cpu.state.sp() + 3)))
+            String::from_utf8_unchecked(mos::get_mos_path_string(
+                self,
+                self._peek24(cpu.state.sp() + 3),
+            ))
         };
         //eprintln!("f_mkdir(\"{}\")", dir_name);
 
@@ -819,29 +959,35 @@ impl AgonMachine {
 
     fn hostfs_mos_f_rename(&mut self, cpu: &mut Cpu) {
         let old_name = unsafe {
-            String::from_utf8_unchecked(mos::get_mos_path_string(self, self._peek24(cpu.state.sp() + 3)))
+            String::from_utf8_unchecked(mos::get_mos_path_string(
+                self,
+                self._peek24(cpu.state.sp() + 3),
+            ))
         };
         let new_name = unsafe {
-            String::from_utf8_unchecked(mos::get_mos_path_string(self, self._peek24(cpu.state.sp() + 6)))
+            String::from_utf8_unchecked(mos::get_mos_path_string(
+                self,
+                self._peek24(cpu.state.sp() + 6),
+            ))
         };
         //eprintln!("f_rename(\"{}\", \"{}\")", old_name, new_name);
 
-        match std::fs::rename(self.host_path_from_mos_path_join(&old_name),
-                              self.host_path_from_mos_path_join(&new_name)) {
+        match std::fs::rename(
+            self.host_path_from_mos_path_join(&old_name),
+            self.host_path_from_mos_path_join(&new_name),
+        ) {
             Ok(_) => {
                 // success
                 cpu.state.reg.set24(Reg16::HL, 0);
             }
-            Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        cpu.state.reg.set24(Reg16::HL, 4);
-                    }
-                    _ => {
-                        cpu.state.reg.set24(Reg16::HL, 1);
-                    }
+            Err(e) => match e.kind() {
+                std::io::ErrorKind::NotFound => {
+                    cpu.state.reg.set24(Reg16::HL, 4);
                 }
-            }
+                _ => {
+                    cpu.state.reg.set24(Reg16::HL, 1);
+                }
+            },
         }
         Environment::new(&mut cpu.state, self).subroutine_return();
     }
@@ -866,16 +1012,14 @@ impl AgonMachine {
                     cpu.state.reg.set24(Reg16::HL, 1);
                 }
             }
-            Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        cpu.state.reg.set24(Reg16::HL, 4);
-                    }
-                    _ => {
-                        cpu.state.reg.set24(Reg16::HL, 1);
-                    }
+            Err(e) => match e.kind() {
+                std::io::ErrorKind::NotFound => {
+                    cpu.state.reg.set24(Reg16::HL, 4);
                 }
-            }
+                _ => {
+                    cpu.state.reg.set24(Reg16::HL, 1);
+                }
+            },
         }
         Environment::new(&mut cpu.state, self).subroutine_return();
     }
@@ -888,25 +1032,22 @@ impl AgonMachine {
 
     fn hostfs_mos_f_unlink(&mut self, cpu: &mut Cpu) {
         let filename_ptr = self._peek24(cpu.state.sp() + 3);
-        let filename = unsafe {
-            String::from_utf8_unchecked(mos::get_mos_path_string(self, filename_ptr))
-        };
+        let filename =
+            unsafe { String::from_utf8_unchecked(mos::get_mos_path_string(self, filename_ptr)) };
         //eprintln!("f_unlink(\"{}\")", filename);
 
         match std::fs::remove_file(self.host_path_from_mos_path_join(&filename)) {
             Ok(()) => {
                 cpu.state.reg.set24(Reg16::HL, 0); // ok
             }
-            Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        cpu.state.reg.set24(Reg16::HL, 4);
-                    }
-                    _ => {
-                        cpu.state.reg.set24(Reg16::HL, 1);
-                    }
+            Err(e) => match e.kind() {
+                std::io::ErrorKind::NotFound => {
+                    cpu.state.reg.set24(Reg16::HL, 4);
                 }
-            }
+                _ => {
+                    cpu.state.reg.set24(Reg16::HL, 1);
+                }
+            },
         };
 
         Environment::new(&mut cpu.state, self).subroutine_return();
@@ -925,21 +1066,19 @@ impl AgonMachine {
         match std::fs::read_dir(self.host_path_from_mos_path_join(&path)) {
             Ok(dir) => {
                 // XXX should clear the DIR struct in z80 ram
-                
+
                 // store in map of z80 DIR ptr to rust ReadDir
                 self.open_dirs.insert(dir_ptr, dir);
                 cpu.state.reg.set24(Reg16::HL, 0); // ok
             }
-            Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        cpu.state.reg.set24(Reg16::HL, 4);
-                    }
-                    _ => {
-                        cpu.state.reg.set24(Reg16::HL, 1);
-                    }
+            Err(e) => match e.kind() {
+                std::io::ErrorKind::NotFound => {
+                    cpu.state.reg.set24(Reg16::HL, 4);
                 }
-            }
+                _ => {
+                    cpu.state.reg.set24(Reg16::HL, 1);
+                }
+            },
         }
 
         cpu.state.reg.set24(Reg16::HL, 0); // ok
@@ -957,7 +1096,7 @@ impl AgonMachine {
     fn mos_path_join(&mut self, new_fragments: &str) -> MosPath {
         let mut full_path = match new_fragments.get(0..1) {
             Some("/") | Some("\\") => std::path::PathBuf::new(),
-            _ => self.mos_current_dir.0.clone()
+            _ => self.mos_current_dir.0.clone(),
         };
 
         for fragment in new_fragments.split(|c| c == '/' || c == '\\') {
@@ -971,15 +1110,16 @@ impl AgonMachine {
                 }
                 f => {
                     let abs_path = self.hostfs_root_dir.join(&full_path);
-                    
+
                     // look for a case-insensitive match for this path fragment
                     let matched_f = match std::fs::read_dir(abs_path) {
                         Ok(dir) => {
-                            if let Some(ci_f) = dir.into_iter().find(|item| {
-                                match item {
-                                    Ok(dir_entry) => dir_entry.file_name().to_ascii_lowercase().into_string() == Ok(f.to_ascii_lowercase()),
-                                    Err(_) => false
+                            if let Some(ci_f) = dir.into_iter().find(|item| match item {
+                                Ok(dir_entry) => {
+                                    dir_entry.file_name().to_ascii_lowercase().into_string()
+                                        == Ok(f.to_ascii_lowercase())
                                 }
+                                Err(_) => false,
                             }) {
                                 // found a case-insensitive match
                                 ci_f.unwrap().file_name()
@@ -987,9 +1127,7 @@ impl AgonMachine {
                                 std::ffi::OsString::from(f)
                             }
                         }
-                        Err(_) => {
-                            std::ffi::OsString::from(f)
-                        }
+                        Err(_) => std::ffi::OsString::from(f),
                     };
 
                     full_path.push(matched_f);
@@ -1068,9 +1206,7 @@ impl AgonMachine {
     fn hostfs_mos_f_stat(&mut self, cpu: &mut Cpu) {
         let path_str = {
             let ptr = self._peek24(cpu.state.sp() + 3);
-            unsafe {
-                String::from_utf8_unchecked(mos::get_mos_path_string(self, ptr))
-            }
+            unsafe { String::from_utf8_unchecked(mos::get_mos_path_string(self, ptr)) }
         };
         let filinfo_ptr = self._peek24(cpu.state.sp() + 6);
         let path = self.host_path_from_mos_path_join(&path_str);
@@ -1086,16 +1222,14 @@ impl AgonMachine {
                 // success
                 cpu.state.reg.set24(Reg16::HL, 0);
             }
-            Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        cpu.state.reg.set24(Reg16::HL, 4);
-                    }
-                    _ => {
-                        cpu.state.reg.set24(Reg16::HL, 1);
-                    }
+            Err(e) => match e.kind() {
+                std::io::ErrorKind::NotFound => {
+                    cpu.state.reg.set24(Reg16::HL, 4);
                 }
-            }
+                _ => {
+                    cpu.state.reg.set24(Reg16::HL, 1);
+                }
+            },
         }
 
         Environment::new(&mut cpu.state, self).subroutine_return();
@@ -1106,9 +1240,7 @@ impl AgonMachine {
         let filename = {
             let ptr = self._peek24(cpu.state.sp() + 6);
             // MOS filenames may not be valid utf-8
-            unsafe {
-                String::from_utf8_unchecked(mos::get_mos_path_string(self, ptr))
-            }
+            unsafe { String::from_utf8_unchecked(mos::get_mos_path_string(self, ptr)) }
         };
         let path = self.mos_path_join(&filename);
         let mode = self._peek24(cpu.state.sp() + 9);
@@ -1116,7 +1248,7 @@ impl AgonMachine {
             if !metadata.is_file() {
                 cpu.state.reg.set24(Reg16::HL, 4);
                 Environment::new(&mut cpu.state, self).subroutine_return();
-                return
+                return;
             }
         }
         //eprintln!("f_open(${:x}, \"{}\", {})", fptr, &filename, mode);
@@ -1125,7 +1257,8 @@ impl AgonMachine {
             .write(mode & mos::FA_WRITE != 0)
             .create((mode & mos::FA_CREATE_NEW != 0) || (mode & mos::FA_CREATE_ALWAYS != 0))
             .truncate(mode & mos::FA_CREATE_ALWAYS != 0)
-            .open(self.mos_path_to_host_path(&path)) {
+            .open(self.mos_path_to_host_path(&path))
+        {
             Ok(mut f) => {
                 // wipe the FIL structure
                 z80_mem_tools::memset(self, fptr, 0, mos::SIZEOF_MOS_FIL_STRUCT);
@@ -1135,22 +1268,20 @@ impl AgonMachine {
                 f.seek(SeekFrom::Start(0)).unwrap();
 
                 // XXX don't support files larger than 512KiB
-                file_len = file_len.min(1<<19);
+                file_len = file_len.min(1 << 19);
 
                 // store file len in fatfs FIL structure
                 self._poke24(fptr + mos::FIL_MEMBER_OBJSIZE, file_len as u32);
-                
+
                 // store mapping from MOS *FIL to rust File
                 self.open_files.insert(fptr, f);
 
                 cpu.state.reg.set24(Reg16::HL, 0); // ok
             }
-            Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => cpu.state.reg.set24(Reg16::HL, 4),
-                    _ => cpu.state.reg.set24(Reg16::HL, 1)
-                }
-            }
+            Err(e) => match e.kind() {
+                std::io::ErrorKind::NotFound => cpu.state.reg.set24(Reg16::HL, 4),
+                _ => cpu.state.reg.set24(Reg16::HL, 1),
+            },
         }
         Environment::new(&mut cpu.state, self).subroutine_return();
     }
@@ -1165,25 +1296,63 @@ impl AgonMachine {
         self.last_pc = pc;
 
         if self.enable_hostfs && pc < 0x20000 && self.flash_addr_u == 0 {
-            if pc == self.mos_map.f_close { self.hostfs_mos_f_close(cpu); }
-            if pc == self.mos_map.f_gets { self.hostfs_mos_f_gets(cpu); }
-            if pc == self.mos_map.f_read { self.hostfs_mos_f_read(cpu); }
-            if pc == self.mos_map.f_open { self.hostfs_mos_f_open(cpu); }
-            if pc == self.mos_map.f_write { self.hostfs_mos_f_write(cpu); }
-            if pc == self.mos_map.f_chdir { self.hostfs_mos_f_chdir(cpu); }
-            if pc == self.mos_map.f_closedir { self.hostfs_mos_f_closedir(cpu); }
-            if pc == self.mos_map.f_getlabel { self.hostfs_mos_f_getlabel(cpu); }
-            if pc == self.mos_map.f_getcwd { self.hostfs_mos_f_getcwd(cpu); }
-            if pc == self.mos_map.f_lseek { self.hostfs_mos_f_lseek(cpu); }
-            if pc == self.mos_map.f_mkdir { self.hostfs_mos_f_mkdir(cpu); }
-            if pc == self.mos_map.f_mount { self.hostfs_mos_f_mount(cpu); }
-            if pc == self.mos_map.f_opendir { self.hostfs_mos_f_opendir(cpu); }
-            if pc == self.mos_map.f_putc { self.hostfs_mos_f_putc(cpu); }
-            if pc == self.mos_map.f_readdir { self.hostfs_mos_f_readdir(cpu); }
-            if pc == self.mos_map.f_rename { self.hostfs_mos_f_rename(cpu); }
-            if pc == self.mos_map.f_stat { self.hostfs_mos_f_stat(cpu); }
-            if pc == self.mos_map.f_unlink { self.hostfs_mos_f_unlink(cpu); }
-            if pc == self.mos_map.f_truncate { self.hostfs_mos_f_truncate(cpu); }
+            if pc == self.mos_map.f_close {
+                self.hostfs_mos_f_close(cpu);
+            }
+            if pc == self.mos_map.f_gets {
+                self.hostfs_mos_f_gets(cpu);
+            }
+            if pc == self.mos_map.f_read {
+                self.hostfs_mos_f_read(cpu);
+            }
+            if pc == self.mos_map.f_open {
+                self.hostfs_mos_f_open(cpu);
+            }
+            if pc == self.mos_map.f_write {
+                self.hostfs_mos_f_write(cpu);
+            }
+            if pc == self.mos_map.f_chdir {
+                self.hostfs_mos_f_chdir(cpu);
+            }
+            if pc == self.mos_map.f_closedir {
+                self.hostfs_mos_f_closedir(cpu);
+            }
+            if pc == self.mos_map.f_getlabel {
+                self.hostfs_mos_f_getlabel(cpu);
+            }
+            if pc == self.mos_map.f_getcwd {
+                self.hostfs_mos_f_getcwd(cpu);
+            }
+            if pc == self.mos_map.f_lseek {
+                self.hostfs_mos_f_lseek(cpu);
+            }
+            if pc == self.mos_map.f_mkdir {
+                self.hostfs_mos_f_mkdir(cpu);
+            }
+            if pc == self.mos_map.f_mount {
+                self.hostfs_mos_f_mount(cpu);
+            }
+            if pc == self.mos_map.f_opendir {
+                self.hostfs_mos_f_opendir(cpu);
+            }
+            if pc == self.mos_map.f_putc {
+                self.hostfs_mos_f_putc(cpu);
+            }
+            if pc == self.mos_map.f_readdir {
+                self.hostfs_mos_f_readdir(cpu);
+            }
+            if pc == self.mos_map.f_rename {
+                self.hostfs_mos_f_rename(cpu);
+            }
+            if pc == self.mos_map.f_stat {
+                self.hostfs_mos_f_stat(cpu);
+            }
+            if pc == self.mos_map.f_unlink {
+                self.hostfs_mos_f_unlink(cpu);
+            }
+            if pc == self.mos_map.f_truncate {
+                self.hostfs_mos_f_truncate(cpu);
+            }
             // never referenced in MOS
             //if pc == self.mos_map._f_puts { eprintln!("Un-trapped fatfs call: f_puts"); }
             //if pc == self.mos_map._f_setlabel { eprintln!("Un-trapped fatfs call: f_setlabel"); }
@@ -1209,12 +1378,17 @@ impl AgonMachine {
     }
 
     #[inline]
-    pub fn fire_gpio_interrupts(&mut self, cpu: &mut Cpu, vector_base: u32, interrupts_due: u8) -> bool {
+    pub fn fire_gpio_interrupts(
+        &mut self,
+        cpu: &mut Cpu,
+        vector_base: u32,
+        interrupts_due: u8,
+    ) -> bool {
         if interrupts_due != 0 {
             let mut env = Environment::new(&mut cpu.state, self);
             for pin in 0..=7 {
-                if interrupts_due & (1<<pin) != 0 {
-                    env.interrupt(vector_base + 2*pin);
+                if interrupts_due & (1 << pin) != 0 {
+                    env.interrupt(vector_base + 2 * pin);
                     return true;
                 }
             }
@@ -1233,7 +1407,8 @@ impl AgonMachine {
                 cpu.state.reg.adl = true;
                 cpu.state.reg.madl = true;
                 cpu.state.set_pc(0);
-                self.soft_reset.store(false, std::sync::atomic::Ordering::Relaxed);
+                self.soft_reset
+                    .store(false, std::sync::atomic::Ordering::Relaxed);
                 return;
             }
         }
@@ -1242,14 +1417,16 @@ impl AgonMachine {
             // Interrupts in priority order
             for i in 0..self.prt_timers.len() {
                 if self.prt_timers[i].irq_due() {
-                    Environment::new(&mut cpu.state, self).interrupt(0xa + 2*(i as u32));
+                    Environment::new(&mut cpu.state, self).interrupt(0xa + 2 * (i as u32));
                     return;
                 }
             }
 
             // fire uart interrupt
             if self.uart0.is_rx_interrupt_enabled() && self.uart0.maybe_fill_rx_buf() != None || // character(s) received
-               self.uart0.ier & 0x02 != 0 { // character(s) to send
+               self.uart0.ier & 0x02 != 0
+            {
+                // character(s) to send
                 let mut env = Environment::new(&mut cpu.state, self);
                 //println!("uart interrupt!");
                 env.interrupt(0x18); // uart0_handler
@@ -1328,7 +1505,9 @@ impl AgonMachine {
             let mut cycle: u64 = 0;
             while cycle < cycles_per_ms {
                 self.debugger_tick(&mut debugger, &mut cpu);
-                if self.paused { break; }
+                if self.paused {
+                    break;
+                }
                 self.do_interrupts(&mut cpu);
                 cycle += self.execute_instruction(&mut cpu) as u64;
             }
@@ -1336,9 +1515,9 @@ impl AgonMachine {
             while timeslice_start.elapsed() < std::time::Duration::from_millis(1) {
                 std::thread::sleep(std::time::Duration::from_micros(500));
             }
-            timeslice_start = timeslice_start.checked_add(
-                std::time::Duration::from_millis(1)
-            ).unwrap_or(std::time::Instant::now());
+            timeslice_start = timeslice_start
+                .checked_add(std::time::Duration::from_millis(1))
+                .unwrap_or(std::time::Instant::now());
         }
     }
 }

@@ -19,7 +19,7 @@ pub struct Uart {
     fctl: u8,
     // Line control register
     pub lctl: u8, // lctl & 0x80 enables access to baud rate generator
-                  // registers where rbr/thr and ier are normally accessed
+    // registers where rbr/thr and ier are normally accessed
     pub brg_div: u16,
     // scratch pad register
     pub spr: u8,
@@ -33,7 +33,12 @@ impl Uart {
             link,
             transmit_cooldown: 0,
             tx_fifo: vec![],
-            ier: 0, fctl: 0, lctl: 0, brg_div: 2, spr: 0, rx_buf: None
+            ier: 0,
+            fctl: 0,
+            lctl: 0,
+            brg_div: 2,
+            spr: 0,
+            rx_buf: None,
         }
     }
 
@@ -50,8 +55,9 @@ impl Uart {
     }
 
     pub fn send_byte(&mut self, value: u8) {
-        if (self.tx_fifo.len() < 16 && self.fctl & FCTL_FIFOEN != 0) ||
-           (self.tx_fifo.is_empty() && self.fctl & FCTL_FIFOEN == 0) {
+        if (self.tx_fifo.len() < 16 && self.fctl & FCTL_FIFOEN != 0)
+            || (self.tx_fifo.is_empty() && self.fctl & FCTL_FIFOEN == 0)
+        {
             self.tx_fifo.push(value);
         } else {
             // drop the data. the ez80 was pushing data too fast
@@ -74,7 +80,7 @@ impl Uart {
 
         match maybe_data {
             Some(data) => data,
-            None => 0
+            None => 0,
         }
     }
 
@@ -93,7 +99,11 @@ impl Uart {
     }
 
     pub fn read_modem_status_register(&mut self) -> u8 {
-        if self.link.read_clear_to_send() { 0x10 } else { 0 }
+        if self.link.read_clear_to_send() {
+            0x10
+        } else {
+            0
+        }
     }
 
     /*

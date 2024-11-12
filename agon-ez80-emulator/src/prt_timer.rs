@@ -1,4 +1,4 @@
-// ez80f92 programmable reload timer 
+// ez80f92 programmable reload timer
 
 #[derive(Debug)]
 pub struct PrtTimer {
@@ -14,7 +14,6 @@ pub struct PrtTimer {
     counter: u16,
     step_: u16,
     latch_counter_high: u8,
-
     //t_: std::time::Instant
 }
 
@@ -25,7 +24,11 @@ const PRT_MODE: u8 = 0x10;
 impl PrtTimer {
     pub fn new() -> Self {
         PrtTimer {
-            ctl: 0, reload: 0, counter: 0, step_: 0, latch_counter_high: 0,
+            ctl: 0,
+            reload: 0,
+            counter: 0,
+            step_: 0,
+            latch_counter_high: 0,
             //t_: std::time::Instant::now()
         }
     }
@@ -67,13 +70,15 @@ impl PrtTimer {
             1 => 16,
             2 => 64,
             3 => 256,
-            _ => panic!()
+            _ => panic!(),
         }
     }
 
     // intended to be called per-instruction, so clock_ticks should be < 8
     pub fn apply_ticks(&mut self, clock_ticks: u16) {
-        if self.ctl & PRT_EN == 0 { return }
+        if self.ctl & PRT_EN == 0 {
+            return;
+        }
         if self.ctl & RST_EN != 0 {
             self.counter = self.reload;
             self.ctl &= !RST_EN;

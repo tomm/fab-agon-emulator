@@ -21,7 +21,9 @@ impl I2c {
         0x20 << 3
     }
 
-    pub fn get_ctl(&self) -> u8 { self.ctl }
+    pub fn get_ctl(&self) -> u8 {
+        self.ctl
+    }
 
     pub fn set_ctl(&mut self, val: u8) {
         self.ctl = val;

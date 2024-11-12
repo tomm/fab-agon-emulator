@@ -52,7 +52,9 @@ pub struct MosMap {
 }
 
 impl MosMap {
-    pub fn from_symbol_map(map: std::collections::HashMap<String, u32>) -> Result<MosMap, &'static str> {
+    pub fn from_symbol_map(
+        map: std::collections::HashMap<String, u32>,
+    ) -> Result<MosMap, &'static str> {
         let mut mos_map = MosMap::default();
         let err = "Missing MOS FS symbol in symbol map";
 
@@ -97,7 +99,7 @@ pub fn get_mos_path_string<M: Machine>(machine: &M, address: u32) -> Vec<u8> {
     loop {
         match machine.peek(ptr) {
             0 | 10 | 13 => break,
-            b => s.push(b)
+            b => s.push(b),
         }
         ptr += 1;
     }

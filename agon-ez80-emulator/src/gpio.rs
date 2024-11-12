@@ -1,7 +1,7 @@
 pub struct GpioSet {
     pub b: Gpio,
     pub c: Gpio,
-    pub d: Gpio
+    pub d: Gpio,
 }
 
 impl GpioSet {
@@ -28,7 +28,12 @@ pub struct Gpio {
 impl Gpio {
     pub fn new() -> Self {
         Gpio {
-            io_level: 0, dr: 0, ddr: 0xff, alt1: 0, alt2: 0, interrupt_due: 0
+            io_level: 0,
+            dr: 0,
+            ddr: 0xff,
+            alt1: 0,
+            alt2: 0,
+            interrupt_due: 0,
         }
     }
 
@@ -37,23 +42,31 @@ impl Gpio {
         self.set_input_pins(level);
     }
 
-    pub fn get_interrupt_due(&mut self) -> u8 { self.interrupt_due }
+    pub fn get_interrupt_due(&mut self) -> u8 {
+        self.interrupt_due
+    }
 
     // Note these aren't the mode numbers zilog docs use, but these made more sense
     // - pin 0..=7
     pub fn get_mode(&self, pin: u8) -> u8 {
-        let mask = 1<<pin;
-        let mode = if self.dr & mask != 0 { 1 } else { 0 } +
-                   if self.ddr & mask != 0 { 2 } else { 0 } +
-                   if self.alt1 & mask != 0 { 4 } else { 0 } +
-                   if self.alt2 & mask != 0 { 8 } else { 0 };
+        let mask = 1 << pin;
+        let mode = if self.dr & mask != 0 { 1 } else { 0 }
+            + if self.ddr & mask != 0 { 2 } else { 0 }
+            + if self.alt1 & mask != 0 { 4 } else { 0 }
+            + if self.alt2 & mask != 0 { 8 } else { 0 };
         assert!(mode < 16);
         mode
     }
-    
-    pub fn get_ddr(&self) -> u8 { self.ddr }
-    pub fn get_alt1(&self) -> u8 { self.alt1 }
-    pub fn get_alt2(&self) -> u8 { self.alt2 }
+
+    pub fn get_ddr(&self) -> u8 {
+        self.ddr
+    }
+    pub fn get_alt1(&self) -> u8 {
+        self.alt1
+    }
+    pub fn get_alt2(&self) -> u8 {
+        self.alt2
+    }
     pub fn set_ddr(&mut self, val: u8) {
         let modified = self.ddr ^ val;
         self.ddr = val;
@@ -77,7 +90,7 @@ impl Gpio {
     pub fn set_dr(&mut self, dr: u8) {
         for pin in 0..=7 {
             let mode = self.get_mode(pin);
-            let mask = 1<<pin;
+            let mask = 1 << pin;
             match mode {
                 // output
                 0 | 1 |
@@ -140,12 +153,14 @@ impl Gpio {
         }
     }
 
-    pub fn get_output_level(&mut self) -> u8 { self.io_level }
+    pub fn get_output_level(&mut self) -> u8 {
+        self.io_level
+    }
 
     // pin: [0..7]
     pub fn set_input_pin(&mut self, pin: u8, state: bool) {
         let level = self.get_output_level();
-        let bit = 1<<pin;
+        let bit = 1 << pin;
         self.set_input_pins(if state { level | bit } else { level & !bit });
     }
 
@@ -155,7 +170,7 @@ impl Gpio {
 
         for pin in 0..=7 {
             let mode = self.get_mode(pin);
-            let mask = 1<<pin;
+            let mask = 1 << pin;
             match mode {
                 // output
                 0 | 1 => {}
@@ -189,7 +204,7 @@ impl Gpio {
                 15 => {
                     self.interrupt_due |= mask & ((old_levels ^ levels) & levels);
                 }
-                _ => panic!()
+                _ => panic!(),
             }
         }
     }
