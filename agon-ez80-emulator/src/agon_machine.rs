@@ -949,9 +949,22 @@ impl AgonMachine {
                 // success
                 cpu.state.reg.set24(Reg16::HL, 0);
             }
-            Err(_) => {
+            Err(e) => {
                 // error
-                cpu.state.reg.set24(Reg16::HL, 1);
+                match e.kind() {
+                    std::io::ErrorKind::AlreadyExists => {
+                        // directory already exists - we return "access denied"
+                        cpu.state.reg.set24(Reg16::HL, 8);
+                    }
+                    std::io::ErrorKind::NotFound => {
+                        // parent directory does not exist
+                        cpu.state.reg.set24(Reg16::HL, 5);
+                    }
+                    _ => {
+                        // eprintln!("Error creating directory: {:?}", e);
+                        cpu.state.reg.set24(Reg16::HL, 1);
+                    }
+                }
             }
         }
         Environment::new(&mut cpu.state, self).subroutine_return();
@@ -1031,24 +1044,53 @@ impl AgonMachine {
     }
 
     fn hostfs_mos_f_unlink(&mut self, cpu: &mut Cpu) {
-        let filename_ptr = self._peek24(cpu.state.sp() + 3);
-        let filename =
-            unsafe { String::from_utf8_unchecked(mos::get_mos_path_string(self, filename_ptr)) };
-        //eprintln!("f_unlink(\"{}\")", filename);
-
-        match std::fs::remove_file(self.host_path_from_mos_path_join(&filename)) {
-            Ok(()) => {
-                cpu.state.reg.set24(Reg16::HL, 0); // ok
-            }
-            Err(e) => match e.kind() {
-                std::io::ErrorKind::NotFound => {
-                    cpu.state.reg.set24(Reg16::HL, 4);
-                }
-                _ => {
-                    cpu.state.reg.set24(Reg16::HL, 1);
-                }
-            },
+        let path_str = {
+            let ptr = self._peek24(cpu.state.sp() + 3);
+            unsafe { String::from_utf8_unchecked(mos::get_mos_path_string(self, ptr)) }
         };
+        let mut path = self.host_path_from_mos_path_join(&path_str);
+        // eprintln!("f_unlink(\"{}\")", path_str);
+
+        if path.exists() && path.is_dir() {
+            match std::fs::remove_dir(&path) {
+                Ok(_) => {
+                    cpu.state.reg.set24(Reg16::HL, 0); // ok
+                }
+                Err(_) => {
+                    cpu.state.reg.set24(Reg16::HL, 7);
+                }
+            }
+        } else {
+            match std::fs::remove_file(&path) {
+                Ok(_) => {
+                    cpu.state.reg.set24(Reg16::HL, 0); // ok
+                }
+                Err(e) => match e.kind() {
+                    std::io::ErrorKind::NotFound => {
+                        let leafname = path.file_name().unwrap().to_str().unwrap().to_string();
+                        if path.pop() {
+                            if path.exists() {
+                                // if our leafname included a wildcard (* or ?), then we should return 6 (invalid name)
+                                if leafname.contains('*') || leafname.contains('?') {
+                                    cpu.state.reg.set24(Reg16::HL, 6);
+                                } else {
+                                    // if the directory exists, then the file does not exist
+                                    cpu.state.reg.set24(Reg16::HL, 4);
+                                }
+                            } else {
+                                cpu.state.reg.set24(Reg16::HL, 5);
+                            }
+                        } else {
+                            cpu.state.reg.set24(Reg16::HL, 4);
+                        }
+                    }
+                    _ => {
+                        // eprintln!("Error removing file: {:?}", e);
+                        cpu.state.reg.set24(Reg16::HL, 1);
+                    }
+                },
+            };
+        }
 
         Environment::new(&mut cpu.state, self).subroutine_return();
     }
@@ -1073,7 +1115,7 @@ impl AgonMachine {
             }
             Err(e) => match e.kind() {
                 std::io::ErrorKind::NotFound => {
-                    cpu.state.reg.set24(Reg16::HL, 4);
+                    cpu.state.reg.set24(Reg16::HL, 5);
                 }
                 _ => {
                     cpu.state.reg.set24(Reg16::HL, 1);
@@ -1081,7 +1123,6 @@ impl AgonMachine {
             },
         }
 
-        cpu.state.reg.set24(Reg16::HL, 0); // ok
         let mut env = Environment::new(&mut cpu.state, self);
         env.subroutine_return();
     }
@@ -1209,7 +1250,7 @@ impl AgonMachine {
             unsafe { String::from_utf8_unchecked(mos::get_mos_path_string(self, ptr)) }
         };
         let filinfo_ptr = self._peek24(cpu.state.sp() + 6);
-        let path = self.host_path_from_mos_path_join(&path_str);
+        let mut path = self.host_path_from_mos_path_join(&path_str);
         //eprintln!("f_stat(\"{}\", ${:x})", path_str, filinfo_ptr);
 
         match std::fs::metadata(&path) {
@@ -1224,7 +1265,22 @@ impl AgonMachine {
             }
             Err(e) => match e.kind() {
                 std::io::ErrorKind::NotFound => {
-                    cpu.state.reg.set24(Reg16::HL, 4);
+                    let leafname = path.file_name().unwrap().to_str().unwrap().to_string();
+                    if path.pop() {
+                        if path.exists() {
+                            // if our leafname included a wildcard (* or ?), then we should return 6 (invalid name)
+                            if leafname.contains('*') || leafname.contains('?') {
+                                cpu.state.reg.set24(Reg16::HL, 6);
+                            } else {
+                                // if the directory exists, then the file does not exist
+                                cpu.state.reg.set24(Reg16::HL, 4);
+                            }
+                        } else {
+                            cpu.state.reg.set24(Reg16::HL, 5);
+                        }
+                    } else {
+                        cpu.state.reg.set24(Reg16::HL, 4);
+                    }
                 }
                 _ => {
                     cpu.state.reg.set24(Reg16::HL, 1);
