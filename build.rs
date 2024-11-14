@@ -7,9 +7,7 @@ fn main() {
         println!("cargo:rustc-link-search=./SDL2/x86_64-w64-mingw32/lib");
     }
 
-    if target_os != "windows"
-        && target_os != "macos"
-    {
+    if target_os != "windows" && target_os != "macos" {
         system_deps::Config::new().probe().unwrap();
     }
     if std::env::var("FORCE").is_err() {
