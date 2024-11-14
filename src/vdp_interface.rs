@@ -55,9 +55,9 @@ pub fn init(firmware_paths: Vec<std::path::PathBuf>, verbose: bool) -> VdpInterf
 
     for p in &firmware_paths {
         match unsafe { libloading::Library::new(p) } {
-            Ok(ref lib) => {
+            Ok(lib) => {
                 unsafe {
-                    VDP_DLL = lib;
+                    VDP_DLL = Box::leak(Box::new(lib));
                 }
                 return VdpInterface::new(unsafe { VDP_DLL.as_ref() }.unwrap());
             }
