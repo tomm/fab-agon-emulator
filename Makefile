@@ -41,8 +41,8 @@ else
 endif
 
 cargo-clean:
-	cargo clean
 	rm -f fab-agon-emulator
+	cargo clean
 
 clean: vdp-clean cargo-clean
 

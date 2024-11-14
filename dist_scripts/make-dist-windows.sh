@@ -9,10 +9,8 @@
 # download SDL2 libs for mingw:
 # https://github.com/libsdl-org/SDL/releases/download/release-2.28.3/SDL2-devel-2.28.3-mingw.tar.gz
 #
-# extract, copy contents of x86_64-w64-mingw32/lib to
-# $HOME/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib
-#
-# copy bin/SDL2.dll to .
+# extract into fab-agon-emulator project root, rename directory from SDL2-2.28.3 to SDL2
+# copy SDL2/x86_64-w64-mingw32/bin/SDL2.dll to .
 #
 # locate libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll (posix threads version) somewhere
 # in /usr/..... , and copy to .
@@ -42,5 +40,5 @@ cp LICENSE README.md $DIST_DIR
 mkdir $DIST_DIR/sdcard
 cp -r sdcard/* $DIST_DIR/sdcard/
 x86_64-w64-mingw32-strip $DIST_DIR/firmware/*.so $DIST_DIR/*.exe $DIST_DIR/*.dll
-zip -r $DIST_DIR.zip $DIST_DIR
+zip -r ./artifacts/$DIST_DIR.zip $DIST_DIR
 

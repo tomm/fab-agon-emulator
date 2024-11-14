@@ -13,4 +13,5 @@ cp -r ./firmware $DIST_DIR
 cp LICENSE README.md $DIST_DIR
 mkdir $DIST_DIR/sdcard
 cp -r sdcard/* $DIST_DIR/sdcard/
-tar cvjf $DIST_DIR.tar.bz2 $DIST_DIR
+strip $DIST_DIR/firmware/*.so $DIST_DIR/fab-agon-emulator
+tar cvjf ./artifacts/$DIST_DIR.tar.bz2 $DIST_DIR
