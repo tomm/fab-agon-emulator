@@ -1,0 +1,5 @@
+target
+.git
+artifacts
+*.dll
+SDL2
