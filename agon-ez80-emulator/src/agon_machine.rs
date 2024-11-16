@@ -82,8 +82,6 @@ impl Machine for AgonMachine {
 
         if let Some(onchip_ram_addr) = self.get_internal_ram_address(address) {
             self.mem_internal[onchip_ram_addr as usize] = value;
-        } else if let Some(rom_addr) = self.get_rom_address(address) {
-            self.mem_rom[rom_addr as usize] = value;
         } else if let Some(ram_addr) = self.get_external_ram_address(address) {
             self.mem_external[ram_addr as usize] = value;
         } else {
