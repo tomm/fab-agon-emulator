@@ -664,7 +664,7 @@ impl AgonMachine {
                     };
 
                     if n_read == 0 {
-                        break 'outer mos::FR_DISK_ERR; // EOF
+                        break; // EOF - break out of loop, but ensure position is updated
                     }
                     line.push(host_buf[0]);
 
@@ -673,7 +673,7 @@ impl AgonMachine {
                     }
                 }
                 // no f.tell()...
-                let fpos = match f.seek(SeekFrom::Current(0)) {
+                let fpos = match f.stream_position() {
                     Ok(n) => n,
                     Err(_) => break 'outer mos::FR_DISK_ERR,
                 };
