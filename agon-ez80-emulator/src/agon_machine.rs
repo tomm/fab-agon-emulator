@@ -1536,8 +1536,8 @@ impl AgonMachine {
 
         match self.ram_init {
             RamInit::Random => {
-                for i in 0x40000..0xc0000 {
-                    self.poke(i, rand::thread_rng().gen_range(0..=255));
+                for i in 0..EXTERNAL_RAM_SIZE {
+                    self.mem_external[i as usize] = rand::thread_rng().gen_range(0..=255);
                 }
 
                 for i in 0..ONCHIP_RAM_SIZE {

@@ -228,6 +228,8 @@ fn parse_number(tokens: &mut Tokens) -> Option<u32> {
     if let Some(&s) = tokens.peek() {
         let num = if s.starts_with('&') || s.starts_with('$') {
             u32::from_str_radix(s.get(1..s.len()).unwrap_or(""), 16).ok()
+        } else if s.starts_with("0x") {
+            u32::from_str_radix(s.get(2..s.len()).unwrap_or(""), 16).ok()
         } else if s.ends_with('h') || s.ends_with('H') {
             u32::from_str_radix(s.get(0..s.len() - 1).unwrap_or(""), 16).ok()
         } else {

@@ -66,23 +66,18 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     let gpios = Arc::new(Mutex::new(gpio::GpioSet::new()));
 
-    if let Some(breakpoint) = args.breakpoint {
-        if let Ok(breakpoint) = u32::from_str_radix(&breakpoint, 16) {
-            let trigger = Trigger {
-                address: breakpoint,
-                once: false,
-                actions: vec![
-                    DebugCmd::Pause,
-                    DebugCmd::Message("CPU paused at initial breakpoint".to_owned()),
-                    DebugCmd::GetState,
-                ],
-            };
-            let debug_cmd = DebugCmd::AddTrigger(trigger);
-            _ = tx_cmd_debugger.send(debug_cmd);
-            _ = tx_cmd_debugger.send(DebugCmd::Continue);
-        } else {
-            println!("Cannot parse breakpoint as hexadecimal. Ignoring.")
-        }
+    for breakpoint in &args.breakpoints {
+        let trigger = Trigger {
+            address: *breakpoint,
+            once: false,
+            actions: vec![
+                DebugCmd::Pause,
+                DebugCmd::Message("CPU paused at initial breakpoint".to_owned()),
+                DebugCmd::GetState,
+            ],
+        };
+        let debug_cmd = DebugCmd::AddTrigger(trigger);
+        _ = tx_cmd_debugger.send(debug_cmd);
     }
 
     // Atomics for various state communication

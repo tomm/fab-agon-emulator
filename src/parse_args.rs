@@ -6,14 +6,13 @@ USAGE:
 
 OPTIONS:
   -d, --debugger        Enable the eZ80 debugger
-  -b, --breakpoint      Set a breakpoint before starting
+  -b, --breakpoint      Set a breakpoint. --breakpoint can be used repeatedly
   -f, --fullscreen      Start in fullscreen mode
   -h, --help            Prints help information
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
   --firmware 1.03       Use quark 1.03 firmware (default is console8)
   --firmware quark      Use quark 1.04 firmware (default is console8)
   --firmware electron   Use ElectronOS firmware (default is console8)
-  --firmware rainbow    Use Rainbow firmware (default is console8)
   --mode <n>            Start in a specific screen mode
   --osk                 Enable on-screen-keyboard input (requires OS osk)
   --sdcard <path>       Sets the path of the emulated SDCard
@@ -63,7 +62,7 @@ pub struct AppArgs {
     pub sdcard: Option<String>,
     pub sdcard_img: Option<String>,
     pub debugger: bool,
-    pub breakpoint: Option<String>,
+    pub breakpoints: Vec<u32>,
     pub unlimited_cpu: bool,
     pub fullscreen: bool,
     pub verbose: bool,
@@ -106,7 +105,21 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         sdcard: pargs.opt_value_from_str("--sdcard")?,
         sdcard_img: pargs.opt_value_from_str("--sdcard-img")?,
         debugger: pargs.contains(["-d", "--debugger"]),
-        breakpoint: pargs.opt_value_from_str(["-b", "--breakpoint"])?,
+        breakpoints: pargs.values_from_fn(
+            ["-b", "--breakpoint"],
+            |s: &str| -> Result<u32, pico_args::Error> {
+                match parse_int(s) {
+                    Some(n) => Ok(n),
+                    None => {
+                        println!(
+                            "Error parsing --breakpoint. Expected an integer, but found {}",
+                            s
+                        );
+                        std::process::exit(0);
+                    }
+                }
+            },
+        )?,
         unlimited_cpu: pargs.contains(["-u", "--unlimited_cpu"]),
         fullscreen: pargs.contains(["-f", "--fullscreen"]),
         alternative_hostkey: pargs.contains("--ralt-hostkey"),
@@ -175,4 +188,26 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
     }
 
     Ok(args)
+}
+
+/**
+ * Parse an integer in any of the following formats:
+ * 1234 (decimal)
+ * 0x4d2 (hex)
+ * &4d2 (hex)
+ * $4d2 (hex)
+ * 4d2h (hex)
+ */
+fn parse_int(s: &str) -> Option<u32> {
+    let num = if s.starts_with('&') || s.starts_with('$') {
+        u32::from_str_radix(s.get(1..s.len()).unwrap_or(""), 16).ok()
+    } else if s.starts_with("0x") {
+        u32::from_str_radix(s.get(2..s.len()).unwrap_or(""), 16).ok()
+    } else if s.ends_with('h') || s.ends_with('H') {
+        u32::from_str_radix(s.get(0..s.len() - 1).unwrap_or(""), 16).ok()
+    } else {
+        u32::from_str_radix(s, 10).ok()
+    };
+
+    num
 }

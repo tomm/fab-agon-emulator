@@ -230,6 +230,7 @@ pub fn start(
     let mut rl = DefaultEditor::new().unwrap();
     while !state.is_emulator_shutdown() {
         while state.is_in_debugger() {
+            std::thread::sleep(std::time::Duration::from_millis(50));
             drain_rx(&rx, &state);
             let readline = rl.readline(">> ");
             match readline {
