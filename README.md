@@ -63,6 +63,26 @@ fab-agon-emulator -d
 At the debugger prompt (which will be in the terminal window you invoked the
 emulator from), type `help` for instructions on the use of the debugger.
 
+## Debug IO space
+
+Some IO addresses unused by the EZ80F92 are used by the emulator for debugging
+purposes:
+
+| IO addresses  | Function                              |
+| ------------- | ------------------------------------- |
+| 0x00          | Terminate emulator                    |
+| 0x10-0x1f     | Breakpoint (requires --debugger)      |
+| 0x20-0x2f     | Print CPU state (requires --debugger) |
+
+These functions are activated by write (not read), and the upper 8-bits of the
+IO address are ignored. ie:
+
+```
+	out (0),a
+```
+
+will shut down the emulator.
+
 ## Other command-line options
 
 Read about other command-line options with:

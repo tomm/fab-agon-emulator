@@ -66,13 +66,18 @@ pub fn main() -> Result<(), pico_args::Error> {
 
     let gpios = Arc::new(Mutex::new(gpio::GpioSet::new()));
 
+    // Atomics for various state communication
+    let ez80_paused = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+
     for breakpoint in &args.breakpoints {
         let trigger = Trigger {
             address: *breakpoint,
             once: false,
             actions: vec![
                 DebugCmd::Pause,
-                DebugCmd::Message("CPU paused at initial breakpoint".to_owned()),
+                DebugCmd::Message("CPU paused at breakpoint".to_owned()),
                 DebugCmd::GetState,
             ],
         };
@@ -80,21 +85,19 @@ pub fn main() -> Result<(), pico_args::Error> {
         _ = tx_cmd_debugger.send(debug_cmd);
     }
 
-    // Atomics for various state communication
-    let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-    let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-
     // Preserve stdin state, as debugger can leave stdin in raw mode
     #[cfg(target_os = "linux")]
     let _tty = raw_tty::TtyWithGuard::new(std::io::stdin());
 
     let debugger_con = if args.debugger {
+        let _ez80_paused = ez80_paused.clone();
         let _emulator_shutdown = emulator_shutdown.clone();
         let _debugger_thread = thread::spawn(move || {
             agon_light_emulator_debugger::start(
                 tx_cmd_debugger,
                 rx_resp_debugger,
                 _emulator_shutdown,
+                _ez80_paused,
             );
         });
         Some(DebuggerConnection {
@@ -121,6 +124,8 @@ pub fn main() -> Result<(), pico_args::Error> {
         });
 
     let _cpu_thread = {
+        let _ez80_paused = ez80_paused.clone();
+        let _emulator_shutdown = emulator_shutdown.clone();
         let soft_reset_ez80 = soft_reset.clone();
         let gpios_ = gpios.clone();
 
@@ -175,6 +180,8 @@ pub fn main() -> Result<(), pico_args::Error> {
                     uart1_link: uart1_serial.unwrap_or(uart1_dummy),
                     gpios: gpios_,
                     soft_reset: soft_reset_ez80,
+                    emulator_shutdown: _emulator_shutdown,
+                    paused: _ez80_paused,
                     clockspeed_hz: if args.unlimited_cpu {
                         1000_000_000
                     } else {

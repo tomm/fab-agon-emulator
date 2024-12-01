@@ -220,6 +220,7 @@ fn main() {
     let (tx_vdp_to_ez80, from_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
     let (to_vdp, rx_ez80_to_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
     let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let gpios = std::sync::Arc::new(std::sync::Mutex::new(gpio::GpioSet::new()));
     let gpios_ = gpios.clone();
 
@@ -259,6 +260,7 @@ fn main() {
             }),
             uart1_link: Box::new(DummySerialLink {}),
             soft_reset,
+            emulator_shutdown,
             gpios: gpios_,
             clockspeed_hz: if unlimited_cpu {
                 std::u64::MAX

@@ -30,7 +30,9 @@ pub struct AgonMachine {
     mos_map: mos::MosMap,
     hostfs_root_dir: std::path::PathBuf,
     mos_current_dir: MosPath,
+    paused: Arc<std::sync::atomic::AtomicBool>,
     soft_reset: Arc<std::sync::atomic::AtomicBool>,
+    emulator_shutdown: Arc<std::sync::atomic::AtomicBool>,
     clockspeed_hz: u64,
     prt_timers: [prt_timer::PrtTimer; 6],
     gpios: Arc<Mutex<gpio::GpioSet>>,
@@ -47,7 +49,7 @@ pub struct AgonMachine {
     // last_pc and mem_out_of_bounds are used by the debugger
     pub last_pc: u32,
     pub mem_out_of_bounds: std::cell::Cell<Option<u32>>, // address
-    pub paused: bool,
+    pub io_unhandled: std::cell::Cell<Option<u16>>,      // address
     pub cycle_counter: std::cell::Cell<u32>,
 }
 
@@ -279,6 +281,7 @@ impl Machine for AgonMachine {
     fn port_out(&mut self, address: u16, value: u8) {
         self.use_cycles(1);
         match address {
+            // Real ez80f92 peripherals
             0x80 => self.prt_timers[0].write_ctl(value),
             0x81 => self.prt_timers[0].write_reload_low(value),
             0x82 => self.prt_timers[0].write_reload_high(value),
@@ -457,6 +460,16 @@ impl Machine for AgonMachine {
 
             _ => {
                 //println!("OUT(${:02X}) = ${:x}", address, value);
+                // Emulator special functions, mapped in IO space
+                // Discard high byte of address, so we can use `out (n),a`
+                // for debugging
+                if address & 0xff == 0 {
+                    println!("Emulator shutdown triggered by write to IO 0x0");
+                    self.emulator_shutdown
+                        .store(true, std::sync::atomic::Ordering::Relaxed);
+                } else {
+                    self.io_unhandled.set(Some(address));
+                }
             }
         }
     }
@@ -466,6 +479,8 @@ pub struct AgonMachineConfig {
     pub uart0_link: Box<dyn uart::SerialLink>,
     pub uart1_link: Box<dyn uart::SerialLink>,
     pub soft_reset: Arc<std::sync::atomic::AtomicBool>,
+    pub emulator_shutdown: Arc<std::sync::atomic::AtomicBool>,
+    pub paused: Arc<std::sync::atomic::AtomicBool>,
     pub clockspeed_hz: u64,
     pub ram_init: RamInit,
     pub mos_bin: std::path::PathBuf,
@@ -489,6 +504,7 @@ impl AgonMachine {
             hostfs_root_dir: std::env::current_dir().unwrap(),
             mos_current_dir: MosPath(std::path::PathBuf::new()),
             soft_reset: config.soft_reset,
+            emulator_shutdown: config.emulator_shutdown,
             clockspeed_hz: config.clockspeed_hz,
             prt_timers: [
                 prt_timer::PrtTimer::new(),
@@ -502,8 +518,9 @@ impl AgonMachine {
             ram_init: config.ram_init,
             last_pc: 0,
             mem_out_of_bounds: std::cell::Cell::new(None),
+            io_unhandled: std::cell::Cell::new(None),
             cycle_counter: std::cell::Cell::new(0),
-            paused: false,
+            paused: config.paused,
             mos_bin: config.mos_bin,
             onchip_mem_enable: true,
             onchip_mem_segment: 0xff,
@@ -511,6 +528,15 @@ impl AgonMachine {
             cs0_lbr: 0,
             cs0_ubr: 0xff,
         }
+    }
+
+    pub fn set_paused(&self, state: bool) {
+        self.paused
+            .store(state, std::sync::atomic::Ordering::Relaxed);
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.paused.load(std::sync::atomic::Ordering::Relaxed)
     }
 
     #[inline]
@@ -1528,7 +1554,6 @@ impl AgonMachine {
         let mut cpu = Cpu::new_ez80();
 
         let mut debugger = if debugger_con.is_some() {
-            self.paused = true;
             Some(debugger::DebuggerServer::new(debugger_con.unwrap()))
         } else {
             None
@@ -1550,7 +1575,9 @@ impl AgonMachine {
         self.load_mos();
 
         cpu.state.set_pc(0);
-        //cpu.set_trace(true);
+
+        // This extra call is needed, or breakpoints at 0 don't work. I don't understand why :)
+        self.debugger_tick(&mut debugger, &mut cpu);
 
         let cycles_per_ms: u64 = self.clockspeed_hz / 1000;
         let mut timeslice_start = std::time::Instant::now();
@@ -1559,7 +1586,7 @@ impl AgonMachine {
             let mut cycle: u64 = 0;
             while cycle < cycles_per_ms {
                 self.debugger_tick(&mut debugger, &mut cpu);
-                if self.paused {
+                if self.is_paused() {
                     break;
                 }
                 self.do_interrupts(&mut cpu);

@@ -100,11 +100,51 @@ impl DebuggerServer {
             self.send_disassembly(machine, cpu, None, machine.last_pc, machine.last_pc + 1);
             self.send_state(machine, cpu);
 
-            machine.paused = true;
+            machine.set_paused(true);
             true
         } else {
             false
         }
+    }
+
+    fn on_unhandled_io(&mut self, machine: &mut AgonMachine, cpu: &mut ez80::Cpu) {
+        // An IO-space read or write occurred, that didn't correspond to
+        // any EZ80F92 peripherals
+        //
+        // We implement some debugger functions with these unused IOs
+        if let Some(address) = machine.io_unhandled.get() {
+            match address & 0xff {
+                0x10..=0x1f => {
+                    self.con.tx.send(DebugResp::IsPaused(true)).unwrap();
+                    self.con
+                        .tx
+                        .send(DebugResp::Message(format!(
+                            "Breakpoint triggered by IO 0x{:x} access at PC=${:x}",
+                            address & 0xff,
+                            machine.last_pc
+                        )))
+                        .unwrap();
+                    self.send_disassembly(machine, cpu, None, machine.last_pc, machine.last_pc + 1);
+                    self.send_state(machine, cpu);
+
+                    machine.set_paused(true);
+                }
+                0x20..=0x2f => {
+                    self.con
+                        .tx
+                        .send(DebugResp::Message(format!(
+                            "State dump triggered by IO 0x{:x} access at PC=${:x}",
+                            address & 0xff,
+                            machine.last_pc
+                        )))
+                        .unwrap();
+                    self.send_disassembly(machine, cpu, None, machine.last_pc, machine.last_pc + 1);
+                    self.send_state(machine, cpu);
+                }
+                _ => {}
+            }
+        }
+        machine.io_unhandled.set(None);
     }
 
     /// Called before each instruction is executed
@@ -113,9 +153,11 @@ impl DebuggerServer {
 
         // catch out of bounds memory accesses
         self.on_out_of_bounds(machine, cpu);
+        // debugger functions triggered by IO read/write
+        self.on_unhandled_io(machine, cpu);
 
         // check triggers
-        if !machine.paused {
+        if !machine.is_paused() {
             let to_run: Vec<Trigger> = self
                 .triggers
                 .iter()
@@ -202,7 +244,7 @@ impl DebuggerServer {
                                 DebugCmd::GetState,
                             ],
                         });
-                        machine.paused = false;
+                        machine.set_paused(false);
                         self.con.tx.send(DebugResp::IsPaused(false)).unwrap();
                     }
                     // CALL instruction at (pc)
@@ -228,34 +270,31 @@ impl DebuggerServer {
                                 DebugCmd::GetState,
                             ],
                         });
-                        machine.paused = false;
+                        machine.set_paused(false);
                         self.con.tx.send(DebugResp::IsPaused(false)).unwrap();
                     }
                     // other instructions. just step
                     _ => {
-                        machine.paused = false;
+                        machine.set_paused(false);
                         machine.execute_instruction(cpu);
-                        machine.paused = true;
+                        machine.set_paused(true);
                         self.send_state(machine, cpu);
                     }
                 }
             }
             DebugCmd::Step => {
-                machine.paused = false;
+                machine.set_paused(false);
                 machine.execute_instruction(cpu);
-                machine.paused = true;
+                machine.set_paused(true);
                 self.send_state(machine, cpu);
             }
             DebugCmd::Pause => {
-                machine.paused = true;
+                machine.set_paused(true);
                 self.con.tx.send(DebugResp::IsPaused(true)).unwrap();
             }
             DebugCmd::Continue => {
                 machine.mem_out_of_bounds.set(None);
-                machine.paused = false;
-                // force one instruction to be executed, just to
-                // get over any breakpoint on the current PC
-                machine.execute_instruction(cpu);
+                machine.set_paused(false);
 
                 if !self.on_out_of_bounds(machine, cpu) {
                     self.con.tx.send(DebugResp::IsPaused(false)).unwrap();

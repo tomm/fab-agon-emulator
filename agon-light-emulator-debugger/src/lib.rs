@@ -8,17 +8,17 @@ use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, Reg16, Registers};
 
 #[derive(Clone)]
 struct EmuState {
-    pub in_debugger: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    pub ez80_paused: std::sync::Arc<std::sync::atomic::AtomicBool>,
     pub emulator_shutdown: std::sync::Arc<std::sync::atomic::AtomicBool>,
 }
 
 impl EmuState {
     pub fn is_in_debugger(&self) -> bool {
-        self.in_debugger.load(std::sync::atomic::Ordering::SeqCst)
+        self.ez80_paused.load(std::sync::atomic::Ordering::SeqCst)
     }
 
     pub fn set_in_debugger(&self, state: bool) {
-        self.in_debugger
+        self.ez80_paused
             .store(state, std::sync::atomic::Ordering::SeqCst);
     }
 
@@ -35,9 +35,6 @@ impl EmuState {
 }
 
 fn print_help() {
-    println!("While CPU is running:");
-    println!("<CTRL-C>                     Pause Agon CPU and enter debugger");
-    println!();
     println!("While CPU is paused:");
     println!("br[eak] <address>            Set a breakpoint at the hex address");
     println!("c[ontinue]                   Resume (un-pause) Agon CPU");
@@ -63,6 +60,9 @@ fn print_help() {
     println!("triggers                     List triggers");
     println!();
     println!("The previous command can be repeated by pressing return.");
+    println!();
+    println!("CPU running. Press <CTRL-C> to pause");
+    println!();
 }
 
 fn do_cmd(cmd: parser::Cmd, tx: &Sender<DebugCmd>, rx: &Receiver<DebugResp>, state: &EmuState) {
@@ -192,15 +192,14 @@ fn drain_rx(rx: &Receiver<DebugResp>, state: &EmuState) {
     }
 }
 
-const PAUSE_AT_START: bool = true;
-
 pub fn start(
     tx: Sender<DebugCmd>,
     rx: Receiver<DebugResp>,
     emulator_shutdown: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    ez80_paused: std::sync::Arc<std::sync::atomic::AtomicBool>,
 ) {
     let state = EmuState {
-        in_debugger: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(PAUSE_AT_START)),
+        ez80_paused,
         emulator_shutdown,
     };
     let tx_from_ctrlc = tx.clone();
@@ -211,7 +210,8 @@ pub fn start(
     println!("Agon Light Emulator Debugger");
     println!();
     print_help();
-    if PAUSE_AT_START {
+
+    if state.is_in_debugger() {
         println!("Interrupting execution.");
     }
 
