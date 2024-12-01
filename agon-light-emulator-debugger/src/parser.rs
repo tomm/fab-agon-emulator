@@ -1,4 +1,4 @@
-use agon_ez80_emulator::debugger::{DebugCmd, Trigger};
+use agon_ez80_emulator::debugger::{DebugCmd, PauseReason, Trigger};
 
 #[derive(Debug)]
 pub enum Cmd {
@@ -102,7 +102,7 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
             }
             "pause" => {
                 expect_end_of_cmd(tokens)?;
-                Ok(Cmd::Core(DebugCmd::Pause))
+                Ok(Cmd::Core(DebugCmd::Pause(PauseReason::DebuggerRequested)))
             }
             "help" => {
                 expect_end_of_cmd(tokens)?;
@@ -130,8 +130,7 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
                         address: addr,
                         once: false,
                         actions: vec![
-                            DebugCmd::Pause,
-                            DebugCmd::Message("CPU paused at breakpoint".to_string()),
+                            DebugCmd::Pause(PauseReason::DebuggerBreakpoint),
                             DebugCmd::GetState,
                         ],
                     })))

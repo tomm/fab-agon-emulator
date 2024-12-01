@@ -14,10 +14,18 @@ pub type Registers = ez80::Registers;
 pub type Reg8 = ez80::Reg8;
 pub type Reg16 = ez80::Reg16;
 
+#[derive(Debug, Copy, Clone)]
+pub enum PauseReason {
+    DebuggerRequested,
+    OutOfBoundsMemAccess(u32), // address
+    DebuggerBreakpoint,
+    IOBreakpoint(u8),
+}
+
 #[derive(Debug, Clone)]
 pub enum DebugCmd {
     Ping,
-    Pause,
+    Pause(PauseReason),
     Continue,
     Step,
     StepOver,
@@ -44,7 +52,8 @@ pub enum DebugCmd {
 
 #[derive(Debug)]
 pub enum DebugResp {
-    IsPaused(bool),
+    Resumed,
+    Paused(PauseReason),
     Pong,
     Message(String),
     Registers(Registers),
@@ -89,12 +98,10 @@ impl DebuggerServer {
 
     fn on_out_of_bounds(&mut self, machine: &mut AgonMachine, cpu: &mut ez80::Cpu) -> bool {
         if let Some(address) = machine.mem_out_of_bounds.get() {
-            self.con.tx.send(DebugResp::IsPaused(true)).unwrap();
             self.con
                 .tx
-                .send(DebugResp::Message(format!(
-                    "Out of bounds memory access at PC=${:x}: ${:x}",
-                    machine.last_pc, address
+                .send(DebugResp::Paused(PauseReason::OutOfBoundsMemAccess(
+                    address,
                 )))
                 .unwrap();
             self.send_disassembly(machine, cpu, None, machine.last_pc, machine.last_pc + 1);
@@ -115,14 +122,9 @@ impl DebuggerServer {
         if let Some(address) = machine.io_unhandled.get() {
             match address & 0xff {
                 0x10..=0x1f => {
-                    self.con.tx.send(DebugResp::IsPaused(true)).unwrap();
                     self.con
                         .tx
-                        .send(DebugResp::Message(format!(
-                            "Breakpoint triggered by IO 0x{:x} access at PC=${:x}",
-                            address & 0xff,
-                            machine.last_pc
-                        )))
+                        .send(DebugResp::Paused(PauseReason::IOBreakpoint(address as u8)))
                         .unwrap();
                     self.send_disassembly(machine, cpu, None, machine.last_pc, machine.last_pc + 1);
                     self.send_state(machine, cpu);
@@ -239,13 +241,13 @@ impl DebuggerServer {
                             address: addr_next,
                             once: true,
                             actions: vec![
-                                DebugCmd::Pause,
+                                DebugCmd::Pause(PauseReason::DebuggerRequested),
                                 DebugCmd::Message("Stepped over RST".to_string()),
                                 DebugCmd::GetState,
                             ],
                         });
                         machine.set_paused(false);
-                        self.con.tx.send(DebugResp::IsPaused(false)).unwrap();
+                        self.con.tx.send(DebugResp::Resumed).unwrap();
                     }
                     // CALL instruction at (pc)
                     0xc4 | 0xd4 | 0xe4 | 0xf4 | 0xcc | 0xcd | 0xdc | 0xec | 0xfc => {
@@ -265,13 +267,13 @@ impl DebuggerServer {
                             address: addr_next,
                             once: true,
                             actions: vec![
-                                DebugCmd::Pause,
+                                DebugCmd::Pause(PauseReason::DebuggerRequested),
                                 DebugCmd::Message("Stepped over CALL".to_string()),
                                 DebugCmd::GetState,
                             ],
                         });
                         machine.set_paused(false);
-                        self.con.tx.send(DebugResp::IsPaused(false)).unwrap();
+                        self.con.tx.send(DebugResp::Resumed).unwrap();
                     }
                     // other instructions. just step
                     _ => {
@@ -288,16 +290,16 @@ impl DebuggerServer {
                 machine.set_paused(true);
                 self.send_state(machine, cpu);
             }
-            DebugCmd::Pause => {
+            DebugCmd::Pause(reason) => {
                 machine.set_paused(true);
-                self.con.tx.send(DebugResp::IsPaused(true)).unwrap();
+                self.con.tx.send(DebugResp::Paused(*reason)).unwrap();
             }
             DebugCmd::Continue => {
                 machine.mem_out_of_bounds.set(None);
                 machine.set_paused(false);
 
                 if !self.on_out_of_bounds(machine, cpu) {
-                    self.con.tx.send(DebugResp::IsPaused(false)).unwrap();
+                    self.con.tx.send(DebugResp::Resumed).unwrap();
                 }
             }
             DebugCmd::AddTrigger(t) => {

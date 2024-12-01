@@ -1,25 +1,25 @@
+use inline_colorization::*;
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
 use std::sync::mpsc::{Receiver, Sender};
 
 mod parser;
 
-use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, Reg16, Registers};
+use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, PauseReason, Reg16, Registers};
 
 #[derive(Clone)]
 struct EmuState {
-    pub ez80_paused: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    pub ez80_paused: std::cell::Cell<bool>,
     pub emulator_shutdown: std::sync::Arc<std::sync::atomic::AtomicBool>,
 }
 
 impl EmuState {
     pub fn is_in_debugger(&self) -> bool {
-        self.ez80_paused.load(std::sync::atomic::Ordering::SeqCst)
+        self.ez80_paused.get()
     }
 
     pub fn set_in_debugger(&self, state: bool) {
-        self.ez80_paused
-            .store(state, std::sync::atomic::Ordering::SeqCst);
+        self.ez80_paused.set(state);
     }
 
     pub fn is_emulator_shutdown(&self) -> bool {
@@ -34,35 +34,41 @@ impl EmuState {
     }
 }
 
+fn print_help_line(command: &str, desc: &str) {
+    println!("{color_cyan}{: <30}{color_white}{}", command, desc);
+}
+
 fn print_help() {
-    println!("While CPU is paused:");
-    println!("br[eak] <address>            Set a breakpoint at the hex address");
-    println!("c[ontinue]                   Resume (un-pause) Agon CPU");
-    println!("delete <address>             Delete a breakpoint");
-    println!("dis[assemble] [start] [end]  Disassemble in current ADL mode");
-    println!("dis16 [start] [end]          Disassemble in ADL=0 (Z80) mode");
-    println!("dis24 [start] [end]          Disassemble in ADL=1 (24-bit) mode");
-    println!("exit                         Quit from Agon Light Emulator");
-    println!("info breakpoints             List breakpoints");
-    println!("[mem]ory <start> [len]       Dump memory");
-    println!("n[ext]                       Step over function calls");
-    println!("pause                        Pause execution and enter debugger");
-    println!("state                        Show CPU state");
-    println!(".                            Show CPU state");
-    println!("s[tep]                       Execute one instuction");
-    println!("trace on                     Enable logging every instruction");
-    println!("trace off                    Disable logging every instruction");
-    println!("trigger <address> cmd1 : cmd2 : ...");
+    print_help_line("br[eak] <address>", "Set a breakpoint at the hex address");
+    print_help_line("c[ontinue]", "Resume (un-pause) Agon CPU");
+    print_help_line("delete <address>", "Delete a breakpoint");
+    print_help_line(
+        "dis[assemble] [start] [end]",
+        "Disassemble in current ADL mode",
+    );
+    print_help_line("dis16 [start] [end]", "Disassemble in ADL=0 (Z80) mode");
+    print_help_line("dis24 [start] [end]", "Disassemble in ADL=1 (24-bit) mode");
+    print_help_line("exit", "Quit from Agon Light Emulator");
+    print_help_line("info breakpoints", "List breakpoints");
+    print_help_line("[mem]ory <start> [len]", "Dump memory");
+    print_help_line("n[ext]", "Step over function calls");
+    print_help_line("pause", "Pause execution and enter debugger");
+    print_help_line("state", "Show CPU state");
+    print_help_line(".", "Show CPU state");
+    print_help_line("s[tep]", "Execute one instuction");
+    print_help_line("trace on", "Enable logging every instruction");
+    print_help_line("trace off", "Disable logging every instruction");
+    println!("{color_cyan}trigger <address> cmd1 : cmd2 : ...{color_white}");
     println!("    Perform debugger commands when <address> is reached");
     println!("    eg: break $123 is equivalent to:");
     println!("        trigger $123 pause:\"CPU paused at breakpoint\":state");
     println!();
-    println!("triggers                     List triggers");
+    print_help_line("triggers", "List triggers");
     println!();
     println!("The previous command can be repeated by pressing return.");
     println!();
-    println!("CPU running. Press <CTRL-C> to pause");
-    println!();
+    println!("{color_green}CPU running. Press <CTRL-C> to pause");
+    println!("{color_reset}");
 }
 
 fn do_cmd(cmd: parser::Cmd, tx: &Sender<DebugCmd>, rx: &Receiver<DebugResp>, state: &EmuState) {
@@ -80,7 +86,7 @@ fn do_cmd(cmd: parser::Cmd, tx: &Sender<DebugCmd>, rx: &Receiver<DebugResp>, sta
 fn eval_cmd(text: &str, tx: &Sender<DebugCmd>, rx: &Receiver<DebugResp>, state: &EmuState) {
     match parser::parse_cmd(&mut parser::tokenize(text).into_iter().peekable()) {
         Ok(cmd) => do_cmd(cmd, tx, rx, state),
-        Err(msg) => println!("{}", msg),
+        Err(msg) => println!("{color_red}{}{color_reset}", msg),
     }
 }
 
@@ -125,10 +131,34 @@ fn handle_debug_resp(resp: &DebugResp, state: &EmuState) {
             }
         }
         DebugResp::Message(s) => {
-            println!("{}", s);
+            println!("{color_yellow}{}{color_reset}", s);
         }
-        DebugResp::IsPaused(p) => {
-            state.set_in_debugger(*p);
+        DebugResp::Paused(reason) => {
+            match reason {
+                PauseReason::DebuggerRequested => {
+                    println!("{color_yellow}CPU paused{color_reset}");
+                }
+                PauseReason::OutOfBoundsMemAccess(address) => {
+                    println!(
+                        "{color_yellow}CPU paused (memory 0x{:x} out of bounds){color_reset}",
+                        address
+                    );
+                }
+                PauseReason::DebuggerBreakpoint => {
+                    println!("{color_yellow}CPU paused (breakpoint){color_reset}");
+                }
+                PauseReason::IOBreakpoint(io_address) => {
+                    println!(
+                        "{color_yellow}CPU paused (IO breakpoint 0x{:x}){color_reset}",
+                        io_address
+                    );
+                }
+            }
+            state.set_in_debugger(true);
+        }
+        DebugResp::Resumed => {
+            println!("{color_green}CPU running{color_reset}");
+            state.set_in_debugger(false);
         }
         DebugResp::Triggers(bs) => {
             println!("Triggers:");
@@ -196,10 +226,10 @@ pub fn start(
     tx: Sender<DebugCmd>,
     rx: Receiver<DebugResp>,
     emulator_shutdown: std::sync::Arc<std::sync::atomic::AtomicBool>,
-    ez80_paused: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    ez80_paused: bool,
 ) {
     let state = EmuState {
-        ez80_paused,
+        ez80_paused: std::cell::Cell::new(ez80_paused),
         emulator_shutdown,
     };
     let tx_from_ctrlc = tx.clone();
@@ -207,24 +237,28 @@ pub fn start(
     // should be able to get this from rl.history(), but couldn't figure out the API...
     let mut last_cmd: Option<String> = None;
 
-    println!("Agon Light Emulator Debugger");
+    println!();
+    println!("{style_bold}Agon EZ80 Debugger{style_reset}");
     println!();
     print_help();
 
     if state.is_in_debugger() {
-        println!("Interrupting execution.");
+        println!("{color_yellow}Interrupting execution.{color_reset}");
     }
 
     {
         let _state = state.clone();
         ctrlc::set_handler(move || {
-            _state.set_in_debugger(true);
-            println!("Interrupting execution.");
-            tx_from_ctrlc.send(DebugCmd::Pause).unwrap();
+            print!("\r");
+            tx_from_ctrlc
+                .send(DebugCmd::Pause(PauseReason::DebuggerRequested))
+                .unwrap();
             tx_from_ctrlc.send(DebugCmd::GetState).unwrap();
         })
         .expect("Error setting Ctrl-C handler");
     }
+
+    let prompt = &format!("{color_cyan}>> ");
 
     // `()` can be used when no completer is required
     let mut rl = DefaultEditor::new().unwrap();
@@ -232,7 +266,8 @@ pub fn start(
         while state.is_in_debugger() {
             std::thread::sleep(std::time::Duration::from_millis(50));
             drain_rx(&rx, &state);
-            let readline = rl.readline(">> ");
+            let readline = rl.readline(prompt);
+            print!("{color_reset}");
             match readline {
                 Ok(line) => {
                     if line != "" {
@@ -255,7 +290,7 @@ pub fn start(
                     break;
                 }
                 Err(err) => {
-                    println!("Error: {:?}", err);
+                    println!("{color_red}Error: {:?}{color_reset}", err);
                     break;
                 }
             }

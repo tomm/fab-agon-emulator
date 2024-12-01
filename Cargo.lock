@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "agon-ez80-emulator"
-version = "0.9.73"
+version = "0.9.74"
 dependencies = [
  "chrono",
  "ez80",
@@ -14,10 +14,11 @@ dependencies = [
 
 [[package]]
 name = "agon-light-emulator-debugger"
-version = "0.9.73"
+version = "0.9.74"
 dependencies = [
  "agon-ez80-emulator",
  "ctrlc",
+ "inline_colorization",
  "rustyline",
 ]
 
@@ -195,7 +196,7 @@ source = "git+https://github.com/tomm/ez80.git?rev=64558c2acda1464248193f2f10804
 
 [[package]]
 name = "fab-agon-emulator"
-version = "0.9.73"
+version = "0.9.74"
 dependencies = [
  "agon-ez80-emulator",
  "agon-light-emulator-debugger",
@@ -296,6 +297,12 @@ dependencies = [
  "equivalent",
  "hashbrown",
 ]
+
+[[package]]
+name = "inline_colorization"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc1804bdb6a9784758b200007273a8b84e2b0b0b97a8f1e18e763eceb3e9f98a"
 
 [[package]]
 name = "io-kit-sys"

@@ -1,4 +1,5 @@
 use crate::parse_args::parse_args;
+use agon_ez80_emulator::debugger;
 use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, Trigger};
 use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
 use sdl2::event::Event;
@@ -76,8 +77,7 @@ pub fn main() -> Result<(), pico_args::Error> {
             address: *breakpoint,
             once: false,
             actions: vec![
-                DebugCmd::Pause,
-                DebugCmd::Message("CPU paused at breakpoint".to_owned()),
+                DebugCmd::Pause(debugger::PauseReason::DebuggerBreakpoint),
                 DebugCmd::GetState,
             ],
         };
@@ -97,7 +97,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                 tx_cmd_debugger,
                 rx_resp_debugger,
                 _emulator_shutdown,
-                _ez80_paused,
+                _ez80_paused.load(std::sync::atomic::Ordering::Relaxed),
             );
         });
         Some(DebuggerConnection {

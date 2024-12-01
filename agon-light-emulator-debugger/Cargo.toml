@@ -10,4 +10,5 @@ license.workspace = true
 [dependencies]
 ctrlc = "3.4.1"
 rustyline = "12.0.0"
+inline_colorization = "0.1.6"
 agon-ez80-emulator = { workspace = true }
