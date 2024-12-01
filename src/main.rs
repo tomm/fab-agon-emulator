@@ -51,8 +51,14 @@ pub fn firmware_paths(
     paths
 }
 
-pub fn main() -> Result<(), pico_args::Error> {
-    let args = parse_args()?;
+pub fn main() -> () {
+    let args = match parse_args() {
+        Ok(a) => a,
+        Err(e) => {
+            eprintln!("Error parsing arguments: {}", e);
+            std::process::exit(-1);
+        }
+    };
     let vdp_interface = vdp_interface::init(
         firmware_paths(args.firmware, args.vdp_dll, false),
         args.verbose,
@@ -71,6 +77,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     let ez80_paused = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let exit_status = std::sync::Arc::new(std::sync::atomic::AtomicI32::new(0));
 
     for breakpoint in &args.breakpoints {
         let trigger = Trigger {
@@ -124,6 +131,7 @@ pub fn main() -> Result<(), pico_args::Error> {
         });
 
     let _cpu_thread = {
+        let _exit_status = exit_status.clone();
         let _ez80_paused = ez80_paused.clone();
         let _emulator_shutdown = emulator_shutdown.clone();
         let soft_reset_ez80 = soft_reset.clone();
@@ -181,6 +189,7 @@ pub fn main() -> Result<(), pico_args::Error> {
                     gpios: gpios_,
                     soft_reset: soft_reset_ez80,
                     emulator_shutdown: _emulator_shutdown,
+                    exit_status: _exit_status,
                     paused: _ez80_paused,
                     clockspeed_hz: if args.unlimited_cpu {
                         1000_000_000
@@ -617,7 +626,7 @@ pub fn main() -> Result<(), pico_args::Error> {
     }
     std::thread::sleep(std::time::Duration::from_millis(200));
 
-    Ok(())
+    std::process::exit(exit_status.load(std::sync::atomic::Ordering::Relaxed))
 }
 
 fn calc_int_scale(canvas_size: (u32, u32), agon_size: (u32, u32)) -> (u32, u32) {

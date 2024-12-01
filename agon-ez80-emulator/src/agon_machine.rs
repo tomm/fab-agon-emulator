@@ -33,6 +33,7 @@ pub struct AgonMachine {
     paused: Arc<std::sync::atomic::AtomicBool>,
     soft_reset: Arc<std::sync::atomic::AtomicBool>,
     emulator_shutdown: Arc<std::sync::atomic::AtomicBool>,
+    exit_status: Arc<std::sync::atomic::AtomicI32>,
     clockspeed_hz: u64,
     prt_timers: [prt_timer::PrtTimer; 6],
     gpios: Arc<Mutex<gpio::GpioSet>>,
@@ -464,10 +465,16 @@ impl Machine for AgonMachine {
                 // Discard high byte of address, so we can use `out (n),a`
                 // for debugging
                 if address & 0xff == 0 {
-                    println!("Emulator shutdown triggered by write to IO 0x0");
+                    println!(
+                        "Emulator shutdown triggered by writing 0x{:x} IO 0x0",
+                        value
+                    );
+                    self.exit_status
+                        .store(value as i32, std::sync::atomic::Ordering::Relaxed);
                     self.emulator_shutdown
                         .store(true, std::sync::atomic::Ordering::Relaxed);
                 } else {
+                    // the debugger will handle some of these
                     self.io_unhandled.set(Some(address));
                 }
             }
@@ -480,6 +487,7 @@ pub struct AgonMachineConfig {
     pub uart1_link: Box<dyn uart::SerialLink>,
     pub soft_reset: Arc<std::sync::atomic::AtomicBool>,
     pub emulator_shutdown: Arc<std::sync::atomic::AtomicBool>,
+    pub exit_status: Arc<std::sync::atomic::AtomicI32>,
     pub paused: Arc<std::sync::atomic::AtomicBool>,
     pub clockspeed_hz: u64,
     pub ram_init: RamInit,
@@ -505,6 +513,7 @@ impl AgonMachine {
             mos_current_dir: MosPath(std::path::PathBuf::new()),
             soft_reset: config.soft_reset,
             emulator_shutdown: config.emulator_shutdown,
+            exit_status: config.exit_status,
             clockspeed_hz: config.clockspeed_hz,
             prt_timers: [
                 prt_timer::PrtTimer::new(),

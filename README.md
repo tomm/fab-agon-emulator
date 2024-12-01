@@ -68,11 +68,11 @@ emulator from), type `help` for instructions on the use of the debugger.
 Some IO addresses unused by the EZ80F92 are used by the emulator for debugging
 purposes:
 
-| IO addresses  | Function                              |
-| ------------- | ------------------------------------- |
-| 0x00          | Terminate emulator                    |
-| 0x10-0x1f     | Breakpoint (requires --debugger)      |
-| 0x20-0x2f     | Print CPU state (requires --debugger) |
+| IO addresses  | Function                                                           |
+| ------------- | ------------------------------------------------------------------ |
+| 0x00          | Terminate emulator (exit code will be the value written to IO 0x0) |
+| 0x10-0x1f     | Breakpoint (requires --debugger)                                   |
+| 0x20-0x2f     | Print CPU state (requires --debugger)                              |
 
 These functions are activated by write (not read), and the upper 8-bits of the
 IO address are ignored. ie:
