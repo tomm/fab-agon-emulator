@@ -52,6 +52,10 @@ pub fn firmware_paths(
 }
 
 pub fn main() -> () {
+    std::process::exit(main_loop());
+}
+
+pub fn main_loop() -> i32 {
     let args = match parse_args() {
         Ok(a) => a,
         Err(e) => {
@@ -626,7 +630,7 @@ pub fn main() -> () {
     }
     std::thread::sleep(std::time::Duration::from_millis(200));
 
-    std::process::exit(exit_status.load(std::sync::atomic::Ordering::Relaxed))
+    return exit_status.load(std::sync::atomic::Ordering::Relaxed);
 }
 
 fn calc_int_scale(canvas_size: (u32, u32), agon_size: (u32, u32)) -> (u32, u32) {
