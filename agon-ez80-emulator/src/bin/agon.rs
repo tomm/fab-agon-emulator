@@ -222,6 +222,8 @@ fn main() {
     let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let gpios = std::sync::Arc::new(std::sync::Mutex::new(gpio::GpioSet::new()));
+    let exit_status = std::sync::Arc::new(std::sync::atomic::AtomicI32::new(0));
+    let ez80_paused = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let gpios_ = gpios.clone();
 
     let mut unlimited_cpu = false;
@@ -252,6 +254,8 @@ fn main() {
     }
 
     let _cpu_thread = std::thread::spawn(move || {
+        let _exit_status = exit_status.clone();
+        let _ez80_paused = ez80_paused.clone();
         let mut machine = AgonMachine::new(AgonMachineConfig {
             ram_init: RamInit::Random,
             uart0_link: Box::new(ChannelSerialLink {
@@ -260,6 +264,8 @@ fn main() {
             }),
             uart1_link: Box::new(DummySerialLink {}),
             soft_reset,
+            exit_status: _exit_status,
+            paused: _ez80_paused,
             emulator_shutdown,
             gpios: gpios_,
             clockspeed_hz: if unlimited_cpu {
