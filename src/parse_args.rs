@@ -25,8 +25,8 @@ OPTIONS:
 ADVANCED:
   --mos PATH            Use a different MOS.bin firmware
   --vdp PATH            Use a different VDP dll/so firmware
-  --renderer sw         Use software renderer
-  --renderer hw         Use GL/D3D renderer (default)
+  --renderer sw         Use software renderer (default)
+  --renderer hw         Use GL/D3D renderer
   --uart1-device <dev>  Link ez80 uart1 to this host serial device
   --uart1-baud <rate>   Open --uart1-device with the given baud rate
   --verbose             Verbose mode (includes VDP debug logs)
@@ -160,7 +160,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
                 }
             }
         } else {
-            Renderer::Accelerated
+            Renderer::Software
         },
         firmware: if let Some(ver) = firmware_ver {
             if ver == "1.03" {
