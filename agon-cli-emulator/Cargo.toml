@@ -1,0 +1,14 @@
+[package]
+name = "agon-cli-emulator"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+agon-ez80-emulator = { workspace = true }
+agon-light-emulator-debugger = { workspace = true }
+pico-args = "0.5.0"
+
+#[target.'cfg(target_os = "linux")'.dependencies]
+#raw_tty = "0.1.0"

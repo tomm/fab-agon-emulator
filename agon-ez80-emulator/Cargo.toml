@@ -13,3 +13,4 @@ ez80 = { git = "https://github.com/tomm/ez80.git", rev="64558c2acda1464248193f2f
 rand = "*"
 filetime = "0.2"
 chrono = "0.4.38"
+pico-args = "0.5.0"

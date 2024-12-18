@@ -31,6 +31,7 @@ DIST_DIR=fab-agon-emulator-$VERSION-windows-x64
 rm -rf $DIST_DIR
 mkdir $DIST_DIR
 cp ./target/x86_64-pc-windows-gnu/release/fab-agon-emulator.exe $DIST_DIR
+cp ./target/x86_64-pc-windows-gnu/release/agon-cli-emulator.exe $DIST_DIR
 cp -r ./firmware $DIST_DIR
 cp SDL2.dll $DIST_DIR
 cp libgcc_s_seh-1.dll $DIST_DIR

@@ -1,3 +1,7 @@
+mod parse_args;
+//use agon_ez80_emulator::debugger;
+//use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, Trigger};
+use crate::parse_args::parse_args;
 use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
 use std::io::{self, BufRead, Write};
 use std::sync::mpsc;
@@ -49,7 +53,7 @@ fn handle_vdp(
                 0x11 => {
                     rx_from_ez80.recv().unwrap();
                 } // color
-                v if v >= 0x20 && v != 0x7f => {
+                v if v == 8 || (v >= 0x20 && v != 0x7f) => {
                     //print!("\x1b[0m{}\x1b[90m", char::from_u32(data as u32).unwrap());
                     print!("{}", char::from_u32(data as u32).unwrap());
                 }
@@ -123,6 +127,7 @@ fn start_vdp(
     tx_vdp_to_ez80: Sender<u8>,
     rx_ez80_to_vdp: Receiver<u8>,
     gpios: std::sync::Arc<std::sync::Mutex<gpio::GpioSet>>,
+    emulator_shutdown: std::sync::Arc<std::sync::atomic::AtomicBool>,
 ) {
     let (tx_stdin, rx_stdin): (Sender<String>, Receiver<String>) = mpsc::channel();
 
@@ -139,7 +144,7 @@ fn start_vdp(
     let mut vdp_terminal_mode = false;
     let mut last_kb_input = std::time::Instant::now();
     let mut last_vsync = std::time::Instant::now();
-    loop {
+    while !emulator_shutdown.load(std::sync::atomic::Ordering::Relaxed) {
         if !handle_vdp(&tx_vdp_to_ez80, &rx_ez80_to_vdp, &mut vdp_terminal_mode) {
             // no packets from ez80. sleep a little
             std::thread::sleep(std::time::Duration::from_millis(1));
@@ -216,80 +221,120 @@ impl SerialLink for ChannelSerialLink {
     }
 }
 
+const PREFIX: Option<&'static str> = option_env!("PREFIX");
+
 fn main() {
+    let args = match parse_args() {
+        Ok(a) => a,
+        Err(e) => {
+            eprintln!("Error parsing arguments: {}", e);
+            std::process::exit(-1);
+        }
+    };
+
     let (tx_vdp_to_ez80, from_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
     let (to_vdp, rx_ez80_to_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
     let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-    let gpios = std::sync::Arc::new(std::sync::Mutex::new(gpio::GpioSet::new()));
     let exit_status = std::sync::Arc::new(std::sync::atomic::AtomicI32::new(0));
+    let gpios = std::sync::Arc::new(std::sync::Mutex::new(gpio::GpioSet::new()));
     let ez80_paused = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let gpios_ = gpios.clone();
 
-    let mut unlimited_cpu = false;
-    let mut sdcard_img = None;
-    let mut args: Vec<String> = std::env::args().skip(1).collect();
-    while args.len() > 0 {
-        let arg = args.remove(0);
-        match arg.as_str() {
-            "-u" | "--unlimited-cpu" => {
-                unlimited_cpu = true;
-            }
-            "--sdcard-img" => {
-                sdcard_img = if args.len() > 0 {
-                    Some(args.remove(0))
-                } else {
-                    None
-                };
-            }
-            "--help" | "-h" | _ => {
-                println!("Usage: agon [OPTIONS]");
-                println!();
-                println!("Options:");
-                println!("  --sdcard-img <filename>  Use an SDcard image rather than hostfs");
-                println!("  -u, --unlimited-cpu      Don't limit CPU to Agon Light 18.432MHz");
-                std::process::exit(0);
-            }
-        }
-    }
+    /*
+    let (tx_cmd_debugger, rx_cmd_debugger): (Sender<DebugCmd>, Receiver<DebugCmd>) =
+        mpsc::channel();
+    let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) =
+        mpsc::channel();
+        */
 
-    let _cpu_thread = std::thread::spawn(move || {
-        let _exit_status = exit_status.clone();
+    let default_firmware = match PREFIX {
+        None => std::path::Path::new(".")
+            .join("firmware")
+            .join("mos_console8.bin"),
+        Some(prefix) => std::path::Path::new(prefix)
+            .join("share")
+            .join("fab-agon-emulator")
+            .join("mos_console8.bin"),
+    };
+
+    // Preserve stdin state, as debugger can leave stdin in raw mode
+    //#[cfg(target_os = "linux")]
+    //let _tty = raw_tty::TtyWithGuard::new(std::io::stdin());
+
+    let debugger_con = /*if args.debugger {
         let _ez80_paused = ez80_paused.clone();
-        let mut machine = AgonMachine::new(AgonMachineConfig {
-            ram_init: RamInit::Random,
-            uart0_link: Box::new(ChannelSerialLink {
-                sender: to_vdp,
-                receiver: from_vdp,
-            }),
-            uart1_link: Box::new(DummySerialLink {}),
-            soft_reset,
-            exit_status: _exit_status,
-            paused: _ez80_paused,
-            emulator_shutdown,
-            gpios: gpios_,
-            clockspeed_hz: if unlimited_cpu {
-                std::u64::MAX
-            } else {
-                18_432_000
-            },
-            mos_bin: std::path::PathBuf::from("../firmware/mos_console8.bin"),
+        let _emulator_shutdown = emulator_shutdown.clone();
+        let _debugger_thread = std::thread::spawn(move || {
+            agon_light_emulator_debugger::start(
+                tx_cmd_debugger,
+                rx_resp_debugger,
+                _emulator_shutdown,
+                _ez80_paused.load(std::sync::atomic::Ordering::Relaxed),
+            );
         });
+        Some(DebuggerConnection {
+            tx: tx_resp_debugger,
+            rx: rx_cmd_debugger,
+        })
+    } else*/ {
+        None
+    };
 
-        if let Some(f) = sdcard_img {
-            match std::fs::File::options().read(true).write(true).open(&f) {
-                Ok(file) => machine.set_sdcard_image(Some(file)),
-                Err(e) => {
-                    eprintln!("Could not open sdcard image '{}': {:?}", f, e);
-                    std::process::exit(-1);
+    let _cpu_thread = {
+        let _exit_status = exit_status.clone();
+        let _emulator_shutdown = emulator_shutdown.clone();
+        std::thread::spawn(move || {
+            let _ez80_paused = ez80_paused.clone();
+            let mut machine = AgonMachine::new(AgonMachineConfig {
+                ram_init: if args.zero {
+                    RamInit::Zero
+                } else {
+                    RamInit::Random
+                },
+                uart0_link: Box::new(ChannelSerialLink {
+                    sender: to_vdp,
+                    receiver: from_vdp,
+                }),
+                uart1_link: Box::new(DummySerialLink {}),
+                soft_reset,
+                exit_status: _exit_status,
+                paused: _ez80_paused,
+                emulator_shutdown: _emulator_shutdown,
+                gpios: gpios_,
+                clockspeed_hz: if args.unlimited_cpu {
+                    std::u64::MAX
+                } else {
+                    18_432_000
+                },
+                mos_bin: args.mos_bin.unwrap_or(default_firmware),
+            });
+
+            if let Some(f) = args.sdcard_img {
+                match std::fs::File::options().read(true).write(true).open(&f) {
+                    Ok(file) => machine.set_sdcard_image(Some(file)),
+                    Err(e) => {
+                        eprintln!("Could not open sdcard image '{}': {:?}", f, e);
+                        std::process::exit(-1);
+                    }
                 }
+            } else {
+                machine.set_sdcard_directory(match args.sdcard {
+                    Some(dir) => std::path::PathBuf::from(dir),
+                    None => std::env::current_dir().unwrap(),
+                });
             }
-        } else {
-            machine.set_sdcard_directory(std::env::current_dir().unwrap().join("sdcard"));
-        }
 
-        machine.start(None);
-    });
+            machine.start(debugger_con);
+        });
+    };
 
-    start_vdp(tx_vdp_to_ez80, rx_ez80_to_vdp, gpios);
+    start_vdp(
+        tx_vdp_to_ez80,
+        rx_ez80_to_vdp,
+        gpios,
+        emulator_shutdown.clone(),
+    );
+
+    std::process::exit(exit_status.load(std::sync::atomic::Ordering::Relaxed));
 }

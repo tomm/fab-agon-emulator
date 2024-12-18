@@ -140,7 +140,6 @@ impl DebuggerServer {
                             machine.last_pc
                         )))
                         .unwrap();
-                    self.send_disassembly(machine, cpu, None, machine.last_pc, machine.last_pc + 1);
                     self.send_state(machine, cpu);
                 }
                 _ => {}
