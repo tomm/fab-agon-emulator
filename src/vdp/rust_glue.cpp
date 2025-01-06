@@ -19,7 +19,7 @@ uint32_t startup_screen_mode = 0;
 
 extern "C" bool z80_uart0_is_cts()
 {
-	return Serial2.available() < 4;
+	return Serial2.isReadyToReceive();
 }
 
 extern "C" void z80_send_to_vdp(uint8_t b)
