@@ -24,6 +24,7 @@ cp *.so ../../firmware
 cd ../..
 
 FORCE=1 cargo build -r --target=x86_64-pc-windows-gnu
+cargo build -r --target=x86_64-pc-windows-gnu --manifest-path=./agon-cli-emulator/Cargo.toml
 
 VERSION=`cargo tree --depth 0 | awk '{print $2;}'`
 DIST_DIR=fab-agon-emulator-$VERSION-windows-x64

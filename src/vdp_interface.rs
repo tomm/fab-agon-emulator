@@ -8,6 +8,7 @@ pub struct VdpInterface {
         unsafe extern "C" fn(outWidth: *mut u32, outHeight: *mut u32, buffer: *mut u8),
     >,
     pub set_startup_screen_mode: libloading::Symbol<'static, unsafe extern "C" fn(m: u32)>,
+    pub z80_uart0_is_cts: libloading::Symbol<'static, unsafe extern "C" fn() -> bool>,
     pub z80_send_to_vdp: libloading::Symbol<'static, unsafe extern "C" fn(b: u8)>,
     pub z80_recv_from_vdp: libloading::Symbol<'static, unsafe extern "C" fn(out: *mut u8) -> bool>,
     pub sendVKeyEventToFabgl:
@@ -31,6 +32,7 @@ impl VdpInterface {
                 vdp_loop: lib.get(b"vdp_loop").unwrap(),
                 signal_vblank: lib.get(b"signal_vblank").unwrap(),
                 copyVgaFramebuffer: lib.get(b"copyVgaFramebuffer").unwrap(),
+                z80_uart0_is_cts: lib.get(b"z80_uart0_is_cts").unwrap(),
                 z80_send_to_vdp: lib.get(b"z80_send_to_vdp").unwrap(),
                 z80_recv_from_vdp: lib.get(b"z80_recv_from_vdp").unwrap(),
                 set_startup_screen_mode: lib.get(b"set_startup_screen_mode").unwrap(),

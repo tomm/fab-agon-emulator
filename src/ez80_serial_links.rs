@@ -17,6 +17,7 @@ impl SerialLink for DummySerialLink {
 }
 
 pub struct Ez80ToVdpSerialLink {
+    pub z80_uart0_is_cts: libloading::Symbol<'static, unsafe extern "C" fn() -> bool>,
     pub z80_send_to_vdp: libloading::Symbol<'static, unsafe extern "C" fn(b: u8)>,
     pub z80_recv_from_vdp: libloading::Symbol<'static, unsafe extern "C" fn(out: *mut u8) -> bool>,
 }
@@ -36,7 +37,7 @@ impl SerialLink for Ez80ToVdpSerialLink {
         }
     }
     fn read_clear_to_send(&mut self) -> bool {
-        true
+        unsafe { (*self.z80_uart0_is_cts)() }
     }
 }
 

@@ -186,6 +186,7 @@ pub fn main_loop() -> i32 {
                         RamInit::Random
                     },
                     uart0_link: Box::new(ez80_serial_links::Ez80ToVdpSerialLink {
+                        z80_uart0_is_cts: vdp_interface.z80_uart0_is_cts.clone(),
                         z80_send_to_vdp: vdp_interface.z80_send_to_vdp.clone(),
                         z80_recv_from_vdp: vdp_interface.z80_recv_from_vdp.clone(),
                     }),

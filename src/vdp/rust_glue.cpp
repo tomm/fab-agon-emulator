@@ -11,9 +11,26 @@
 
 // Arduino.h
 extern void delay(int ms);
+// HardwareSerial.h
+extern HardwareSerial Serial2;
 
 bool vdp_debug_logging = false;
 uint32_t startup_screen_mode = 0;
+
+extern "C" bool z80_uart0_is_cts()
+{
+	return Serial2.available() < 4;
+}
+
+extern "C" void z80_send_to_vdp(uint8_t b)
+{
+	Serial2.writeToInQueue(b);
+}
+
+extern "C" bool z80_recv_from_vdp(uint8_t *out)
+{
+	return Serial2.readFromOutQueue(out);
+}
 
 extern "C" void signal_vblank(void)
 {
