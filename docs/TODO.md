@@ -11,6 +11,7 @@ vdu 23 0 &88 250 0 50 0 0
 
 ## CPU bugs
 
+- [ ] prt 16khz rtc source?
 - [ ] Mixed mode push ((ismixed<<1) | isadl) to stack. I haven't implemented the ismixed part
 
 ## Mañana mañana

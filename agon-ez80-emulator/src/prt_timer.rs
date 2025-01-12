@@ -81,28 +81,24 @@ impl PrtTimer {
         }
         if self.ctl & RST_EN != 0 {
             self.counter = self.reload;
+            self.step_ = 0;
             self.ctl &= !RST_EN;
         }
         let clk_div = self.clk_div();
         self.step_ = self.step_.wrapping_add(clock_ticks);
         if self.step_ >= clk_div {
             self.step_ -= clk_div;
+            self.counter = self.counter.wrapping_sub(1);
             if self.counter == 0 {
-                if self.ctl & PRT_MODE != 0 {
-                    self.counter = self.reload;
-                }
-                //println("Elapsed {}", self.t_.elapsed());
-                //self.t_ = std::time::Instant::now();
-            } else {
-                self.counter -= 1;
-                if self.counter == 0 {
-                    // set PRT_IRQ
-                    self.ctl |= 0x80;
+                // set PRT_IRQ
+                self.ctl |= 0x80;
 
-                    if self.ctl & PRT_MODE == 0 {
-                        // clear RST_EN and PRT_EN
-                        self.ctl &= 0b1111_1100;
-                    }
+                if self.ctl & PRT_MODE == 0 {
+                    // clear RST_EN and PRT_EN
+                    self.ctl &= 0b1111_1100;
+                } else {
+                    // continuous mode: reload counter
+                    self.counter = self.reload;
                 }
             }
         }
@@ -141,6 +137,23 @@ mod tests {
     }
 
     #[test]
+    fn test_timer_single_pass_65536() {
+        // try with 65536 timer duration
+        let mut timer = PrtTimer::new();
+        // enable
+        timer.write_ctl(3);
+        assert_eq!(timer.counter, 0);
+        for _i in 0..65535 {
+            timer.apply_ticks(4);
+        }
+        assert_eq!(timer.counter, 1);
+        timer.apply_ticks(4);
+        assert_eq!(timer.counter, 0);
+        timer.apply_ticks(4);
+        assert_eq!(timer.counter, 0);
+    }
+
+    #[test]
     fn test_timer_continuous() {
         let mut timer = PrtTimer::new();
         timer.write_reload_low(2);
@@ -157,14 +170,39 @@ mod tests {
         timer.apply_ticks(0);
         assert_eq!(timer.counter, 1);
         timer.apply_ticks(4);
-        assert_eq!(timer.counter, 0);
-        println!("last call");
-        timer.apply_ticks(4);
+        // in continuous mode, timer counter never goes to zero: it resets to reload value instead
         assert_eq!(timer.counter, 2);
+        timer.apply_ticks(4);
+        assert_eq!(timer.counter, 1);
         // first read - PRT_IRQ set
         assert_eq!(timer.read_ctl(), 0x91);
         // second read - PRT_IRQ has been cleared
         assert_eq!(timer.read_ctl(), 0x11);
+    }
+
+    #[test]
+    fn test_timer_continuous_65536() {
+        // try with 65536 timer duration
+        let mut timer = PrtTimer::new();
+        // enable
+        timer.write_ctl(3 | 0x10);
+        assert_eq!(timer.counter, 0);
+        for _i in 0..65535 {
+            timer.apply_ticks(4);
+        }
+        // no interrupt yet
+        assert_eq!(timer.read_ctl(), 0x11);
+        assert_eq!(timer.counter, 1);
+        timer.apply_ticks(4);
+        assert_eq!(timer.counter, 0);
+
+        // first read - PRT_IRQ set
+        assert_eq!(timer.read_ctl(), 0x91);
+        // second read - PRT_IRQ has been cleared
+        assert_eq!(timer.read_ctl(), 0x11);
+
+        timer.apply_ticks(4);
+        assert_eq!(timer.counter, 65535);
     }
 
     #[test]
