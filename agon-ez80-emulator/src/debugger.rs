@@ -38,6 +38,10 @@ pub enum DebugCmd {
         start: u32,
         len: u32,
     },
+    GetMemoryAtReg {
+        reg: Reg16,
+        len: u32,
+    },
     GetRegisters,
     GetState,
     DisassemblePc {
@@ -60,6 +64,7 @@ pub enum DebugResp {
     State {
         registers: Registers,
         instructions_executed: u64,
+        total_cycles_elapsed: u64,
         stack: [u8; 16],
         pc_instruction: String,
     },
@@ -315,6 +320,14 @@ impl DebuggerServer {
             DebugCmd::GetMemory { start, len } => {
                 self.send_mem(machine, cpu, *start, *len);
             }
+            DebugCmd::GetMemoryAtReg { reg, len } => {
+                let addr = if cpu.registers().adl {
+                    cpu.registers().get24(*reg)
+                } else {
+                    cpu.registers().get16_mbase(*reg)
+                };
+                self.send_mem(machine, cpu, addr, *len);
+            }
         }
     }
 
@@ -377,6 +390,7 @@ impl DebuggerServer {
             .send(DebugResp::State {
                 registers: cpu.registers().clone(),
                 instructions_executed: cpu.state.instructions_executed,
+                total_cycles_elapsed: machine.total_cycles_elapsed,
                 stack,
                 pc_instruction,
             })

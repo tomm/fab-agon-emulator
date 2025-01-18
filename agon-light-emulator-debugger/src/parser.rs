@@ -1,4 +1,4 @@
-use agon_ez80_emulator::debugger::{DebugCmd, PauseReason, Trigger};
+use agon_ez80_emulator::debugger::{DebugCmd, PauseReason, Reg16, Trigger};
 
 #[derive(Debug)]
 pub enum Cmd {
@@ -172,7 +172,13 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
                     expect_end_of_cmd(tokens)?;
                     Ok(Cmd::Core(DebugCmd::GetMemory { start, len }))
                 } else {
-                    Err(format!("mem <start> [len]"))
+                    if let Some(reg) = parse_reg16(tokens) {
+                        let len = parse_number(tokens).unwrap_or(16);
+                        expect_end_of_cmd(tokens)?;
+                        Ok(Cmd::Core(DebugCmd::GetMemoryAtReg { reg, len }))
+                    } else {
+                        Err(format!("mem <start> [len]"))
+                    }
                 }
             }
             "." | "state" => {
@@ -239,6 +245,28 @@ fn parse_number(tokens: &mut Tokens) -> Option<u32> {
             tokens.next();
         }
         num
+    } else {
+        None
+    }
+}
+
+fn parse_reg16(tokens: &mut Tokens) -> Option<Reg16> {
+    if let Some(&s) = tokens.peek() {
+        let maybe_reg = match s.to_lowercase().as_str() {
+            "bc" => Some(Reg16::BC),
+            "de" => Some(Reg16::DE),
+            "hl" => Some(Reg16::HL),
+            "sp" => Some(Reg16::SP),
+            "ix" => Some(Reg16::IX),
+            "iy" => Some(Reg16::IY),
+            _ => None,
+        };
+
+        if maybe_reg.is_some() {
+            tokens.next();
+        }
+
+        maybe_reg
     } else {
         None
     }

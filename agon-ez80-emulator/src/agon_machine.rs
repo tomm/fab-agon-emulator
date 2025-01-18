@@ -52,6 +52,7 @@ pub struct AgonMachine {
     pub mem_out_of_bounds: std::cell::Cell<Option<u32>>, // address
     pub io_unhandled: std::cell::Cell<Option<u16>>,      // address
     pub cycle_counter: std::cell::Cell<u32>,
+    pub total_cycles_elapsed: u64,
 }
 
 // a path relative to the hostfs_root_dir
@@ -529,6 +530,7 @@ impl AgonMachine {
             mem_out_of_bounds: std::cell::Cell::new(None),
             io_unhandled: std::cell::Cell::new(None),
             cycle_counter: std::cell::Cell::new(0),
+            total_cycles_elapsed: 0,
             paused: config.paused,
             mos_bin: config.mos_bin,
             onchip_mem_enable: true,
@@ -1455,6 +1457,7 @@ impl AgonMachine {
         self.cycle_counter.set(0);
         cpu.execute_instruction(self);
         let cycles_elapsed = self.cycle_counter.get();
+        self.total_cycles_elapsed += cycles_elapsed as u64;
         //println!("{:2} cycles, {:?}", cycles_elapsed, ez80::disassembler::disassemble(self, cpu, None, pc, pc+1));
 
         for t in &mut self.prt_timers {
