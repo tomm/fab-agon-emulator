@@ -279,6 +279,7 @@ pub fn main_loop() -> i32 {
     unsafe {
         vgabuf.set_len(1024 * 768 * 3);
     }
+    let mut frame_rate_hz: f32 = 60.0;
     let mut mode_w: u32 = 640;
     let mut mode_h: u32 = 480;
     let mut mouse_btn_state: u8 = 0;
@@ -334,10 +335,9 @@ pub fn main_loop() -> i32 {
         canvas.present();
 
         let mut last_frame_time = std::time::Instant::now();
-        // XXX assumes 60Hz video mode
-        let frame_duration = std::time::Duration::from_micros(16666);
 
         'inner: loop {
+            let frame_duration = std::time::Duration::from_micros(1_000_000 / frame_rate_hz as u64);
             let elapsed_since_last_frame = last_frame_time.elapsed();
             if elapsed_since_last_frame < frame_duration {
                 std::thread::sleep(std::time::Duration::from_millis(5));
@@ -354,6 +354,9 @@ pub fn main_loop() -> i32 {
 
             // signal vsync to ez80 via GPIO (pin 1 (from 0) of GPIO port B)
             {
+                // XXX note this is wrong, should be asserted for the whole vblank duration.
+                // but we do it here just for an instant since that's sufficient to trigger
+                // the interrupt.
                 let mut gpios = gpios.lock().unwrap();
                 gpios.b.set_input_pin(1, true);
                 gpios.b.set_input_pin(1, false);
@@ -550,6 +553,7 @@ pub fn main_loop() -> i32 {
                         &mut w as *mut u32,
                         &mut h as *mut u32,
                         &mut vgabuf[0] as *mut u8,
+                        &mut frame_rate_hz as *mut f32,
                     );
                 }
 

@@ -5,7 +5,12 @@ pub struct VdpInterface {
     pub signal_vblank: libloading::Symbol<'static, unsafe extern "C" fn() -> ()>,
     pub copyVgaFramebuffer: libloading::Symbol<
         'static,
-        unsafe extern "C" fn(outWidth: *mut u32, outHeight: *mut u32, buffer: *mut u8),
+        unsafe extern "C" fn(
+            outWidth: *mut u32,
+            outHeight: *mut u32,
+            buffer: *mut u8,
+            frameRateHz: *mut f32,
+        ),
     >,
     pub set_startup_screen_mode: libloading::Symbol<'static, unsafe extern "C" fn(m: u32)>,
     pub z80_uart0_is_cts: libloading::Symbol<'static, unsafe extern "C" fn() -> bool>,

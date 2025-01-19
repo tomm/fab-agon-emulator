@@ -79,7 +79,7 @@ extern "C" void sendHostMouseEventToFabgl(uint8_t mousePacket[4])
 }
 
 /* Buffer must be big enough for any screen resolution - up to 1024x768x3 bytes :) */
-extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
+extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer, float *frameRateHz)
 {
 	auto lock = fabgl::VGABaseController::acquireLock();
 	fabgl::VGABaseController *vga = fabgl::VGABaseController::activeController;
@@ -98,6 +98,7 @@ extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 	if (!vga->is_started()) {
 		// this can arise as a race condition, as the lock in 
 		// setResolution is dropped briefly between end() and the rest of the function.
+		*frameRateHz = 60;
 		*outWidth = 640;
 		*outHeight = 480;
 		memset(buffer, 0, 640*480*3);
@@ -110,6 +111,14 @@ extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer)
 	// rect is inclusive range
 	Rect rect(0, 0, w-1, h-1);
 	vga->readScreen(rect, (fabgl::RGB888*)buffer);
+
+	{
+		auto timings = vga->getResolutionTimings();
+		const int16_t hlen = timings->HVisibleArea + timings->HFrontPorch + timings->HSyncPulse + timings->HBackPorch;
+		const int16_t vlen = timings->VVisibleArea + timings->VFrontPorch + timings->VSyncPulse + timings->VBackPorch;
+		const int32_t totalPixels = (int32_t)hlen * (int32_t)vlen * (int32_t)timings->scanCount;
+		*frameRateHz = (float)timings->frequency / (float)totalPixels;
+	}
 }
 
 extern "C" void getAudioSamples(uint8_t *buffer, uint32_t length)
