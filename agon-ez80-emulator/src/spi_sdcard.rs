@@ -32,7 +32,10 @@ impl SpiSdcard {
             // 0x80 means transfer finished (immediate on the emulator)
             self.spi_sr = 0x80;
 
-            if (self.next_write_sector.is_none() || !self.next_write_started) && val == 255 {
+            if (self.next_write_sector.is_none() || !self.next_write_started)
+                && self.in_buf.len() == 0
+                && val == 255
+            {
                 // init sequence. ignore
             } else if self.next_write_sector.is_some() && !self.next_write_started && val == 254 {
                 // 254 is the 'SD_START_TOKEN'

@@ -28,7 +28,8 @@ be used as the emulated SDCard. Otherwise, the `.agon-sdcard/` directory in your
 home directory will be used if present, and if not then `sdcard/` in the current
 directory is used.
 
-Alternatively you can use raw SDCard images, with the --sdcard-img option.
+Alternatively you can use SDCard images (full MBR partitioned images, or raw
+FAT32 images), with the --sdcard-img option.
 
 ## Changing VDP version
 
