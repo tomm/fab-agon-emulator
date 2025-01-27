@@ -541,6 +541,13 @@ impl AgonMachine {
         }
     }
 
+    fn _peek32(&self, address: u32) -> u32 {
+        self.peek(address) as u32
+            + ((self.peek(address.wrapping_add(1)) as u32) << 8)
+            + ((self.peek(address.wrapping_add(2)) as u32) << 16)
+            + ((self.peek(address.wrapping_add(3)) as u32) << 24)
+    }
+
     pub fn set_paused(&self, state: bool) {
         self.paused
             .store(state, std::sync::atomic::Ordering::Relaxed);
@@ -1254,7 +1261,7 @@ impl AgonMachine {
 
     fn hostfs_mos_f_lseek(&mut self, cpu: &mut Cpu) {
         let fptr = self._peek24(cpu.state.sp() + 3);
-        let offset = self._peek24(cpu.state.sp() + 6);
+        let offset = self._peek32(cpu.state.sp() + 6);
 
         //eprintln!("f_lseek(${:x}, {})", fptr, offset);
 
