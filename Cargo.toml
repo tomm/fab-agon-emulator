@@ -2,7 +2,7 @@
 members = ["agon-light-emulator-debugger", "agon-ez80-emulator", "agon-cli-emulator"]
 
 [workspace.package]
-version = "0.9.87"
+version = "0.9.88"
 edition = "2021"
 authors = ["Tom Morton <tomm8086@gmail.com>"]
 license = "GPL-3.0"

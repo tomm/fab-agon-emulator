@@ -51,7 +51,17 @@ extern "C" void set_startup_screen_mode(uint32_t mode)
 extern "C" void sendPS2KbEventToFabgl(uint16_t ps2scancode, uint8_t isDown)
 {
 	if (fabgl::PS2Controller::keyboard() != nullptr) {
-		fabgl::PS2Controller::keyboard()->injectScancode(ps2scancode, isDown);
+		if (ps2scancode == 0x62) {
+			if (isDown) {
+				/* VK_PAUSE hack */
+				fabgl::VirtualKeyItem item;
+				item.down = 1;
+				item.vk = fabgl::VK_PAUSE;
+				fabgl::PS2Controller::keyboard()->injectVirtualKey(item, true);
+			}
+		} else {
+			fabgl::PS2Controller::keyboard()->injectScancode(ps2scancode, isDown);
+		}
 	}
 }
 

@@ -111,7 +111,7 @@ pub fn sdl2ps2(scancode: sdl2::keyboard::Scancode) -> u16 {
         sdl2::keyboard::Scancode::PageUp => 0xe07d,
         sdl2::keyboard::Scancode::PageDown => 0xe07a,
         sdl2::keyboard::Scancode::Right => 0xe074,
-        // numlock
+        sdl2::keyboard::Scancode::NumLockClear => 0x77,
         sdl2::keyboard::Scancode::Kp7 => 0x6c,
         sdl2::keyboard::Scancode::Kp4 => 0x6b,
         sdl2::keyboard::Scancode::Kp1 => 0x69,
@@ -141,9 +141,10 @@ pub fn sdl2ps2(scancode: sdl2::keyboard::Scancode) -> u16 {
         sdl2::keyboard::Scancode::F10 => 0x09,
         sdl2::keyboard::Scancode::F11 => 0x78,
         sdl2::keyboard::Scancode::F12 => 0x07,
-        // print screen
-        // scroll lock
-        // pause break
+        sdl2::keyboard::Scancode::PrintScreen => 0xe07c, // kinda. good enough for fabgl
+        sdl2::keyboard::Scancode::ScrollLock => 0x7e,
+        sdl2::keyboard::Scancode::Pause => 0x62,
+        // wrong. pause=0x62 is set3, not set2. I use this as pause in set2 is a pain in the arse 8 byte sequence
         sdl2::keyboard::Scancode::Backslash => 0x5d,
         sdl2::keyboard::Scancode::NonUsBackslash => 0x61,
         _ => 0,
