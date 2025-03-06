@@ -1,16 +1,17 @@
 # TODO
 
 ## Known bugs
-- [ ] This (setting key repeat rates) causes a crash: *vdu 23 0 &88 250 0 50 0 0
 - [ ] Mixed mode push ((ismixed<<1) | isadl) to stack. I haven't implemented the ismixed part
 - [ ] c8 joystick gpio mutex contention on windows -- probably use atomics instead
-- [ ] trs-os hang on "run auto command" -- IS CPU-emu BUG! Works with: real agon & emulated VDP!
 - [ ] ez80f92 PRT gpio-b pin 1 source (vblank) not implemented
 
 ## VDP flaws and omissions
 - [ ] ESP32 RAM is unlimited. Figure out ESP32 PSRAM accounting issues (C++ custom allocators)
 - [ ] vdp audio sample rate setting not implemented
-- [ ] VDP keyboard shortcircuits the queue of ps2 scancodes, and instead injects vkeys. this causes issues (eg. PAUSE key is erroneously subject to key repeat)
+- [ ] VDP key repeat rate settings are ignored, and host system key repeat is used. But maybe this is good.
+- [ ] PAUSE key is subject to key repeat, which it is not on a real agon.
+- [ ] Copper effects not implemented
+- [ ] Hardware sprites not implemented
 
 ## Feature ideas
 - [ ] symbol support in debugger
