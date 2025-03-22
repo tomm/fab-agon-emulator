@@ -10,7 +10,6 @@ OPTIONS:
   -f, --fullscreen      Start in fullscreen mode
   -h, --help            Prints help information
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
-  --firmware 1.03       Use quark 1.03 firmware (default is console8)
   --firmware quark      Use quark 1.04 firmware (default is console8)
   --firmware electron   Use ElectronOS firmware (default is console8)
   --mode <n>            Start in a specific screen mode
@@ -37,7 +36,6 @@ ADVANCED:
 #[derive(Debug, Copy, Clone)]
 #[allow(non_camel_case_types)]
 pub enum FirmwareVer {
-    quark103,
     quark,
     console8,
     rainbow,
@@ -163,9 +161,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
             Renderer::Software
         },
         firmware: if let Some(ver) = firmware_ver {
-            if ver == "1.03" {
-                FirmwareVer::quark103
-            } else if ver == "quark" {
+            if ver == "quark" {
                 FirmwareVer::quark
             } else if ver == "console8" {
                 FirmwareVer::console8
@@ -174,7 +170,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
             } else if ver == "electron" {
                 FirmwareVer::electron
             } else {
-                println!("Unknown --firmware value: {}. Valid values are: 1.03, quark, console8, rainbow, electron", ver);
+                println!("Unknown --firmware value: {}. Valid values are: quark, console8, rainbow, electron", ver);
                 std::process::exit(0);
             }
         } else {
