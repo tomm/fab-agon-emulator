@@ -94,6 +94,7 @@ impl Machine for AgonMachine {
     }
 
     fn port_in(&mut self, address: u16) -> u8 {
+        //println!("IN(0x{:x})", address);
         self.use_cycles(1);
         match address {
             0x80 => self.prt_timers[0].read_ctl(),
@@ -280,7 +281,9 @@ impl Machine for AgonMachine {
             }
         }
     }
+
     fn port_out(&mut self, address: u16, value: u8) {
+        //println!("OUT(0x{:x}) = 0x{:x}", address, value);
         self.use_cycles(1);
         match address {
             // Real ez80f92 peripherals
@@ -617,8 +620,14 @@ impl AgonMachine {
             self.mem_rom[i] = *e;
         }
 
-        let mos_map = self.mos_bin.with_extension("map");
+        // First try to find a rom descriptor table to locate MOS FatFS
+        if let Some(map) = mos::MosMap::from_rom_descriptor_table(&self.mem_rom) {
+            self.mos_map = map;
+            return;
+        }
 
+        // Next try to use a map file
+        let mos_map = self.mos_bin.with_extension("map");
         match crate::symbol_map::read_zds_map_file(mos_map.to_str().unwrap()) {
             Ok(map) => match mos::MosMap::from_symbol_map(map) {
                 Ok(mos_map) => {

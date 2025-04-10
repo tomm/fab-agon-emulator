@@ -52,6 +52,44 @@ pub struct MosMap {
 }
 
 impl MosMap {
+    pub fn from_rom_descriptor_table(rom: &[u8]) -> Option<MosMap> {
+        fn ld24(rom: &[u8]) -> u32 {
+            rom[0] as u32 + ((rom[1] as u32) << 8) + ((rom[2] as u32) << 16)
+        }
+        // Does the rom have a descriptor table at 0x6b?
+        if rom[0x6b] == b'M' && rom[0x6c] == b'O' && rom[0x6d] == b'S' && rom.len() >= 0x100 {
+            let mut mos_map = MosMap::default();
+            mos_map.f_chdir = ld24(&rom[0x6f..]);
+            mos_map._f_chdrive = ld24(&rom[0x72..]);
+            mos_map.f_close = ld24(&rom[0x75..]);
+            mos_map.f_closedir = ld24(&rom[0x78..]);
+            mos_map.f_getcwd = ld24(&rom[0x7b..]);
+            mos_map._f_getfree = ld24(&rom[0x7e..]);
+            mos_map.f_getlabel = ld24(&rom[0x81..]);
+            mos_map.f_gets = ld24(&rom[0x84..]);
+            mos_map.f_lseek = ld24(&rom[0x87..]);
+            mos_map.f_mkdir = ld24(&rom[0x8a..]);
+            mos_map.f_mount = ld24(&rom[0x8d..]);
+            mos_map.f_open = ld24(&rom[0x90..]);
+            mos_map.f_opendir = ld24(&rom[0x93..]);
+            mos_map._f_printf = ld24(&rom[0x96..]);
+            mos_map.f_putc = ld24(&rom[0x99..]);
+            mos_map._f_puts = ld24(&rom[0x9c..]);
+            mos_map.f_read = ld24(&rom[0x9f..]);
+            mos_map.f_readdir = ld24(&rom[0xa2..]);
+            mos_map.f_rename = ld24(&rom[0xa5..]);
+            mos_map._f_setlabel = ld24(&rom[0xa8..]);
+            mos_map.f_stat = ld24(&rom[0xab..]);
+            mos_map._f_sync = ld24(&rom[0xae..]);
+            mos_map.f_truncate = ld24(&rom[0xb1..]);
+            mos_map.f_unlink = ld24(&rom[0xb4..]);
+            mos_map.f_write = ld24(&rom[0xb7..]);
+            Some(mos_map)
+        } else {
+            None
+        }
+    }
+
     pub fn from_symbol_map(
         map: std::collections::HashMap<String, u32>,
     ) -> Result<MosMap, &'static str> {
