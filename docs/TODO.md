@@ -4,6 +4,7 @@
 - [ ] Mixed mode push ((ismixed<<1) | isadl) to stack. I haven't implemented the ismixed part
 - [ ] c8 joystick gpio mutex contention on windows -- probably use atomics instead
 - [ ] ez80f92 PRT gpio-b pin 1 source (vblank) not implemented
+- [ ] hostfs should accept filename/paths terminated by any character <= 0x1f
 
 ## VDP flaws and omissions
 - [ ] ESP32 RAM is unlimited. Figure out ESP32 PSRAM accounting issues (C++ custom allocators)

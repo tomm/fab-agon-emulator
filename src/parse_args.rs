@@ -10,8 +10,9 @@ OPTIONS:
   -f, --fullscreen      Start in fullscreen mode
   -h, --help            Prints help information
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
-  --firmware quark      Use quark 1.04 firmware (default is console8)
-  --firmware electron   Use ElectronOS firmware (default is console8)
+  --firmware console8   Use console8 (MOS 2.x) firmware (default is platform)
+  --firmware quark      Use quark 1.04 firmware (default is platform)
+  --firmware electron   Use ElectronOS firmware (default is platform)
   --mode <n>            Start in a specific screen mode
   --osk                 Enable on-screen-keyboard input (requires OS osk)
   --sdcard <path>       Sets the path of the emulated SDCard
@@ -36,6 +37,7 @@ ADVANCED:
 #[derive(Debug, Copy, Clone)]
 #[allow(non_camel_case_types)]
 pub enum FirmwareVer {
+    platform,
     quark,
     console8,
     rainbow,
@@ -163,6 +165,8 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         firmware: if let Some(ver) = firmware_ver {
             if ver == "quark" {
                 FirmwareVer::quark
+            } else if ver == "platform" {
+                FirmwareVer::platform
             } else if ver == "console8" {
                 FirmwareVer::console8
             } else if ver == "rainbow" {
@@ -170,7 +174,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
             } else if ver == "electron" {
                 FirmwareVer::electron
             } else {
-                println!("Unknown --firmware value: {}. Valid values are: quark, console8, rainbow, electron", ver);
+                println!("Unknown --firmware value: {}. Valid values are: platform, quark, console8, electron", ver);
                 std::process::exit(0);
             }
         } else {

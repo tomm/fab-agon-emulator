@@ -16,6 +16,8 @@ ifeq ($(UNAME_S),Darwin)
 else
 	$(MAKE) -C src/vdp
 	cp src/vdp/*.so firmware/
+	# Use c8 vdp for platform firmware also
+	cp firmware/vdp_console8.so firmware/vdp_platform.so
 endif
 
 cargo:
