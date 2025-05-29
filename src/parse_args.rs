@@ -178,7 +178,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
                 std::process::exit(0);
             }
         } else {
-            FirmwareVer::console8
+            FirmwareVer::platform
         },
     };
 
