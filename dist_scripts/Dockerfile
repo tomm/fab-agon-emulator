@@ -1,4 +1,4 @@
-FROM rust:1.75.0-slim-bookworm
+FROM rust:1.85.1-slim-bookworm
 
 RUN apt update && apt install -y wget mingw-w64 zip bzip2 git gcc g++ libsdl2-dev make && rm -rf /var/lib/apt/lists/*
 

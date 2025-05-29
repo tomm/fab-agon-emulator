@@ -21,6 +21,7 @@ make clean
 cd src/vdp
 CXX=x86_64-w64-mingw32-g++-posix make -j8
 cp *.so ../../firmware
+cp vdp_console8.so ../../firmware/vdp_platform.so
 cd ../..
 
 FORCE=1 cargo build -r --target=x86_64-pc-windows-gnu
