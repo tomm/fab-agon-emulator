@@ -13,6 +13,8 @@ ifeq ($(UNAME_S),Darwin)
 	EXTRA_FLAGS="-Wno-c++11-narrowing -arch arm64" SUFFIX=.arm64 $(MAKE) -C src/vdp
 	$(MAKE) -C src/vdp lipo
 	find src/vdp -type f \( -name "*.so" -a ! -name "*.x86_64.so" -a ! -name "*.arm64.so" \) -exec cp {} firmware/ \;
+	# Use c8 vdp for platform firmware also
+	cp firmware/vdp_console8.so firmware/vdp_platform.so
 else
 	$(MAKE) -C src/vdp
 	cp src/vdp/*.so firmware/
