@@ -46,6 +46,7 @@ pub struct AgonMachine {
     flash_addr_u: u8,
     cs0_lbr: u8,
     cs0_ubr: u8,
+    flash_waitstates: u8,
 
     // last_pc and mem_out_of_bounds are used by the debugger
     pub last_pc: u32,
@@ -69,7 +70,7 @@ impl Machine for AgonMachine {
             self.use_cycles(1);
             self.mem_internal[onchip_ram_addr as usize]
         } else if let Some(rom_addr) = self.get_rom_address(address) {
-            self.use_cycles(2);
+            self.use_cycles(1 + self.flash_waitstates as u32);
             self.mem_rom[rom_addr as usize]
         } else if let Some(ram_addr) = self.get_external_ram_address(address) {
             self.use_cycles(1);
@@ -462,6 +463,7 @@ impl Machine for AgonMachine {
             0xd7 => self.uart1.spr = value,
 
             0xf7 => self.flash_addr_u = value,
+            0xf8 => self.flash_waitstates = value >> 5,
 
             _ => {
                 //println!("OUT(${:02X}) = ${:x}", address, value);
@@ -541,6 +543,7 @@ impl AgonMachine {
             flash_addr_u: 0,
             cs0_lbr: 0,
             cs0_ubr: 0xff,
+            flash_waitstates: 4,
         }
     }
 
