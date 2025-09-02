@@ -8,7 +8,7 @@ license.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ez80 = { git = "https://github.com/tomm/ez80.git", rev="61ad9f2070c46b2e34c6bdab772955c9429691f6"}
+ez80 = { git = "https://github.com/tomm/ez80.git", rev="148a4e897c8ccc8bbdaaa9f0bacd0eee2fb69f73"}
 #ez80 = { path = "../../ez80" }
 rand = "*"
 filetime = "0.2"

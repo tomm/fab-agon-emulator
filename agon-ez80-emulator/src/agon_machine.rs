@@ -52,7 +52,7 @@ pub struct AgonMachine {
     pub last_pc: u32,
     pub mem_out_of_bounds: std::cell::Cell<Option<u32>>, // address
     pub io_unhandled: std::cell::Cell<Option<u16>>,      // address
-    pub cycle_counter: std::cell::Cell<u32>,
+    pub cycle_counter: std::cell::Cell<i32>,
     pub total_cycles_elapsed: u64,
 }
 
@@ -61,8 +61,9 @@ pub struct MosPath(std::path::PathBuf);
 
 impl Machine for AgonMachine {
     #[inline]
-    fn use_cycles(&self, cycles: u32) {
-        self.cycle_counter.set(self.cycle_counter.get() + cycles);
+    fn use_cycles(&self, cycles: i32) {
+        self.cycle_counter
+            .set(self.cycle_counter.get().wrapping_add(cycles));
     }
 
     fn peek(&self, address: u32) -> u8 {
@@ -70,7 +71,7 @@ impl Machine for AgonMachine {
             self.use_cycles(1);
             self.mem_internal[onchip_ram_addr as usize]
         } else if let Some(rom_addr) = self.get_rom_address(address) {
-            self.use_cycles(1 + self.flash_waitstates as u32);
+            self.use_cycles(1 + self.flash_waitstates as i32);
             self.mem_rom[rom_addr as usize]
         } else if let Some(ram_addr) = self.get_external_ram_address(address) {
             self.use_cycles(1);
@@ -1398,7 +1399,7 @@ impl AgonMachine {
 
     #[inline]
     // returns cycles elapsed
-    pub fn execute_instruction(&mut self, cpu: &mut Cpu) -> u32 {
+    pub fn execute_instruction(&mut self, cpu: &mut Cpu) -> i32 {
         let pc = cpu.state.pc();
         // remember PC before instruction executes. the debugger uses this
         // when out-of-bounds memory accesses happen (since they can't be
@@ -1476,7 +1477,9 @@ impl AgonMachine {
         self.cycle_counter.set(0);
         cpu.execute_instruction(self);
         let cycles_elapsed = self.cycle_counter.get();
-        self.total_cycles_elapsed += cycles_elapsed as u64;
+        self.total_cycles_elapsed = self
+            .total_cycles_elapsed
+            .wrapping_add(cycles_elapsed as u64);
         //println!("{:2} cycles, {:?}", cycles_elapsed, ez80::disassembler::disassemble(self, cpu, None, pc, pc+1));
 
         for t in &mut self.prt_timers {
