@@ -1,15 +1,13 @@
 Tom's Fake VDP Version 1.03
 unknown packet VDU 0x17, 0, 0x94
 
-Agon Rainbow MOS Version 2.2.3
+Agon Console8 MOS Version 2.3.3 Rainbow
 
+hello old bean
 / *copy regression_suite/sample.txt temp.txt
-Copying regression_suite/sample.txt to temp.txt
+
+Access denied
 / *type temp.txt
-The quick
-brown fox
-jumped over
-the lazy dog.
 / *ftruncate temp.txt
 / *type temp.txt
 / *load mos
@@ -19,7 +17,7 @@ Could not find file
 Assembling regression_suite/timerirq.asm
 Pass 1...
 Pass 2...
-Done
+Done in 0.11 seconds
 / *load regression_suite/timerirq.bin
 / *run
 Timer CTL read back: 41
@@ -31,7 +29,7 @@ Value set from timer interrupt: D1
 Assembling regression_suite/hostfs.asm
 Pass 1...
 Pass 2...
-Done
+Done in 0.05 seconds
 / *load regression_suite/hostfs.bin
 / *run
 quick
@@ -43,12 +41,12 @@ hostfs test passed
 Assembling helloworld.asm
 Pass 1...
 Pass 2...
-Done
+Done in 0.00 seconds
 /regression_suite *ez80asm helloworld16.asm
 Assembling helloworld16.asm
 Pass 1...
 Pass 2...
-Done
+Done in 0.01 seconds
 /regression_suite *cd /
 / *load regression_suite/helloworld.bin
 / *run
@@ -108,7 +106,7 @@ Hello world Z80!
 0B00B2 E5                .      PUSH HL
 0B00B3 D1                .      POP DE
 / *cd regression_suite
-/regression_suite *load ../bbcbasic24.bin
+/regression_suite *load /bin/bbcbasic24.bin
 /regression_suite *run
 BBC BASIC (Agon ADL) Version 1.03
 BBC BASIC (Z80) Version 3.00

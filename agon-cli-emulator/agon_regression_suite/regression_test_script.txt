@@ -19,7 +19,7 @@ load regression_suite/helloworld16.bin
 run
 disassemble &b0050 100
 cd regression_suite
-load ../bbcbasic24.bin
+load /bin/bbcbasic24.bin
 run
 LOAD "animal.bbc"
 LIST

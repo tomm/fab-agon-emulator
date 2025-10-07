@@ -41,7 +41,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         //debugger: pargs.contains(["-d", "--debugger"]),
         sdcard: pargs.opt_value_from_str("--sdcard")?,
         sdcard_img: pargs.opt_value_from_str("--sdcard-img")?,
-        unlimited_cpu: pargs.contains(["-u", "--unlimited_cpu"]),
+        unlimited_cpu: pargs.contains(["-u", "--unlimited-cpu"]),
         zero: pargs.contains(["-z", "--zero"]),
         mos_bin: pargs.opt_value_from_str("--mos")?,
     };

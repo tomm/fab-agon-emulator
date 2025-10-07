@@ -10,16 +10,17 @@ rm -f agon_regression_suite/regression_test.spi_sd.out \
    sdcard/regression_suite/helloworld16.bin
 
 # Make a new fat32 image for the spi_sd run
-#dd if=/dev/zero of=sdcard_regression_suite.img bs=1M count=16
-gunzip -c sdcard_regression_suite.img.gz > sdcard_regression_suite.img
+dd if=/dev/zero of=sdcard_regression_suite.img bs=1M count=16
+mkfs.vfat sdcard_regression_suite.img
+#gunzip -c sdcard_regression_suite.img.gz > sdcard_regression_suite.img
 # mtools makes invalid 8.3 filenames (not upper case), so this doesn't work.
 #mformat -i sdcard_regression_suite.img@@1048576
-mcopy -s -i sdcard_regression_suite.img@@1048576 sdcard/* ::
-mdel -i sdcard_regression_suite.img@@1048576 ::tmp
-mdir -i sdcard_regression_suite.img@@1048576 ::
+mcopy -s -i sdcard_regression_suite.img sdcard/* ::
+mdel -i sdcard_regression_suite.img ::tmp
+mdir -i sdcard_regression_suite.img ::
 
 cargo run --release -- --sdcard-img sdcard_regression_suite.img --unlimited-cpu < agon_regression_suite/regression_test_script.txt | tee agon_regression_suite/regression_test.spi_sd.out
-cargo run --release -- --unlimited-cpu < agon_regression_suite/regression_test_script.txt | tee agon_regression_suite/regression_test.hostfs.out
+cargo run --release -- --unlimited-cpu --sdcard sdcard < agon_regression_suite/regression_test_script.txt | tee agon_regression_suite/regression_test.hostfs.out
 echo
 
 if ! cmp agon_regression_suite/regression_test.spi_sd.out agon_regression_suite/regression_test.expected; then
