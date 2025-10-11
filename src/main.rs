@@ -6,7 +6,7 @@ use sdl3::event::Event;
 use sdl3_sys::everything::{SDL_ScaleMode, SDL_SetTextureScaleMode};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::thread;
 mod ascii2vk;
 mod audio;
@@ -76,7 +76,7 @@ pub fn main_loop() -> i32 {
     let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) =
         mpsc::channel();
 
-    let gpios = Arc::new(Mutex::new(gpio::GpioSet::new()));
+    let gpios = Arc::new(gpio::GpioSet::new());
 
     // Atomics for various state communication
     let ez80_paused = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
@@ -293,7 +293,7 @@ pub fn main_loop() -> i32 {
     let mut mode_h: u32 = 480;
     let mut mouse_btn_state: u8 = 0;
 
-    joypad::clear_state(&mut gpios.lock().unwrap());
+    joypad::clear_state(&gpios);
 
     'running: loop {
         let (wx, wy): (u32, u32) = {
@@ -380,7 +380,6 @@ pub fn main_loop() -> i32 {
                 // XXX note this is wrong, should be asserted for the whole vblank duration.
                 // but we do it here just for an instant since that's sufficient to trigger
                 // the interrupt.
-                let mut gpios = gpios.lock().unwrap();
                 gpios.b.set_input_pin(1, true);
                 gpios.b.set_input_pin(1, false);
             }
@@ -540,17 +539,17 @@ pub fn main_loop() -> i32 {
                         state,
                         ..
                     } => {
-                        joypad::on_hat_motion(&mut gpios.lock().unwrap(), which, hat_idx, state);
+                        joypad::on_hat_motion(&gpios, which, hat_idx, state);
                     }
                     Event::JoyButtonUp {
                         which, button_idx, ..
                     } => {
-                        joypad::on_button(&mut gpios.lock().unwrap(), which, button_idx, false);
+                        joypad::on_button(&gpios, which, button_idx, false);
                     }
                     Event::JoyButtonDown {
                         which, button_idx, ..
                     } => {
-                        joypad::on_button(&mut gpios.lock().unwrap(), which, button_idx, true);
+                        joypad::on_button(&gpios, which, button_idx, true);
                     }
                     Event::JoyAxisMotion {
                         which,
@@ -558,7 +557,7 @@ pub fn main_loop() -> i32 {
                         value,
                         ..
                     } => {
-                        joypad::on_axis_motion(&mut gpios.lock().unwrap(), which, axis_idx, value);
+                        joypad::on_axis_motion(&gpios, which, axis_idx, value);
                     }
                     Event::JoyDeviceRemoved { .. } => {}
                     Event::JoyDeviceAdded { .. } => {

@@ -126,7 +126,7 @@ fn handle_vdp(
 fn start_vdp(
     tx_vdp_to_ez80: Sender<u8>,
     rx_ez80_to_vdp: Receiver<u8>,
-    gpios: std::sync::Arc<std::sync::Mutex<gpio::GpioSet>>,
+    gpios: std::sync::Arc<gpio::GpioSet>,
     emulator_shutdown: std::sync::Arc<std::sync::atomic::AtomicBool>,
 ) {
     let (tx_stdin, rx_stdin): (Sender<String>, Receiver<String>) = mpsc::channel();
@@ -154,7 +154,6 @@ fn start_vdp(
         if last_vsync.elapsed() >= std::time::Duration::from_micros(16666) {
             // signal vsync to ez80 via GPIO (pin 1 (from 0) of GPIO port B)
             {
-                let mut gpios = gpios.lock().unwrap();
                 gpios.b.set_input_pin(1, true);
                 gpios.b.set_input_pin(1, false);
             }
@@ -237,7 +236,7 @@ fn main() {
     let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let exit_status = std::sync::Arc::new(std::sync::atomic::AtomicI32::new(0));
-    let gpios = std::sync::Arc::new(std::sync::Mutex::new(gpio::GpioSet::new()));
+    let gpios = std::sync::Arc::new(gpio::GpioSet::new());
     let ez80_paused = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let gpios_ = gpios.clone();
 

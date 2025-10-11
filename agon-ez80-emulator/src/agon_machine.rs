@@ -4,7 +4,7 @@ use ez80::*;
 use rand::Rng;
 use std::collections::HashMap;
 use std::io::{Read, Seek, SeekFrom, Write};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 const ROM_SIZE: usize = 0x20000; // 128 KiB flash
 const EXTERNAL_RAM_SIZE: usize = 0x80000; // 512 KiB
@@ -13,6 +13,11 @@ const ONCHIP_RAM_SIZE: u32 = 0x2000; // 8KiB
 pub enum RamInit {
     Zero,
     Random,
+}
+
+#[derive(Default)]
+pub struct GpioVga {
+    pub last_vblank_cycle: u64,
 }
 
 pub struct AgonMachine {
@@ -36,7 +41,7 @@ pub struct AgonMachine {
     exit_status: Arc<std::sync::atomic::AtomicI32>,
     clockspeed_hz: u64,
     prt_timers: [prt_timer::PrtTimer; 6],
-    gpios: Arc<Mutex<gpio::GpioSet>>,
+    gpios: Arc<gpio::GpioSet>,
     ram_init: RamInit,
     mos_bin: std::path::PathBuf,
 
@@ -47,6 +52,8 @@ pub struct AgonMachine {
     cs0_lbr: u8,
     cs0_ubr: u8,
     flash_waitstates: u8,
+
+    gpio_vga: GpioVga,
 
     // last_pc and mem_out_of_bounds are used by the debugger
     pub last_pc: u32,
@@ -123,68 +130,36 @@ impl Machine for AgonMachine {
             0x90 => self.prt_timers[5].read_counter_low(),
             0x91 => self.prt_timers[5].read_counter_high(),
 
-            0x9a => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.b.get_dr()
-            }
-            0x9b => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.b.get_ddr()
-            }
-            0x9c => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.b.get_alt1()
-            }
-            0x9d => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.b.get_alt2()
-            }
+            0x9a => self.gpios.b.get_dr(),
+            0x9b => self.gpios.b.get_ddr(),
+            0x9c => self.gpios.b.get_alt1(),
+            0x9d => self.gpios.b.get_alt2(),
 
             0x9e => {
-                let gpios = self.gpios.lock().unwrap();
                 /* set bit 3 of gpio if uart1 is NOT CTS */
                 let uart1_cts = if self.uart1.read_modem_status_register() & 0x10 != 0 {
                     0
                 } else {
                     8
                 };
-                gpios.c.get_dr() | uart1_cts
+                self.gpios.c.get_dr() | uart1_cts
             }
-            0x9f => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.c.get_ddr()
-            }
-            0xa0 => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.c.get_alt1()
-            }
-            0xa1 => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.c.get_alt2()
-            }
+            0x9f => self.gpios.c.get_ddr(),
+            0xa0 => self.gpios.c.get_alt1(),
+            0xa1 => self.gpios.c.get_alt2(),
 
             0xa2 => {
-                let gpios = self.gpios.lock().unwrap();
                 /* set bit 3 of gpio if uart0 is NOT CTS */
                 let uart0_cts = if self.uart0.read_modem_status_register() & 0x10 != 0 {
                     0
                 } else {
                     8
                 };
-                gpios.d.get_dr() | uart0_cts
+                self.gpios.d.get_dr() | uart0_cts
             }
-            0xa3 => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.d.get_ddr()
-            }
-            0xa4 => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.d.get_alt1()
-            }
-            0xa5 => {
-                let gpios = self.gpios.lock().unwrap();
-                gpios.d.get_alt2()
-            }
+            0xa3 => self.gpios.d.get_ddr(),
+            0xa4 => self.gpios.d.get_alt1(),
+            0xa5 => self.gpios.d.get_alt2(),
 
             0xb4 => {
                 if self.onchip_mem_enable {
@@ -314,66 +289,54 @@ impl Machine for AgonMachine {
             0x91 => self.prt_timers[5].write_reload_high(value),
 
             0x9a => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.b.set_dr(value);
-                gpios.b.update();
+                self.gpios.b.set_dr(value);
+                self.gpios.b.update();
             }
             0x9b => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.b.set_ddr(value);
-                gpios.b.update();
+                self.gpios.b.set_ddr(value);
+                self.gpios.b.update();
             }
             0x9c => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.b.set_alt1(value);
-                gpios.b.update();
+                self.gpios.b.set_alt1(value);
+                self.gpios.b.update();
             }
             0x9d => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.b.set_alt2(value);
-                gpios.b.update();
+                self.gpios.b.set_alt2(value);
+                self.gpios.b.update();
             }
 
             0x9e => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.c.set_dr(value);
-                gpios.c.update();
+                self.gpios.c.set_dr(value);
+                self.gpios.c.update();
             }
             0x9f => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.c.set_ddr(value);
-                gpios.c.update();
+                self.gpios.c.set_ddr(value);
+                self.gpios.c.update();
             }
             0xa0 => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.c.set_alt1(value);
-                gpios.c.update();
+                self.gpios.c.set_alt1(value);
+                self.gpios.c.update();
             }
             0xa1 => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.c.set_alt2(value);
-                gpios.c.update();
+                self.gpios.c.set_alt2(value);
+                self.gpios.c.update();
             }
 
             0xa2 => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.d.set_dr(value);
-                gpios.d.update();
+                self.gpios.d.set_dr(value);
+                self.gpios.d.update();
             }
             0xa3 => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.d.set_ddr(value);
-                gpios.d.update();
+                self.gpios.d.set_ddr(value);
+                self.gpios.d.update();
             }
             0xa4 => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.d.set_alt1(value);
-                gpios.d.update();
+                self.gpios.d.set_alt1(value);
+                self.gpios.d.update();
             }
             0xa5 => {
-                let mut gpios = self.gpios.lock().unwrap();
-                gpios.d.set_alt2(value);
-                gpios.d.update();
+                self.gpios.d.set_alt2(value);
+                self.gpios.d.update();
             }
 
             // chip selects
@@ -499,7 +462,7 @@ pub struct AgonMachineConfig {
     pub clockspeed_hz: u64,
     pub ram_init: RamInit,
     pub mos_bin: std::path::PathBuf,
-    pub gpios: Arc<Mutex<gpio::GpioSet>>,
+    pub gpios: Arc<gpio::GpioSet>,
 }
 
 impl AgonMachine {
@@ -531,6 +494,7 @@ impl AgonMachine {
                 prt_timer::PrtTimer::new(),
             ],
             gpios: config.gpios,
+            gpio_vga: GpioVga::default(),
             ram_init: config.ram_init,
             last_pc: 0,
             mem_out_of_bounds: std::cell::Cell::new(None),
@@ -1557,10 +1521,9 @@ impl AgonMachine {
             // fire gpio interrupts
             {
                 let (b_int, c_int, d_int) = {
-                    let mut gpios = self.gpios.lock().unwrap();
-                    let b_int = gpios.b.get_interrupt_due();
-                    let c_int = gpios.c.get_interrupt_due();
-                    let d_int = gpios.d.get_interrupt_due();
+                    let b_int = self.gpios.b.get_interrupt_due();
+                    let c_int = self.gpios.c.get_interrupt_due();
+                    let d_int = self.gpios.d.get_interrupt_due();
                     (b_int, c_int, d_int)
                 };
 
