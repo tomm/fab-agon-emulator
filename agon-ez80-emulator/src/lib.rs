@@ -1,6 +1,7 @@
 mod agon_machine;
 pub mod debugger;
 pub mod gpio;
+mod gpio_video;
 mod i2c;
 mod mos;
 mod prt_timer;
@@ -10,4 +11,5 @@ mod uart;
 pub use agon_machine::AgonMachine;
 pub use agon_machine::AgonMachineConfig;
 pub use agon_machine::RamInit;
+pub use gpio_video::GpioVgaFrame;
 pub use uart::SerialLink;

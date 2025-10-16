@@ -1,6 +1,6 @@
 use crate::parse_args::parse_args;
 use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, PauseReason, Trigger};
-use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
+use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, GpioVgaFrame, RamInit, SerialLink};
 use sdl3 as sdl2;
 use sdl3::event::Event;
 use sdl3_sys::everything::{SDL_ScaleMode, SDL_SetTextureScaleMode};
@@ -75,6 +75,8 @@ pub fn main_loop() -> i32 {
         mpsc::channel();
     let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) =
         mpsc::channel();
+
+    let (tx_gpio_vga_frame, rx_gpio_vga_frame) = mpsc::channel::<Box<GpioVgaFrame>>();
 
     let gpios = Arc::new(gpio::GpioSet::new());
 
@@ -197,6 +199,7 @@ pub fn main_loop() -> i32 {
                     emulator_shutdown: _emulator_shutdown,
                     exit_status: _exit_status,
                     paused: _ez80_paused,
+                    tx_gpio_vga_frame,
                     clockspeed_hz: if args.unlimited_cpu {
                         1000_000_000
                     } else {
@@ -238,6 +241,7 @@ pub fn main_loop() -> i32 {
         .unwrap()
         .get_content_scale()
         .unwrap();
+    let mut got_gpio_vga_sync: u32 = 0;
 
     open_joystick_devices(&mut joysticks, &joystick_subsystem);
 
@@ -570,13 +574,42 @@ pub fn main_loop() -> i32 {
             {
                 let mut w: u32 = 0;
                 let mut h: u32 = 0;
-                unsafe {
-                    (*vdp_interface.copyVgaFramebuffer)(
-                        &mut w as *mut u32,
-                        &mut h as *mut u32,
-                        &mut vgabuf[0] as *mut u8,
-                        &mut frame_rate_hz as *mut f32,
-                    );
+
+                // If there is an eZ80 GPIO VGA frame, show that
+                if let Ok(img) = rx_gpio_vga_frame.try_recv() {
+                    println!("Got image width {} height {}", img.width, img.height);
+                    w = img.width;
+                    h = img.height;
+
+                    for _y in 0..h {
+                        for _x in 0..w {
+                            let pixel = img.picture[_y as usize][_x as usize];
+                            vgabuf[(w * 3 * _y + 3 * _x + 0) as usize] = (pixel >> 5) * 36;
+                            vgabuf[(w * 3 * _y + 3 * _x + 1) as usize] = ((pixel >> 2) & 7) * 36;
+                            vgabuf[(w * 3 * _y + 3 * _x + 2) as usize] = (pixel & 0x3) * 85;
+                        }
+                    }
+
+                    got_gpio_vga_sync = 4;
+
+                    // drop further queued frames to avoid backlog
+                    while let Ok(_) = rx_gpio_vga_frame.try_recv() {}
+                } else if got_gpio_vga_sync > 0 {
+                    // scan out stale data for a couple of frames till we decide we've lost sync
+                    w = mode_w;
+                    h = mode_h;
+                    got_gpio_vga_sync -= 1;
+                }
+                // otherwise show VDP image
+                else {
+                    unsafe {
+                        (*vdp_interface.copyVgaFramebuffer)(
+                            &mut w as *mut u32,
+                            &mut h as *mut u32,
+                            &mut vgabuf[0] as *mut u8,
+                            &mut frame_rate_hz as *mut f32,
+                        );
+                    }
                 }
 
                 if w != mode_w || h != mode_h {

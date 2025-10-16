@@ -2,7 +2,7 @@ mod parse_args;
 //use agon_ez80_emulator::debugger;
 //use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, Trigger};
 use crate::parse_args::parse_args;
-use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, RamInit, SerialLink};
+use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, GpioVgaFrame, RamInit, SerialLink};
 use std::io::{self, BufRead, Write};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
@@ -233,6 +233,7 @@ fn main() {
 
     let (tx_vdp_to_ez80, from_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
     let (to_vdp, rx_ez80_to_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
+    let (tx_gpio_vga_frame, rx_gpio_vga_frame) = mpsc::channel::<Box<GpioVgaFrame>>();
     let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let exit_status = std::sync::Arc::new(std::sync::atomic::AtomicI32::new(0));
@@ -301,6 +302,7 @@ fn main() {
                 paused: _ez80_paused,
                 emulator_shutdown: _emulator_shutdown,
                 gpios: gpios_,
+                tx_gpio_vga_frame: tx_gpio_vga_frame,
                 clockspeed_hz: if args.unlimited_cpu {
                     std::u64::MAX
                 } else {

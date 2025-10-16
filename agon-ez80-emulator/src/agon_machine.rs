@@ -1,4 +1,4 @@
-use crate::{debugger, gpio, i2c, mos, prt_timer, spi_sdcard, uart};
+use crate::{debugger, gpio, gpio_video, i2c, mos, prt_timer, spi_sdcard, uart};
 use chrono::{Datelike, Timelike};
 use ez80::*;
 use rand::Rng;
@@ -13,11 +13,6 @@ const ONCHIP_RAM_SIZE: u32 = 0x2000; // 8KiB
 pub enum RamInit {
     Zero,
     Random,
-}
-
-#[derive(Default)]
-pub struct GpioVga {
-    pub last_vblank_cycle: u64,
 }
 
 pub struct AgonMachine {
@@ -53,7 +48,7 @@ pub struct AgonMachine {
     cs0_ubr: u8,
     flash_waitstates: u8,
 
-    gpio_vga: GpioVga,
+    gpio_vga: gpio_video::GpioVga,
 
     // last_pc and mem_out_of_bounds are used by the debugger
     pub last_pc: u32,
@@ -262,6 +257,19 @@ impl Machine for AgonMachine {
     fn port_out(&mut self, address: u16, value: u8) {
         //println!("OUT(0x{:x}) = 0x{:x}", address, value);
         self.use_cycles(1);
+
+        fn is_gpio_configured_for_vga(gpios: &gpio::GpioSet) -> bool {
+            // If gpio d pins 6 & 7 are configured for output,
+            // and all gpio c is configured for output,
+            // then it looks like GPIO video out
+            gpios.d.get_ddr() & 0xc0 == 0
+                && gpios.d.get_alt1() & 0xc0 == 0
+                && gpios.d.get_alt2() & 0xc0 == 0
+                && gpios.c.get_ddr() == 0
+                && gpios.c.get_alt1() == 0
+                && gpios.c.get_alt2() == 0
+        }
+
         match address {
             // Real ez80f92 peripherals
             0x80 => self.prt_timers[0].write_ctl(value),
@@ -306,6 +314,14 @@ impl Machine for AgonMachine {
             }
 
             0x9e => {
+                if is_gpio_configured_for_vga(&self.gpios) {
+                    self.gpio_vga.handle_gpioc_write(
+                        self.total_cycles_elapsed,
+                        self.gpios.c.get_dr(),
+                        value,
+                    );
+                }
+
                 self.gpios.c.set_dr(value);
                 self.gpios.c.update();
             }
@@ -323,6 +339,14 @@ impl Machine for AgonMachine {
             }
 
             0xa2 => {
+                // Detect GPIO VGA config
+                if is_gpio_configured_for_vga(&self.gpios) {
+                    self.gpio_vga.handle_gpiod_write(
+                        self.total_cycles_elapsed,
+                        self.gpios.d.get_dr(),
+                        value,
+                    );
+                }
                 self.gpios.d.set_dr(value);
                 self.gpios.d.update();
             }
@@ -463,6 +487,7 @@ pub struct AgonMachineConfig {
     pub ram_init: RamInit,
     pub mos_bin: std::path::PathBuf,
     pub gpios: Arc<gpio::GpioSet>,
+    pub tx_gpio_vga_frame: std::sync::mpsc::Sender<Box<gpio_video::GpioVgaFrame>>,
 }
 
 impl AgonMachine {
@@ -494,7 +519,7 @@ impl AgonMachine {
                 prt_timer::PrtTimer::new(),
             ],
             gpios: config.gpios,
-            gpio_vga: GpioVga::default(),
+            gpio_vga: gpio_video::GpioVga::new(config.tx_gpio_vga_frame),
             ram_init: config.ram_init,
             last_pc: 0,
             mem_out_of_bounds: std::cell::Cell::new(None),
@@ -1491,7 +1516,7 @@ impl AgonMachine {
             }
         }
 
-        if cpu.state.instructions_executed & 0x3f == 0 && cpu.state.reg.get_iff1() {
+        if cpu.state.instructions_executed & 0xf == 0 && cpu.state.reg.get_iff1() {
             // Interrupts in priority order
             for i in 0..self.prt_timers.len() {
                 if self.prt_timers[i].irq_due() {
