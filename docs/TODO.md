@@ -1,5 +1,8 @@
 # TODO
 
+## v1.1
+- [ ] Test joysticks
+
 ## Known bugs
 - [ ] Mixed mode push ((ismixed<<1) | isadl) to stack. I haven't implemented the ismixed part
 - [ ] c8 joystick gpio mutex contention on windows -- probably use atomics instead

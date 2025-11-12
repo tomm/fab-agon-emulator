@@ -750,11 +750,16 @@ fn open_joystick_devices(
 ) {
     joysticks.clear();
 
-    /*
-    for i in 0..joystick_subsystem.num_joysticks().unwrap() {
-        joysticks.push(joystick_subsystem.open(i).unwrap());
+    match joystick_subsystem.joysticks() {
+        Ok(sticks) => {
+            for handle in &sticks {
+                joysticks.push(joystick_subsystem.open(*handle).unwrap());
+            }
+        }
+        Err(e) => {
+            eprintln!("Error opening joysticks: {}", e);
+        }
     }
-    */
 }
 
 /**
