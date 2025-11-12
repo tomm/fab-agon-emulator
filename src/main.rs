@@ -103,6 +103,12 @@ pub fn main_loop() -> i32 {
     #[cfg(target_os = "linux")]
     let _tty = raw_tty::TtyWithGuard::new(std::io::stdin());
 
+    // Prefer wayland on linux
+    #[cfg(target_os = "linux")]
+    if sdl2::video::drivers().any(|drv| drv == "wayland") {
+        sdl2::hint::set(sdl2::hint::names::VIDEO_DRIVER, "wayland");
+    }
+
     let debugger_con = if args.debugger {
         let _ez80_paused = ez80_paused.clone();
         let _emulator_shutdown = emulator_shutdown.clone();
@@ -226,6 +232,11 @@ pub fn main_loop() -> i32 {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut joysticks = vec![];
     let mut got_gpio_vga_sync: u32 = 0;
+
+    println!(
+        "Video driver: {} (can override with SDL_VIDEO_DRIVER environment variable)",
+        video_subsystem.current_video_driver()
+    );
 
     open_joystick_devices(&mut joysticks, &joystick_subsystem);
 

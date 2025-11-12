@@ -2,6 +2,7 @@
 
 ## v1.1
 - [ ] Test joysticks
+- [ ] --renderer does nothing now...
 
 ## Known bugs
 - [ ] Mixed mode push ((ismixed<<1) | isadl) to stack. I haven't implemented the ismixed part
