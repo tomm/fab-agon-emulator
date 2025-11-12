@@ -216,7 +216,7 @@ pub fn main_loop() -> i32 {
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    let native_resolution = video_subsystem
+    let native_resolution_scaled = video_subsystem
         .get_primary_display()
         .unwrap()
         .get_bounds()
@@ -225,19 +225,9 @@ pub fn main_loop() -> i32 {
     let joystick_subsystem = sdl_context.joystick().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut joysticks = vec![];
-    let scale = video_subsystem
-        .get_primary_display()
-        .unwrap()
-        .get_content_scale()
-        .unwrap();
     let mut got_gpio_vga_sync: u32 = 0;
 
     open_joystick_devices(&mut joysticks, &joystick_subsystem);
-
-    println!(
-        "Detected {}x{} native resolution, scale {}",
-        native_resolution.w, native_resolution.h, scale
-    );
 
     let _audio_device = match (|| -> Result<sdl2::audio::AudioStreamWithCallback<audio::VdpAudioStream> ,sdl2::Error> {
         let audio_subsystem = sdl_context.audio()?;
@@ -295,7 +285,10 @@ pub fn main_loop() -> i32 {
 
     'running: loop {
         let (wx, wy): (u32, u32) = {
-            let nat = (1920, 1080); //(native_resolution.w as u32, native_resolution.h as u32);
+            let nat = (
+                native_resolution_scaled.w as u32,
+                native_resolution_scaled.h as u32,
+            );
             if is_fullscreen {
                 nat
             } else if nat.1 - 64 >= mode_h {
@@ -306,7 +299,6 @@ pub fn main_loop() -> i32 {
                 (mode_w, mode_h)
             }
         };
-        println!("wx,wy: {}, {}", wx, wy);
 
         let mut window = video_subsystem
             .window(
@@ -320,11 +312,7 @@ pub fn main_loop() -> i32 {
             .build()
             .unwrap();
 
-        println!(
-            "Window size in pixels: {:?}, scale {:?}",
-            window.size_in_pixels(),
-            window.display_scale()
-        );
+        //println!("Detected display scale of {}x", window.display_scale());
 
         if args.osk {
             video_subsystem.text_input().start(&window);
@@ -347,7 +335,6 @@ pub fn main_loop() -> i32 {
         };
 
         let output_size = canvas.output_size().unwrap();
-        println!("output_size: {:?}", output_size);
         let texture_creator = canvas.texture_creator();
         let (mut agon_texture, mut upscale_texture) =
             make_agon_screen_textures(&texture_creator, (wx, wy), (mode_w, mode_h));
@@ -782,9 +769,7 @@ fn make_agon_screen_textures(
             agon_size.1,
         )
         .unwrap();
-    println!("native size {:?}", native_size);
     let int_scale_size = calc_int_scale(native_size, agon_size);
-    println!("texture int scale {:?}", int_scale_size);
     let upscale_texture = texture_creator
         .create_texture_target(
             unsafe {
