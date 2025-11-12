@@ -214,17 +214,6 @@ pub fn main_loop() -> i32 {
             })
     };
 
-    // VDP thread
-    let _vdp_thread = thread::Builder::new()
-        .name("VDP".to_string())
-        .spawn(move || unsafe {
-            if let Some(scr_mode) = args.scr_mode {
-                (*vdp_interface.set_startup_screen_mode)(scr_mode);
-            }
-            (*vdp_interface.vdp_setup)();
-            (*vdp_interface.vdp_loop)();
-        });
-
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let native_resolution = video_subsystem
@@ -250,40 +239,45 @@ pub fn main_loop() -> i32 {
         native_resolution.w, native_resolution.h, scale
     );
 
-    /*
-    let _audio_device = {
-        match sdl_context.audio() {
-            Ok(audio_subsystem) => {
-                let desired_spec = sdl2::audio::AudioSpecDesired {
-                    freq: Some(16384), // real VDP uses 16384Hz
-                    channels: Some(1),
-                    samples: Some(AUDIO_BUFLEN),
-                };
+    let _audio_device = match (|| -> Result<sdl2::audio::AudioStreamWithCallback<audio::VdpAudioStream> ,sdl2::Error> {
+        let audio_subsystem = sdl_context.audio()?;
 
-                match audio_subsystem.open_playback(None, &desired_spec, |_spec| {
-                    audio::VdpAudioStream {
-                        getAudioSamples: vdp_interface.getAudioSamples,
-                    }
-                }) {
-                    Ok(audio_device) => {
-                        // start playback
-                        audio_device.resume();
+        let desired_spec = sdl2::audio::AudioSpec {
+            format: Some(sdl2::audio::AudioFormat::U8),
+            freq: Some(16384), // real VDP uses 16384Hz
+            channels: Some(1),
+        };
+        let device = audio_subsystem.open_playback_device(&desired_spec)?;
 
-                        Some(audio_device)
-                    }
-                    Err(e) => {
-                        println!("Error opening audio device: {:?}", e);
-                        None
-                    }
-                }
+        let device = audio_subsystem.open_playback_stream_with_callback(&device,
+            &desired_spec,
+            audio::VdpAudioStream {
+                buffer: vec![],
+                getAudioSamples: vdp_interface.getAudioSamples,
             }
-            Err(e) => {
-                println!("Error opening audio subsystem: {:?}", e);
-                None
-            }
+        )?;
+
+        device.resume()?;
+
+        Ok(device)
+    })() {
+        Ok(device) => Some(device),
+        Err(e) => {
+            eprintln!("Error opening audio device: {}", e);
+            None
         }
     };
-    */
+
+    // VDP thread
+    let _vdp_thread = thread::Builder::new()
+        .name("VDP".to_string())
+        .spawn(move || unsafe {
+            if let Some(scr_mode) = args.scr_mode {
+                (*vdp_interface.set_startup_screen_mode)(scr_mode);
+            }
+            (*vdp_interface.vdp_setup)();
+            (*vdp_interface.vdp_loop)();
+        });
 
     let mut screen_scale = args.screen_scale;
     let mut is_fullscreen = args.fullscreen;
@@ -577,7 +571,7 @@ pub fn main_loop() -> i32 {
 
                 // If there is an eZ80 GPIO VGA frame, show that
                 if let Ok(img) = rx_gpio_vga_frame.try_recv() {
-                    println!("Got image width {} height {}", img.width, img.height);
+                    //println!("Got image width {} height {}", img.width, img.height);
                     w = img.width;
                     h = img.height;
 
