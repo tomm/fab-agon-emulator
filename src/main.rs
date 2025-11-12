@@ -216,7 +216,7 @@ pub fn main_loop() -> i32 {
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    let native_resolution_scaled = video_subsystem
+    let scaled_native_resolution = video_subsystem
         .get_primary_display()
         .unwrap()
         .get_bounds()
@@ -228,6 +228,11 @@ pub fn main_loop() -> i32 {
     let mut got_gpio_vga_sync: u32 = 0;
 
     open_joystick_devices(&mut joysticks, &joystick_subsystem);
+
+    /*println!(
+        "Detected {}x{} scaled native resolution",
+        scaled_native_resolution.w, scaled_native_resolution.h
+    );*/
 
     let _audio_device = match (|| -> Result<sdl2::audio::AudioStreamWithCallback<audio::VdpAudioStream> ,sdl2::Error> {
         let audio_subsystem = sdl_context.audio()?;
@@ -286,8 +291,8 @@ pub fn main_loop() -> i32 {
     'running: loop {
         let (wx, wy): (u32, u32) = {
             let nat = (
-                native_resolution_scaled.w as u32,
-                native_resolution_scaled.h as u32,
+                scaled_native_resolution.w as u32,
+                scaled_native_resolution.h as u32,
             );
             if is_fullscreen {
                 nat
@@ -299,6 +304,7 @@ pub fn main_loop() -> i32 {
                 (mode_w, mode_h)
             }
         };
+        //println!("Scaled window size wx,wy: {}, {}", wx, wy);
 
         let mut window = video_subsystem
             .window(
@@ -312,7 +318,11 @@ pub fn main_loop() -> i32 {
             .build()
             .unwrap();
 
-        //println!("Detected display scale of {}x", window.display_scale());
+        /*println!(
+            "Window size in pixels: {:?}, scale {:?}",
+            window.size_in_pixels(),
+            window.display_scale()
+        );*/
 
         if args.osk {
             video_subsystem.text_input().start(&window);
@@ -335,9 +345,10 @@ pub fn main_loop() -> i32 {
         };
 
         let output_size = canvas.output_size().unwrap();
+        //println!("output_size: {:?}", output_size);
         let texture_creator = canvas.texture_creator();
         let (mut agon_texture, mut upscale_texture) =
-            make_agon_screen_textures(&texture_creator, (wx, wy), (mode_w, mode_h));
+            make_agon_screen_textures(&texture_creator, output_size, (mode_w, mode_h));
 
         // clear the screen, so user isn't staring at garbage while things init
         canvas.present();
@@ -598,7 +609,7 @@ pub fn main_loop() -> i32 {
                     mode_w = w;
                     mode_h = h;
                     (agon_texture, upscale_texture) =
-                        make_agon_screen_textures(&texture_creator, (wx, wy), (mode_w, mode_h));
+                        make_agon_screen_textures(&texture_creator, output_size, (mode_w, mode_h));
                 }
 
                 match args.renderer {
@@ -769,7 +780,13 @@ fn make_agon_screen_textures(
             agon_size.1,
         )
         .unwrap();
+    // Use nearest filtering for integer upscale
+    unsafe {
+        SDL_SetTextureScaleMode(texture.raw(), SDL_ScaleMode::NEAREST);
+    }
+    //println!("native size {:?}", native_size);
     let int_scale_size = calc_int_scale(native_size, agon_size);
+    //println!("texture int scale {:?}", int_scale_size);
     let upscale_texture = texture_creator
         .create_texture_target(
             unsafe {
@@ -779,7 +796,7 @@ fn make_agon_screen_textures(
             int_scale_size.1,
         )
         .unwrap();
-    // enable filtering of final blit from integer-upscaled agon screen to the SDL screen
+    // enable linear filtering of final blit from integer-upscaled agon screen to the SDL screen
     unsafe {
         SDL_SetTextureScaleMode(upscale_texture.raw(), SDL_ScaleMode::LINEAR);
     }
