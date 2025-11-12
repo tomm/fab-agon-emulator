@@ -59,12 +59,12 @@ impl GpioVga {
                 let last_vblank = self.last_vblank_cycle;
                 self.last_vblank_cycle = total_cycles_elapsed;
                 let frame_duration = total_cycles_elapsed - last_vblank;
-                println!(
+                /*println!(
                     "{} cycles between vblanks ({} Hz) ({} lines)",
                     frame_duration,
                     18432000.0 / frame_duration as f32,
                     self.num_scanlines
-                );
+                );*/
                 if self.num_scanlines >= 200 && self.num_scanlines <= 600 {
                     // send frame
                     if let Some(img) = self.img.take() {
