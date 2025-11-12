@@ -79,6 +79,7 @@ impl GpioVga {
                     // the total 588 cycles per scanline (46 / 256 = 18%)
                     self.cycles_hblank_to_picture = (46 * scanline_duration_cycles / 256) as u64;
                     self.scanlines_vblank_to_picture = match self.num_scanlines {
+                        261..=263 => 17, // 320x240@60hz (15khz)
                         524..=526 => 35, // 640x480@60hz
                         448..=450 => 62, // 640x350@70hz
                         _ => 0,          // unknown mode... just render all scanlines
