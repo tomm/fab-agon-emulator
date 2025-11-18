@@ -233,7 +233,7 @@ fn main() {
 
     let (tx_vdp_to_ez80, from_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
     let (to_vdp, rx_ez80_to_vdp): (Sender<u8>, Receiver<u8>) = mpsc::channel();
-    let (tx_gpio_vga_frame, rx_gpio_vga_frame) = mpsc::channel::<Box<GpioVgaFrame>>();
+    let (tx_gpio_vga_frame, rx_gpio_vga_frame) = mpsc::channel::<GpioVgaFrame>();
     let soft_reset = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let emulator_shutdown = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let exit_status = std::sync::Arc::new(std::sync::atomic::AtomicI32::new(0));

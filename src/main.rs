@@ -76,7 +76,7 @@ pub fn main_loop() -> i32 {
     let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) =
         mpsc::channel();
 
-    let (tx_gpio_vga_frame, rx_gpio_vga_frame) = mpsc::channel::<Box<GpioVgaFrame>>();
+    let (tx_gpio_vga_frame, rx_gpio_vga_frame) = mpsc::channel::<GpioVgaFrame>();
 
     let gpios = Arc::new(gpio::GpioSet::new());
 
@@ -586,7 +586,8 @@ pub fn main_loop() -> i32 {
 
                     for _y in 0..h {
                         for _x in 0..w {
-                            let pixel = img.picture[_y as usize][_x as usize];
+                            let pixel = img.picture[img.line_length_cycles as usize * _y as usize
+                                + (_x as u64 + img.cycles_hblank_to_picture) as usize];
                             vgabuf[(w * 3 * _y + 3 * _x + 0) as usize] = (pixel >> 5) * 36;
                             vgabuf[(w * 3 * _y + 3 * _x + 1) as usize] = ((pixel >> 2) & 7) * 36;
                             vgabuf[(w * 3 * _y + 3 * _x + 2) as usize] = (pixel & 0x3) * 85;

@@ -487,7 +487,7 @@ pub struct AgonMachineConfig {
     pub ram_init: RamInit,
     pub mos_bin: std::path::PathBuf,
     pub gpios: Arc<gpio::GpioSet>,
-    pub tx_gpio_vga_frame: std::sync::mpsc::Sender<Box<gpio_video::GpioVgaFrame>>,
+    pub tx_gpio_vga_frame: std::sync::mpsc::Sender<gpio_video::GpioVgaFrame>,
 }
 
 impl AgonMachine {
@@ -1465,6 +1465,11 @@ impl AgonMachine {
 
         self.cycle_counter.set(0);
         cpu.execute_instruction(self);
+        self.apply_elapsed_cycles()
+    }
+
+    #[inline]
+    fn apply_elapsed_cycles(&mut self) -> i32 {
         let cycles_elapsed = self.cycle_counter.get();
         self.total_cycles_elapsed = self
             .total_cycles_elapsed
@@ -1516,7 +1521,9 @@ impl AgonMachine {
             }
         }
 
-        if cpu.state.instructions_executed & 0xf == 0 && cpu.state.reg.get_iff1() {
+        if (cpu.state.instructions_executed & 0xf == 0 || self.gpio_vga.img.is_some())
+            && cpu.state.reg.get_iff1()
+        {
             // Interrupts in priority order
             for i in 0..self.prt_timers.len() {
                 if self.prt_timers[i].irq_due() {
@@ -1611,7 +1618,9 @@ impl AgonMachine {
                 if self.is_paused() {
                     break;
                 }
+                self.cycle_counter.set(0);
                 self.do_interrupts(&mut cpu);
+                cycle += self.apply_elapsed_cycles() as u64;
                 cycle += self.execute_instruction(&mut cpu) as u64;
             }
 

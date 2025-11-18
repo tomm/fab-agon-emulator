@@ -8,18 +8,33 @@ pub struct GpioVga {
     pub cycles_hblank_to_picture: u64,
     pub scanlines_vblank_to_picture: u32,
     pub last_img_write_cycle: u64,
-    pub tx_gpio_vga_frame: std::sync::mpsc::Sender<Box<GpioVgaFrame>>,
-    pub img: Option<Box<GpioVgaFrame>>,
+    pub tx_gpio_vga_frame: std::sync::mpsc::Sender<GpioVgaFrame>,
+    pub img: Option<GpioVgaFrame>,
 }
 
 pub struct GpioVgaFrame {
+    // Note: cycles == pixels
+    pub cycles_hblank_to_picture: u64,
+    pub line_length_cycles: u64, /* including non-picture parts */
     pub width: u32,
     pub height: u32,
-    pub picture: [[u8; GPIO_VGA_FRAME_MAX_WIDTH]; GPIO_VGA_FRAME_MAX_HEIGHT as usize],
+    pub picture: Vec<u8>, // sized GPIO_VGA_FRAME_MAX_WIDTH*GPIO_VGA_FRAME_MAX_HEIGHT
 }
 
+/*
+ * Strict scanout expects pixels to be scannout out at precise
+ * clock cycle timings relative to the vblank assert. This is
+ * an extreme test of emulator cycle accuracy (which is not satisfied
+ * currently)
+ * Lenient scanout just pins the pixels relative to the last hsync
+ * assert, which should be much easier for the emulator since the
+ * precise timing of PRT interrupts that started the hsync are not
+ * needed.
+ */
+const STRICT_SCANOUT: bool = true;
+
 impl GpioVga {
-    pub fn new(tx_gpio_vga_frame: std::sync::mpsc::Sender<Box<GpioVgaFrame>>) -> Self {
+    pub fn new(tx_gpio_vga_frame: std::sync::mpsc::Sender<GpioVgaFrame>) -> Self {
         GpioVga {
             last_vblank_cycle: 0,
             last_hblank_cycle: 0,
@@ -34,16 +49,33 @@ impl GpioVga {
 
     pub fn handle_gpioc_write(&mut self, total_cycles_elapsed: u64, old_val: u8, _new_val: u8) {
         if let Some(img) = &mut self.img {
-            let hpos = total_cycles_elapsed - self.last_hblank_cycle;
-            let prev_hpos = self.last_img_write_cycle - self.last_hblank_cycle;
-            for x in prev_hpos..hpos {
-                if x < GPIO_VGA_FRAME_MAX_WIDTH as u64
-                    && x >= self.cycles_hblank_to_picture
-                    && self.num_scanlines >= self.scanlines_vblank_to_picture
-                    && self.num_scanlines < GPIO_VGA_FRAME_MAX_HEIGHT
-                {
-                    img.picture[(self.num_scanlines - self.scanlines_vblank_to_picture) as usize]
-                        [(x - self.cycles_hblank_to_picture) as usize] = old_val;
+            if STRICT_SCANOUT {
+                let pos = img.cycles_hblank_to_picture
+                    + (total_cycles_elapsed - self.last_vblank_cycle).wrapping_sub(
+                        self.scanlines_vblank_to_picture as u64 * img.line_length_cycles as u64,
+                    );
+                let prev_pos = img.cycles_hblank_to_picture
+                    + (self.last_img_write_cycle - self.last_vblank_cycle).wrapping_sub(
+                        self.scanlines_vblank_to_picture as u64 * img.line_length_cycles as u64,
+                    );
+                for x in prev_pos..pos {
+                    if (x as usize) < img.picture.len() {
+                        img.picture[x as usize] = old_val;
+                    }
+                }
+            } else {
+                let hpos = total_cycles_elapsed - self.last_hblank_cycle;
+                let prev_hpos = self.last_img_write_cycle - self.last_hblank_cycle;
+                for x in prev_hpos..hpos {
+                    let pos = img.line_length_cycles as usize
+                        * (self
+                            .num_scanlines
+                            .wrapping_sub(self.scanlines_vblank_to_picture))
+                            as usize
+                        + x as usize;
+                    if pos < img.picture.len() {
+                        img.picture[pos] = old_val;
+                    }
                 }
             }
             self.last_img_write_cycle = total_cycles_elapsed;
@@ -71,29 +103,35 @@ impl GpioVga {
                         self.tx_gpio_vga_frame.send(img).unwrap();
                     }
                     // Now we have sync, allocate a GpioVgaFrame for the next frame
-                    let scanline_duration_cycles =
-                        (frame_duration as u32 / self.num_scanlines).min(1280);
+                    let scanline_duration_cycles = (frame_duration as u32 / self.num_scanlines)
+                        .min(1280)
+                        .wrapping_add(1)
+                        >> 2
+                        << 2;
                     // our reading of the scanline starts with hsync assert. how many
                     // cycles to ignore after this before the image?
                     // On vga 640x480 it's 71 + 35 (hsync + back porch). That's 18% of
                     // the total 588 cycles per scanline (46 / 256 = 18%)
-                    self.cycles_hblank_to_picture = (46 * scanline_duration_cycles / 256) as u64;
+                    let cycles_hblank_to_picture = (46 * scanline_duration_cycles / 256) as u64;
                     self.scanlines_vblank_to_picture = match self.num_scanlines {
                         261..=263 => 17, // 320x240@60hz (15khz)
                         524..=526 => 35, // 640x480@60hz
                         448..=450 => 62, // 640x350@70hz
                         _ => 0,          // unknown mode... just render all scanlines
                     };
-                    self.img = Some({
-                        let mut img = unsafe { Box::<GpioVgaFrame>::new_uninit().assume_init() };
-                        img.width = 640 * scanline_duration_cycles / 800;
-                        img.height = match self.num_scanlines {
+                    self.img = Some(GpioVgaFrame {
+                        cycles_hblank_to_picture,
+                        line_length_cycles: scanline_duration_cycles as u64,
+                        width: 640 * scanline_duration_cycles / 800,
+                        height: match self.num_scanlines {
                             524..=526 => 480,                                       // 640x480@60hz
                             448..=450 => 350,                                       // 640x350@70hz
                             _ => self.num_scanlines.min(GPIO_VGA_FRAME_MAX_HEIGHT), // unknown mode... just render all scanlines
-                        };
-                        img.picture.iter_mut().for_each(|scanline| scanline.fill(0));
-                        img
+                        },
+                        picture: vec![
+                            0;
+                            GPIO_VGA_FRAME_MAX_WIDTH * GPIO_VGA_FRAME_MAX_HEIGHT as usize
+                        ],
                     });
                 }
                 self.num_scanlines = 0;
