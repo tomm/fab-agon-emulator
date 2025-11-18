@@ -86,7 +86,7 @@ impl PrtTimer {
         }
         let clk_div = self.clk_div();
         self.step_ = self.step_.wrapping_add(clock_ticks);
-        if self.step_ >= clk_div {
+        while self.step_ >= clk_div {
             self.step_ -= clk_div;
             self.counter = self.counter.wrapping_sub(1);
             if self.counter == 0 {
