@@ -16,22 +16,22 @@ pub struct GpioVgaFrame {
     // Note: cycles == pixels
     pub cycles_hblank_to_picture: u64,
     pub line_length_cycles: u64, /* including non-picture parts */
+    pub scanline_img_start: u32,
     pub width: u32,
     pub height: u32,
     pub picture: Vec<u8>, // sized GPIO_VGA_FRAME_MAX_WIDTH*GPIO_VGA_FRAME_MAX_HEIGHT
 }
 
 /*
- * Strict scanout expects pixels to be scannout out at precise
+ * Scanout expects pixels to be scannout out at precise
  * clock cycle timings relative to the vblank assert. This is
- * an extreme test of emulator cycle accuracy (which is not satisfied
- * currently)
- * Lenient scanout just pins the pixels relative to the last hsync
- * assert, which should be much easier for the emulator since the
- * precise timing of PRT interrupts that started the hsync are not
- * needed.
+ * an extreme test of emulator cycle accuracy (and video driver
+ * correctness).
+ *
+ * Enable DEBUG_SCANOUT to see the entire frame time, including
+ * visualisation of hblank level transitions.
  */
-const STRICT_SCANOUT: bool = true;
+const DEBUG_SCANOUT: bool = false;
 
 impl GpioVga {
     pub fn new(tx_gpio_vga_frame: std::sync::mpsc::Sender<GpioVgaFrame>) -> Self {
@@ -49,35 +49,32 @@ impl GpioVga {
 
     pub fn handle_gpioc_write(&mut self, total_cycles_elapsed: u64, old_val: u8, _new_val: u8) {
         if let Some(img) = &mut self.img {
-            if STRICT_SCANOUT {
-                let pos = img.cycles_hblank_to_picture
-                    + (total_cycles_elapsed - self.last_vblank_cycle).wrapping_sub(
-                        self.scanlines_vblank_to_picture as u64 * img.line_length_cycles as u64,
-                    );
-                let prev_pos = img.cycles_hblank_to_picture
-                    + (self.last_img_write_cycle - self.last_vblank_cycle).wrapping_sub(
-                        self.scanlines_vblank_to_picture as u64 * img.line_length_cycles as u64,
-                    );
-                for x in prev_pos..pos {
+            let pos = total_cycles_elapsed - self.last_vblank_cycle;
+            let prev_pos = self.last_img_write_cycle - self.last_vblank_cycle;
+            for x in prev_pos..pos {
+                if (x as usize) < img.picture.len() {
+                    img.picture[x as usize] = old_val;
+                }
+            }
+            /* Alternative, more robust image sync method where
+             * image is pinned to time after hsync, rather than vsync.
+             * this makes the scanout much more tolerant to emulator
+             * (and video driver) timing issues.
+             * But is not so useful for testing strict correct video output...
+             */
+            /*
+                let scanline_pos = self.num_scanlines as u64 * img.line_length_cycles;
+                let hpos = scanline_pos + (total_cycles_elapsed - self.last_hblank_cycle)
+                    - img.cycles_hblank_to_picture;
+                let prev_hpos = scanline_pos + (self.last_img_write_cycle - self.last_hblank_cycle)
+                    - img.cycles_hblank_to_picture;
+                for x in prev_hpos..hpos {
                     if (x as usize) < img.picture.len() {
                         img.picture[x as usize] = old_val;
                     }
                 }
-            } else {
-                let hpos = total_cycles_elapsed - self.last_hblank_cycle;
-                let prev_hpos = self.last_img_write_cycle - self.last_hblank_cycle;
-                for x in prev_hpos..hpos {
-                    let pos = img.line_length_cycles as usize
-                        * (self
-                            .num_scanlines
-                            .wrapping_sub(self.scanlines_vblank_to_picture))
-                            as usize
-                        + x as usize;
-                    if pos < img.picture.len() {
-                        img.picture[pos] = old_val;
-                    }
-                }
             }
+            */
             self.last_img_write_cycle = total_cycles_elapsed;
         }
     }
@@ -122,11 +119,28 @@ impl GpioVga {
                     self.img = Some(GpioVgaFrame {
                         cycles_hblank_to_picture,
                         line_length_cycles: scanline_duration_cycles as u64,
-                        width: 640 * scanline_duration_cycles / 800,
-                        height: match self.num_scanlines {
-                            524..=526 => 480,                                       // 640x480@60hz
-                            448..=450 => 350,                                       // 640x350@70hz
-                            _ => self.num_scanlines.min(GPIO_VGA_FRAME_MAX_HEIGHT), // unknown mode... just render all scanlines
+                        scanline_img_start: if DEBUG_SCANOUT {
+                            0
+                        } else {
+                            match self.num_scanlines {
+                                524..=526 => 35,
+                                261..=263 => 17,
+                                _ => 0,
+                            }
+                        },
+                        width: if DEBUG_SCANOUT {
+                            scanline_duration_cycles
+                        } else {
+                            640 * scanline_duration_cycles / 800
+                        },
+                        height: if DEBUG_SCANOUT {
+                            self.num_scanlines.min(GPIO_VGA_FRAME_MAX_HEIGHT)
+                        } else {
+                            match self.num_scanlines {
+                                524..=526 => 480,                                       // 640x480@60hz
+                                448..=450 => 350, // 640x350@70hz
+                                _ => self.num_scanlines.min(GPIO_VGA_FRAME_MAX_HEIGHT), // unknown mode... just render all scanlines
+                            }
                         },
                         picture: vec![
                             0;
@@ -155,6 +169,16 @@ impl GpioVga {
                 */
                 self.num_scanlines += 1;
                 self.last_img_write_cycle = total_cycles_elapsed;
+            }
+            // Actually draw hsync transitions to picture. helps with debugging
+            // Blue for rising edge, green for falling edge
+            if let Some(img) = &mut self.img {
+                let pos = total_cycles_elapsed - self.last_vblank_cycle;
+                if (pos as usize) < img.picture.len() {
+                    img.picture[pos as usize] = if new_val & 0x80 != 0 { 0x18 } else { 0x3 };
+                }
+                // prevent picture scanout from erasing our markers
+                self.last_img_write_cycle = total_cycles_elapsed + 1;
             }
         }
     }

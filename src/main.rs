@@ -586,8 +586,9 @@ pub fn main_loop() -> i32 {
 
                     for _y in 0..h {
                         for _x in 0..w {
-                            let pixel = img.picture[img.line_length_cycles as usize * _y as usize
-                                + (_x as u64 + img.cycles_hblank_to_picture) as usize];
+                            let __y = _y + img.scanline_img_start;
+                            let pixel = img.picture[img.line_length_cycles as usize * __y as usize
+                                + (_x as u64) as usize];
                             vgabuf[(w * 3 * _y + 3 * _x + 0) as usize] = (pixel >> 5) * 36;
                             vgabuf[(w * 3 * _y + 3 * _x + 1) as usize] = ((pixel >> 2) & 7) * 36;
                             vgabuf[(w * 3 * _y + 3 * _x + 2) as usize] = (pixel & 0x3) * 85;
