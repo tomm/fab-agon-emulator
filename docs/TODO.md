@@ -10,6 +10,7 @@
 - [ ] c8 joystick gpio mutex contention on windows -- probably use atomics instead
 - [ ] ez80f92 PRT gpio-b pin 1 source (vblank) not implemented
 - [ ] hostfs should accept filename/paths terminated by any character <= 0x1f
+- [ ] SLL opcode is a trap on ez80! emulator accepts it erroneously
 
 ## EZ80 flaws and omissions
 - [ ] ldir, otirx, etc have wrong timing
