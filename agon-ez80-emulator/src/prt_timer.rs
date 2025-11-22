@@ -14,6 +14,7 @@ pub struct PrtTimer {
     counter: u16,
     step_: u16,
     latch_counter_high: u8,
+    interrupt_due_in: u8,
     //t_: std::time::Instant
 }
 
@@ -29,6 +30,7 @@ impl PrtTimer {
             counter: 0,
             step_: 0,
             latch_counter_high: 0,
+            interrupt_due_in: 0,
             //t_: std::time::Instant::now()
         }
     }
@@ -76,6 +78,15 @@ impl PrtTimer {
 
     // intended to be called per-instruction, so clock_ticks should be < 8
     pub fn apply_ticks(&mut self, clock_ticks: u16) {
+        if self.interrupt_due_in != 0 {
+            if clock_ticks as u8 >= self.interrupt_due_in {
+                // signal interrupt
+                self.ctl |= 0x80;
+                self.interrupt_due_in = 0;
+            } else {
+                self.interrupt_due_in -= clock_ticks as u8;
+            }
+        }
         if self.ctl & PRT_EN == 0 {
             return;
         }
@@ -90,8 +101,10 @@ impl PrtTimer {
             self.step_ -= clk_div;
             self.counter = self.counter.wrapping_sub(1);
             if self.counter == 0 {
-                // set PRT_IRQ
-                self.ctl |= 0x80;
+                // set PRT_IRQ (after some latency)
+                if self.interrupt_due_in == 0 {
+                    self.interrupt_due_in = 4;
+                }
 
                 if self.ctl & PRT_MODE == 0 {
                     // clear RST_EN and PRT_EN
@@ -195,13 +208,12 @@ mod tests {
         assert_eq!(timer.counter, 1);
         timer.apply_ticks(4);
         assert_eq!(timer.counter, 0);
-
+        // PRT_IRQ not set until 4 more cycles (latency)
+        timer.apply_ticks(4);
         // first read - PRT_IRQ set
         assert_eq!(timer.read_ctl(), 0x91);
         // second read - PRT_IRQ has been cleared
         assert_eq!(timer.read_ctl(), 0x11);
-
-        timer.apply_ticks(4);
         assert_eq!(timer.counter, 65535);
     }
 
