@@ -1,5 +1,8 @@
 // ez80f92 programmable reload timer
 
+/** Many bothans died to determine this value. */
+const PRT_INT_LATENCY: u8 = 5;
+
 #[derive(Debug)]
 pub struct PrtTimer {
     // bit 0 - PRT_EN (enable)
@@ -103,7 +106,7 @@ impl PrtTimer {
             if self.counter == 0 {
                 // set PRT_IRQ (after some latency)
                 if self.interrupt_due_in == 0 {
-                    self.interrupt_due_in = 4;
+                    self.interrupt_due_in = PRT_INT_LATENCY;
                 }
 
                 if self.ctl & PRT_MODE == 0 {
@@ -120,6 +123,8 @@ impl PrtTimer {
 
 #[cfg(test)]
 mod tests {
+    use crate::prt_timer::PRT_INT_LATENCY;
+
     use super::PrtTimer;
 
     #[test]
@@ -143,7 +148,9 @@ mod tests {
         // not in continuous mode
         timer.apply_ticks(4);
         assert_eq!(timer.counter, 0);
-        // first read - PRT_IRQ set
+        assert_eq!(timer.read_ctl(), 0x00);
+        timer.apply_ticks(PRT_INT_LATENCY as u16);
+        // first read (after IRQ latency period) - PRT_IRQ set
         assert_eq!(timer.read_ctl(), 0x80);
         // second read - PRT_IRQ has been cleared
         assert_eq!(timer.read_ctl(), 0x0);
@@ -187,7 +194,9 @@ mod tests {
         assert_eq!(timer.counter, 2);
         timer.apply_ticks(4);
         assert_eq!(timer.counter, 1);
-        // first read - PRT_IRQ set
+        assert_eq!(timer.read_ctl(), 0x11);
+        timer.apply_ticks(PRT_INT_LATENCY as u16); // take into account interrupt latency
+                                                   // first read - PRT_IRQ set
         assert_eq!(timer.read_ctl(), 0x91);
         // second read - PRT_IRQ has been cleared
         assert_eq!(timer.read_ctl(), 0x11);
@@ -209,7 +218,7 @@ mod tests {
         timer.apply_ticks(4);
         assert_eq!(timer.counter, 0);
         // PRT_IRQ not set until 4 more cycles (latency)
-        timer.apply_ticks(4);
+        timer.apply_ticks(PRT_INT_LATENCY as u16);
         // first read - PRT_IRQ set
         assert_eq!(timer.read_ctl(), 0x91);
         // second read - PRT_IRQ has been cleared
