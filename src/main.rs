@@ -19,6 +19,13 @@ mod vdp_interface;
 const AUDIO_BUFLEN: u16 = 256;
 const PREFIX: Option<&'static str> = option_env!("PREFIX");
 
+#[derive(PartialEq)]
+enum VideoSource {
+    Auto,
+    Vdp,
+    Ez80Gpio,
+}
+
 /**
  * Return firmware paths in priority order.
  */
@@ -104,10 +111,12 @@ pub fn main_loop() -> i32 {
     let _tty = raw_tty::TtyWithGuard::new(std::io::stdin());
 
     // Prefer wayland on linux
+    /*
     #[cfg(target_os = "linux")]
     if sdl2::video::drivers().any(|drv| drv == "wayland") {
         sdl2::hint::set(sdl2::hint::names::VIDEO_DRIVER, "wayland");
     }
+    */
 
     let debugger_con = if args.debugger {
         let _ez80_paused = ez80_paused.clone();
@@ -232,6 +241,7 @@ pub fn main_loop() -> i32 {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut joysticks = vec![];
     let mut got_gpio_vga_sync: u32 = 0;
+    let mut video_src = VideoSource::Auto;
 
     println!(
         "Video driver: {} (can override with SDL_VIDEO_DRIVER environment variable)",
@@ -292,6 +302,7 @@ pub fn main_loop() -> i32 {
     unsafe {
         vgabuf.set_len(1024 * 768 * 3);
     }
+    let mut gpio_frame: Option<GpioVgaFrame> = None;
     let mut frame_rate_hz: f32 = 60.0;
     let mut mode_w: u32 = 640;
     let mut mode_h: u32 = 480;
@@ -428,6 +439,14 @@ pub fn main_loop() -> i32 {
                         // handle emulator shortcut keys
                         let consumed = if keymod.contains(hostkey) {
                             match keycode {
+                                Some(sdl2::keyboard::Keycode::_1) => {
+                                    video_src = VideoSource::Vdp;
+                                    true
+                                }
+                                Some(sdl2::keyboard::Keycode::_2) => {
+                                    video_src = VideoSource::Auto;
+                                    true
+                                }
                                 Some(sdl2::keyboard::Keycode::C) => {
                                     // caps-lock
                                     unsafe {
@@ -599,14 +618,22 @@ pub fn main_loop() -> i32 {
 
                     // drop further queued frames to avoid backlog
                     while let Ok(_) = rx_gpio_vga_frame.try_recv() {}
-                } else if got_gpio_vga_sync > 0 {
-                    // scan out stale data for a couple of frames till we decide we've lost sync
-                    w = mode_w;
-                    h = mode_h;
-                    got_gpio_vga_sync -= 1;
+
+                    gpio_frame = Some(img);
                 }
+
+                // scan out gpio_frame for a couple of frames till we decide we've lost sync
+                if let Some(img) = &gpio_frame {
+                    w = img.width;
+                    h = img.height;
+
+                    if got_gpio_vga_sync > 0 {
+                        got_gpio_vga_sync -= 1;
+                    }
+                }
+
                 // otherwise show VDP image
-                else {
+                if video_src == VideoSource::Vdp || got_gpio_vga_sync == 0 {
                     unsafe {
                         (*vdp_interface.copyVgaFramebuffer)(
                             &mut w as *mut u32,

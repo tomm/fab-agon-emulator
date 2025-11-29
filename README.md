@@ -20,6 +20,8 @@ Emulator shortcuts are accessed with the *right ctrl*.
  * RightCtrl-R - Soft-reset
  * RightCtrl-S - Cycle screen scaling methods (see --scale command line option)
  * RightCtrl-Q - Quit
+ * RightCtrl-1 - Show VDP video output
+ * RightCtrl-2 - Show GPIO video output if available, or VDP output otherwise
 
 ## Emulated SDCard
 

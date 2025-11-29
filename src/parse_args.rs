@@ -13,6 +13,7 @@ OPTIONS:
   --firmware console8   Use console8 (MOS 2.x) firmware (default is platform)
   --firmware quark      Use quark 1.04 firmware (default is platform)
   --firmware electron   Use ElectronOS firmware (default is platform)
+  --firmware fb         Use eZ80 Framebuffer firmware (default is platform)
   --mode <n>            Start in a specific screen mode
   --osk                 Enable on-screen-keyboard input (requires OS osk)
   --sdcard <path>       Sets the path of the emulated SDCard
@@ -42,6 +43,7 @@ pub enum FirmwareVer {
     console8,
     rainbow,
     electron,
+    fb,
 }
 
 #[derive(Debug)]
@@ -163,19 +165,16 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
             Renderer::Software
         },
         firmware: if let Some(ver) = firmware_ver {
-            if ver == "quark" {
-                FirmwareVer::quark
-            } else if ver == "platform" {
-                FirmwareVer::platform
-            } else if ver == "console8" {
-                FirmwareVer::console8
-            } else if ver == "rainbow" {
-                FirmwareVer::rainbow
-            } else if ver == "electron" {
-                FirmwareVer::electron
-            } else {
-                println!("Unknown --firmware value: {}. Valid values are: platform, quark, console8, electron", ver);
-                std::process::exit(0);
+            match ver.as_str() {
+                "quark" => FirmwareVer::quark,
+                "platform" => FirmwareVer::platform,
+                "console8" => FirmwareVer::console8,
+                "electron" => FirmwareVer::electron,
+                "fb" => FirmwareVer::fb,
+                _ => {
+                    println!("Unknown --firmware value: {}. Valid values are: platform, quark, console8, electron, fb", ver);
+                    std::process::exit(0);
+                }
             }
         } else {
             FirmwareVer::platform
