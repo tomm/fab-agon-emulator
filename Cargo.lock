@@ -202,7 +202,7 @@ dependencies = [
 [[package]]
 name = "ez80"
 version = "0.4.1"
-source = "git+https://github.com/tomm/ez80.git?rev=148a4e897c8ccc8bbdaaa9f0bacd0eee2fb69f73#148a4e897c8ccc8bbdaaa9f0bacd0eee2fb69f73"
+source = "git+https://github.com/tomm/ez80.git?rev=f1213e51c5d532b58f5e32bed7d2dc580d8111e5#f1213e51c5d532b58f5e32bed7d2dc580d8111e5"
 
 [[package]]
 name = "fab-agon-emulator"
