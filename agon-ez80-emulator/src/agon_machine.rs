@@ -1481,6 +1481,7 @@ impl AgonMachine {
         }
 
         self.uart0.apply_ticks(cycles_elapsed as i32);
+        self.uart1.apply_ticks(cycles_elapsed as i32);
 
         cycles_elapsed
     }
