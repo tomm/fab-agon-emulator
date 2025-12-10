@@ -3,7 +3,6 @@
 ## v1.1
 - [ ] Test joysticks
 - [ ] --renderer does nothing now...
-- [ ] OTIRX incorrectly uses 5 cycles on LAST iteration, not first (can be seen on z80 fb).
 
 ## Known bugs
 - [ ] Mixed mode push ((ismixed<<1) | isadl) to stack. I haven't implemented the ismixed part

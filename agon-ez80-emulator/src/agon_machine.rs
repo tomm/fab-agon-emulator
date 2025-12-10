@@ -316,7 +316,7 @@ impl Machine for AgonMachine {
             0x9e => {
                 if is_gpio_configured_for_vga(&self.gpios) {
                     self.gpio_vga.handle_gpioc_write(
-                        self.total_cycles_elapsed,
+                        self.total_cycles_elapsed + self.cycle_counter.get() as u64,
                         self.gpios.c.get_dr(),
                         value,
                     );
@@ -342,7 +342,7 @@ impl Machine for AgonMachine {
                 // Detect GPIO VGA config
                 if is_gpio_configured_for_vga(&self.gpios) {
                     self.gpio_vga.handle_gpiod_write(
-                        self.total_cycles_elapsed,
+                        self.total_cycles_elapsed + self.cycle_counter.get() as u64,
                         self.gpios.d.get_dr(),
                         value,
                     );

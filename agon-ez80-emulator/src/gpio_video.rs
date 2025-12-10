@@ -112,6 +112,7 @@ impl GpioVga {
                     let cycles_hblank_to_picture = (46 * scanline_duration_cycles / 256) as u64;
                     self.scanlines_vblank_to_picture = match self.num_scanlines {
                         261..=263 => 17, // 320x240@60hz (15khz)
+                        309..=311 => 17, // 320x288@50hz (15khz)
                         524..=526 => 35, // 640x480@60hz
                         448..=450 => 62, // 640x350@70hz
                         _ => 0,          // unknown mode... just render all scanlines
@@ -125,20 +126,27 @@ impl GpioVga {
                             match self.num_scanlines {
                                 524..=526 => 35,
                                 261..=263 => 17,
+                                309..=311 => 17,
                                 _ => 0,
                             }
                         },
                         width: if DEBUG_SCANOUT {
                             scanline_duration_cycles
                         } else {
-                            640 * scanline_duration_cycles / 800
+                            match self.num_scanlines {
+                                261..=263 => 656 * scanline_duration_cycles / 800, // 320x240@60hz (15khz)
+                                309..=311 => 654 * scanline_duration_cycles / 800, // 320x240@60hz (15khz)
+                                _ => 640 * scanline_duration_cycles / 800,
+                            }
                         },
                         height: if DEBUG_SCANOUT {
                             self.num_scanlines.min(GPIO_VGA_FRAME_MAX_HEIGHT)
                         } else {
                             match self.num_scanlines {
-                                524..=526 => 480,                                       // 640x480@60hz
+                                524..=526 => 480, // 640x480@60hz
                                 448..=450 => 350, // 640x350@70hz
+                                309..=311 => 288,
+                                261..=263 => 240,
                                 _ => self.num_scanlines.min(GPIO_VGA_FRAME_MAX_HEIGHT), // unknown mode... just render all scanlines
                             }
                         },
