@@ -7,7 +7,6 @@ USAGE:
 OPTIONS:
   -b, --breakpoint      Set a breakpoint. --breakpoint can be used repeatedly
   --border rrggbb       Colour of border around Agon screen (default 000000)
-  --caps-as-ctrl        Remap caps-lock as a left ctrl key
   -d, --debugger        Enable the eZ80 debugger
   -f, --fullscreen      Start in fullscreen mode
   --firmware console8   Use console8 (MOS 2.x) firmware (default is platform)
@@ -23,6 +22,7 @@ OPTIONS:
   --scale stretch       Scale Agon screen to full window size
   --sdcard-img <file>   Use a raw SDCard image rather than the host filesystem
   --sdcard <path>       Sets the path of the emulated SDCard
+  --swap-caps-and-ctrl  Swap the caps-lock and left-ctrl keys
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
 
 ADVANCED:
