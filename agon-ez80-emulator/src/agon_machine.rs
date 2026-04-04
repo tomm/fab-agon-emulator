@@ -27,6 +27,7 @@ pub struct AgonMachine {
     open_files: HashMap<u32, std::fs::File>,
     open_dirs: HashMap<u32, std::fs::ReadDir>,
     enable_hostfs: bool,
+    debug_hostfs: bool,
     mos_map: mos::MosMap,
     hostfs_root_dir: std::path::PathBuf,
     mos_current_dir: MosPath,
@@ -516,6 +517,7 @@ impl AgonMachine {
             open_files: HashMap::new(),
             open_dirs: HashMap::new(),
             enable_hostfs: true,
+            debug_hostfs: false,
             mos_map: mos::MosMap::default(),
             hostfs_root_dir: std::env::current_dir().unwrap(),
             mos_current_dir: MosPath(std::path::PathBuf::new()),
@@ -556,6 +558,13 @@ impl AgonMachine {
             + ((self.peek(address.wrapping_add(1)) as u32) << 8)
             + ((self.peek(address.wrapping_add(2)) as u32) << 16)
             + ((self.peek(address.wrapping_add(3)) as u32) << 24)
+    }
+
+    fn _poke32(&mut self, address: u32, value: u32) {
+        self.poke(address, value as u8);
+        self.poke(address.wrapping_add(1), (value >> 8) as u8);
+        self.poke(address.wrapping_add(2), (value >> 16) as u8);
+        self.poke(address.wrapping_add(3), (value >> 24) as u8);
     }
 
     pub fn set_paused(&self, state: bool) {
@@ -696,7 +705,10 @@ impl AgonMachine {
 
     fn hostfs_mos_f_close(&mut self, cpu: &mut Cpu) {
         let fptr = self._peek24(cpu.state.sp() + 3);
-        //eprintln!("f_close(${:x})", fptr);
+
+        if self.debug_hostfs {
+            eprintln!("f_close(${:x})", fptr);
+        }
 
         // closes on Drop
         self.open_files.remove(&fptr);
@@ -711,7 +723,13 @@ impl AgonMachine {
         let buf = self._peek24(cpu.state.sp() + 3);
         let max_len = self._peek24(cpu.state.sp() + 6);
         let fptr = self._peek24(cpu.state.sp() + 9);
-        //eprintln!("f_gets(buf: ${:x}, len: ${:x}, fptr: ${:x})", buf, max_len, fptr);
+
+        if self.debug_hostfs {
+            eprintln!(
+                "f_gets(buf: ${:x}, len: ${:x}, fptr: ${:x})",
+                buf, max_len, fptr
+            );
+        }
 
         let fresult = 'outer: {
             if let Some(mut f) = self.open_files.get(&fptr) {
@@ -739,7 +757,7 @@ impl AgonMachine {
                 };
 
                 // save file position to FIL.fptr U32
-                self._poke24(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
+                self._poke32(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
                 let mut buf2 = buf;
                 for b in line {
                     self.poke(buf2, b);
@@ -765,6 +783,10 @@ impl AgonMachine {
         let ch = self._peek24(cpu.state.sp() + 3);
         let fptr = self._peek24(cpu.state.sp() + 6);
 
+        if self.debug_hostfs {
+            eprintln!("f_putc(fptr: ${:x}, ch: ${:x})", fptr, ch);
+        }
+
         let fresult = 'outer: {
             if let Some(mut f) = self.open_files.get(&fptr) {
                 if f.write(&[ch as u8]).is_err() {
@@ -777,7 +799,7 @@ impl AgonMachine {
                     Err(_) => break 'outer mos::FR_DISK_ERR,
                 };
                 // save file position to FIL.fptr
-                self._poke24(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
+                self._poke32(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
 
                 mos::FR_OK
             } else {
@@ -795,7 +817,13 @@ impl AgonMachine {
         let buf = self._peek24(cpu.state.sp() + 6);
         let num = self._peek24(cpu.state.sp() + 9);
         let num_written_ptr = self._peek24(cpu.state.sp() + 12);
-        //eprintln!("f_write(${:x}, ${:x}, {}, ${:x})", fptr, buf, num, num_written_ptr);
+
+        if self.debug_hostfs {
+            eprintln!(
+                "f_write(${:x}, ${:x}, {}, ${:x})",
+                fptr, buf, num, num_written_ptr
+            );
+        }
 
         let fresult = 'outer: {
             if let Some(mut f) = self.open_files.get(&fptr) {
@@ -812,7 +840,7 @@ impl AgonMachine {
                     Err(_) => break 'outer mos::FR_DISK_ERR,
                 };
                 // save file position to FIL.fptr
-                self._poke24(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
+                self._poke32(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
 
                 // inform caller that all bytes were written
                 self._poke24(num_written_ptr, num);
@@ -833,7 +861,13 @@ impl AgonMachine {
         let mut buf = self._peek24(cpu.state.sp() + 6);
         let len = self._peek24(cpu.state.sp() + 9);
         let bytes_read_ptr = self._peek24(cpu.state.sp() + 12);
-        //eprintln!("f_read(${:x}, ${:x}, ${:x}, ${:x})", fptr, buf, len, bytes_read_ptr);
+
+        if self.debug_hostfs {
+            eprintln!(
+                "f_read(fptr: ${:x}, buf: ${:x}, len: ${:x}, out_bytesRead: ${:x})",
+                fptr, buf, len, bytes_read_ptr
+            );
+        }
 
         let fresult = 'outer: {
             if let Some(mut f) = self.open_files.get(&fptr) {
@@ -850,7 +884,7 @@ impl AgonMachine {
                         buf += 1;
                     }
                     // save file position to FIL.fptr
-                    self._poke24(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
+                    self._poke32(fptr + mos::FIL_MEMBER_FPTR, fpos as u32);
                     // save num bytes read
                     self._poke24(bytes_read_ptr, num_bytes_read as u32);
 
@@ -995,7 +1029,10 @@ impl AgonMachine {
 
     fn hostfs_mos_f_mkdir(&mut self, cpu: &mut Cpu) {
         let dir_name = mos::get_mos_path_string(self, self._peek24(cpu.state.sp() + 3));
-        //eprintln!("f_mkdir(\"{}\")", dir_name);
+
+        if self.debug_hostfs {
+            eprintln!("f_mkdir(\"{}\")", dir_name);
+        }
 
         match std::fs::create_dir(self.host_path_from_mos_path_join(&dir_name)) {
             Ok(_) => {
@@ -1026,7 +1063,10 @@ impl AgonMachine {
     fn hostfs_mos_f_rename(&mut self, cpu: &mut Cpu) {
         let old_name = mos::get_mos_path_string(self, self._peek24(cpu.state.sp() + 3));
         let new_name = mos::get_mos_path_string(self, self._peek24(cpu.state.sp() + 6));
-        //eprintln!("f_rename(\"{}\", \"{}\")", old_name, new_name);
+
+        if self.debug_hostfs {
+            eprintln!("f_rename(\"{}\", \"{}\")", old_name, new_name);
+        }
 
         match std::fs::rename(
             self.host_path_from_mos_path_join(&old_name),
@@ -1051,7 +1091,10 @@ impl AgonMachine {
     fn hostfs_mos_f_chdir(&mut self, cpu: &mut Cpu) {
         let cd_to_ptr = self._peek24(cpu.state.sp() + 3);
         let cd_to = mos::get_mos_path_string(self, cd_to_ptr);
-        //eprintln!("f_chdir({})", cd_to);
+
+        if self.debug_hostfs {
+            eprintln!("f_chdir({})", cd_to);
+        }
 
         let new_path = self.mos_path_join(&cd_to);
 
@@ -1089,7 +1132,10 @@ impl AgonMachine {
             mos::get_mos_path_string(self, ptr)
         };
         let mut path = self.host_path_from_mos_path_join(&path_str);
-        // eprintln!("f_unlink(\"{}\")", path_str);
+
+        if self.debug_hostfs {
+            eprintln!("f_unlink(\"{}\")", path_str);
+        }
 
         if path.exists() && path.is_dir() {
             match std::fs::remove_dir(&path) {
@@ -1140,7 +1186,10 @@ impl AgonMachine {
         let dir_ptr = self._peek24(cpu.state.sp() + 3);
         let path_ptr = self._peek24(cpu.state.sp() + 6);
         let path = mos::get_mos_path_string(self, path_ptr);
-        //eprintln!("f_opendir(${:x}, \"{}\")", dir_ptr, path.trim_end());
+
+        if self.debug_hostfs {
+            eprintln!("f_opendir(${:x}, \"{}\")", dir_ptr, path.trim_end());
+        }
 
         match std::fs::read_dir(self.host_path_from_mos_path_join(&path)) {
             Ok(dir) => {
@@ -1258,14 +1307,16 @@ impl AgonMachine {
         let fptr = self._peek24(cpu.state.sp() + 3);
         let offset = self._peek32(cpu.state.sp() + 6);
 
-        //eprintln!("f_lseek(${:x}, {})", fptr, offset);
+        if self.debug_hostfs {
+            eprintln!("f_lseek(${:x}, {})", fptr, offset);
+        }
 
         match self.open_files.get(&fptr) {
             Some(mut f) => {
                 match f.seek(SeekFrom::Start(offset as u64)) {
                     Ok(pos) => {
                         // save file position to FIL.fptr
-                        self._poke24(fptr + mos::FIL_MEMBER_FPTR, pos as u32);
+                        self._poke32(fptr + mos::FIL_MEMBER_FPTR, pos as u32);
                         // success
                         cpu.state.reg.set24(Reg16::HL, 0);
                     }
@@ -1288,7 +1339,10 @@ impl AgonMachine {
         };
         let filinfo_ptr = self._peek24(cpu.state.sp() + 6);
         let mut path = self.host_path_from_mos_path_join(&path_str);
-        //eprintln!("f_stat(\"{}\", ${:x})", path_str, filinfo_ptr);
+
+        if self.debug_hostfs {
+            eprintln!("f_stat(\"{}\", ${:x})", path_str, filinfo_ptr);
+        }
 
         match std::fs::metadata(&path) {
             Ok(metadata) => {
@@ -1344,7 +1398,13 @@ impl AgonMachine {
                 return;
             }
         }
-        //eprintln!("f_open(${:x}, \"{}\", {})", fptr, &filename, mode);
+        if self.debug_hostfs {
+            eprintln!(
+                "f_open(fpts: ${:x}, filename: \"{}\", mode: ${:x})",
+                fptr, &filename, mode
+            );
+        }
+
         match std::fs::File::options()
             .read(true)
             .write(mode & mos::FA_WRITE != 0)
@@ -1357,11 +1417,8 @@ impl AgonMachine {
                 z80_mem_tools::memset(self, fptr, 0, mos::SIZEOF_MOS_FIL_STRUCT);
 
                 // save the size in the FIL structure
-                let mut file_len = f.seek(SeekFrom::End(0)).unwrap();
+                let file_len = f.seek(SeekFrom::End(0)).unwrap();
                 f.seek(SeekFrom::Start(0)).unwrap();
-
-                // XXX don't support files larger than 512KiB
-                file_len = file_len.min(1 << 19);
 
                 // store file len in fatfs FIL structure
                 self._poke24(fptr + mos::FIL_MEMBER_OBJSIZE, file_len as u32);
