@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "agon-cli-emulator"
-version = "1.1.3"
+version = "1.1.4"
 dependencies = [
  "agon-ez80-emulator",
  "agon-light-emulator-debugger",
@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "agon-ez80-emulator"
-version = "1.1.3"
+version = "1.1.4"
 dependencies = [
  "chrono",
  "ez80",
@@ -24,7 +24,7 @@ dependencies = [
 
 [[package]]
 name = "agon-light-emulator-debugger"
-version = "1.1.3"
+version = "1.1.4"
 dependencies = [
  "agon-ez80-emulator",
  "ctrlc",
@@ -181,7 +181,7 @@ source = "git+https://github.com/tomm/ez80.git?rev=2bd9d08b206bc48525d078a1baac2
 
 [[package]]
 name = "fab-agon-emulator"
-version = "1.1.3"
+version = "1.1.4"
 dependencies = [
  "agon-ez80-emulator",
  "agon-light-emulator-debugger",
