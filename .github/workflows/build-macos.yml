@@ -1,0 +1,51 @@
+name: Build macOS binary
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
+
+      - name: Install SDL3 dependencies via Homebrew
+        run: |
+          brew install sdl3 sdl3_ttf sdl3_image
+
+      - name: Build macOS binary
+        run: |
+          # Resolve brew prefix at runtime so env vars are correct
+          export SDL3_LIB_DIR="$(brew --prefix)/lib"
+          export SDL3_INCLUDE_DIR="$(brew --prefix)/include/SDL3"
+          export SDL3_STATIC=0
+          export CMAKE_POLICY_VERSION_MINIMUM=3.5
+
+          mkdir -p artifacts
+          ./dist_scripts/make-dist-macos.sh
+
+      - name: Zip artifacts
+        run: |
+          cd artifacts
+          zip -r ../fab-agon-emulator-macos.zip .
+          cd ..
+
+      - name: Upload zipped artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fab-agon-emulator-macos
+          path: fab-agon-emulator-macos.zip
+          retention-days: 30
