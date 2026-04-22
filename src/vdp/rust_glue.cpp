@@ -118,9 +118,8 @@ extern "C" void copyVgaFramebuffer(int *outWidth, int *outHeight, void *buffer, 
 	const int h = vga->getScreenHeight();
 	*outHeight = h;
 	*outWidth = w;
-	// rect is inclusive range
-	Rect rect(0, 0, w-1, h-1);
-	vga->readScreen(rect, (fabgl::RGB888*)buffer);
+
+	vga->readEmulatorScreen((fabgl::RGB888*)buffer);
 
 	{
 		auto timings = vga->getResolutionTimings();
