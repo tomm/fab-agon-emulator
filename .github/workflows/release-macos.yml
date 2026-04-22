@@ -1,7 +1,8 @@
 name: Build macOS binary
 
 on:
-  workflow_dispatch:
+  release:
+    types: [created]
 
 jobs:
   build-macos:
@@ -24,7 +25,6 @@ jobs:
 
       - name: Build macOS binary
         run: |
-          # Resolve brew prefix at runtime so env vars are correct
           export SDL3_LIB_DIR="$(brew --prefix)/lib"
           export SDL3_INCLUDE_DIR="$(brew --prefix)/include/SDL3"
           export SDL3_STATIC=0
@@ -32,12 +32,11 @@ jobs:
 
           make clean
           make vdp
-          # only build arm one. can't figure out this god damn platform
           FORCE=1 cargo build -r --target=aarch64-apple-darwin
           cp ./target/aarch64-apple-darwin/release/fab-agon-emulator ./fab-agon-emulator
 
-          VERSION=`cargo tree --depth 0 | awk '{print $2;}'`
-          DIST_DIR=fab-agon-emulator-macos
+          VERSION="${{ github.ref_name }}"
+          DIST_DIR=fab-agon-emulator-macos-${VERSION}
 
           rm -rf $DIST_DIR
           mkdir $DIST_DIR
@@ -46,11 +45,11 @@ jobs:
           cp LICENSE README.md $DIST_DIR
           mkdir $DIST_DIR/sdcard
           cp -r sdcard/* $DIST_DIR/sdcard/
-          zip $DIST_DIR.zip -r $DIST_DIR/*
+          zip ${DIST_DIR}.zip -r $DIST_DIR/*
 
-      - name: Upload zipped artifact
-        uses: actions/upload-artifact@v4
+          echo "DIST_ZIP=${DIST_DIR}.zip" >> $GITHUB_ENV
+
+      - name: Upload artifact to release
+        uses: softprops/action-gh-release@v2
         with:
-          name: fab-agon-emulator-macos
-          path: fab-agon-emulator-macos.zip
-          retention-days: 30
+          files: ${{ env.DIST_ZIP }}
