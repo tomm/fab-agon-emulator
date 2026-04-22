@@ -38,7 +38,11 @@ jobs:
           export CMAKE_POLICY_VERSION_MINIMUM=3.5
 
           mkdir -p artifacts
-          ./dist_scripts/make-dist-macos.sh
+          make clean
+          make vdp
+          # only build arm one. can't figure out this god damn platform
+          FORCE=1 cargo build -r --target=aarch64-apple-darwin
+          cp ./target/x86_64-apple-darwin/release/fab-agon-emulator ./fab-agon-emulator
 
       - name: Zip artifacts
         run: |
