@@ -34,7 +34,6 @@ jobs:
           export SDL3_STATIC=0
           export CMAKE_POLICY_VERSION_MINIMUM=3.5
 
-          mkdir -p artifacts
           make clean
           make vdp
           # only build arm one. can't figure out this god damn platform
@@ -52,7 +51,6 @@ jobs:
           mkdir $DIST_DIR/sdcard
           cp -r sdcard/* $DIST_DIR/sdcard/
           zip $DIST_DIR.zip -r $DIST_DIR/*
-          mv $DIST_DIR.zip artifacts/
 
       - name: Upload zipped artifact
         uses: actions/upload-artifact@v4
