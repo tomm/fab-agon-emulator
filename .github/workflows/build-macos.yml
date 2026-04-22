@@ -32,9 +32,19 @@ jobs:
             local url=$1
             local dmg=$(basename "$url")
             curl -L "$url" -o "$dmg"
-            hdiutil attach "$dmg" -mountpoint /Volumes/SDL -quiet
-            sudo cp -R /Volumes/SDL/*.framework /Library/Frameworks/
-            hdiutil detach /Volumes/SDL -quiet
+
+            # Mount and capture the actual mount point
+            local mountpoint=$(hdiutil attach "$dmg" -nobrowse -quiet | tail -1 | awk '{print $NF}')
+            echo "Mounted at: $mountpoint"
+            ls "$mountpoint"
+
+            # Copy any .framework bundles found
+            find "$mountpoint" -name "*.framework" -maxdepth 3 | while read fw; do
+              echo "Installing: $fw"
+              sudo cp -R "$fw" /Library/Frameworks/
+            done
+
+            hdiutil detach "$mountpoint" -quiet
             rm "$dmg"
           }
 
