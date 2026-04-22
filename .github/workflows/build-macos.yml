@@ -22,15 +22,30 @@ jobs:
         with:
           targets: x86_64-apple-darwin,aarch64-apple-darwin
 
-      - name: Install SDL3 dependencies via Homebrew
+      - name: Install SDL3 from DMG
         run: |
-          brew install sdl3 sdl3_ttf sdl3_image
+          SDL_VERSION="3.4.4"
+          SDL_TTF_VERSION="3.2.2"
+          SDL_IMAGE_VERSION="3.2.4"
+
+          install_dmg() {
+            local url=$1
+            local dmg=$(basename "$url")
+            curl -L "$url" -o "$dmg"
+            hdiutil attach "$dmg" -mountpoint /Volumes/SDL -quiet
+            sudo cp -R /Volumes/SDL/*.framework /Library/Frameworks/
+            hdiutil detach /Volumes/SDL -quiet
+            rm "$dmg"
+          }
+
+          install_dmg "https://github.com/libsdl-org/SDL/releases/download/release-${SDL_VERSION}/SDL3-${SDL_VERSION}.dmg"
+          install_dmg "https://github.com/libsdl-org/SDL_ttf/releases/download/release-${SDL_TTF_VERSION}/SDL3_ttf-${SDL_TTF_VERSION}.dmg"
+          install_dmg "https://github.com/libsdl-org/SDL_image/releases/download/release-${SDL_IMAGE_VERSION}/SDL3_image-${SDL_IMAGE_VERSION}.dmg"
 
       - name: Build macOS binary
         run: |
-          # Resolve brew prefix at runtime so env vars are correct
-          export SDL3_LIB_DIR="$(brew --prefix)/lib"
-          export SDL3_INCLUDE_DIR="$(brew --prefix)/include/SDL3"
+          export SDL3_LIB_DIR="/Library/Frameworks/SDL3.framework"
+          export SDL3_INCLUDE_DIR="/Library/Frameworks/SDL3.framework/Headers"
           export SDL3_STATIC=0
           export CMAKE_POLICY_VERSION_MINIMUM=3.5
 
