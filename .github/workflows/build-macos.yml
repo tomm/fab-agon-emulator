@@ -39,13 +39,20 @@ jobs:
           make vdp
           # only build arm one. can't figure out this god damn platform
           FORCE=1 cargo build -r --target=aarch64-apple-darwin
-          cp ./target/x86_64-apple-darwin/release/fab-agon-emulator ./fab-agon-emulator
+          cp ./target/aarch64-apple-darwin/release/fab-agon-emulator ./fab-agon-emulator
 
-      - name: Zip artifacts
-        run: |
-          cd artifacts
-          zip -r ../fab-agon-emulator-macos.zip .
-          cd ..
+          VERSION=`cargo tree --depth 0 | awk '{print $2;}'`
+          DIST_DIR=fab-agon-emulator-macos
+
+          rm -rf $DIST_DIR
+          mkdir $DIST_DIR
+          cp ./fab-agon-emulator $DIST_DIR
+          cp -r ./firmware $DIST_DIR
+          cp LICENSE README.md $DIST_DIR
+          mkdir $DIST_DIR/sdcard
+          cp -r sdcard/* $DIST_DIR/sdcard/
+          zip $DIST_DIR.zip -r $DIST_DIR/*
+          mv $DIST_DIR.zip artifacts/
 
       - name: Upload zipped artifact
         uses: actions/upload-artifact@v4
