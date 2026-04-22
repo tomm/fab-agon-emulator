@@ -36,7 +36,7 @@ jobs:
           cp ./target/aarch64-apple-darwin/release/fab-agon-emulator ./fab-agon-emulator
 
           VERSION="${{ github.ref_name }}"
-          DIST_DIR=fab-agon-emulator-macos-${VERSION}
+          DIST_DIR=fab-agon-emulator-v${VERSION}-macos-arm64
 
           rm -rf $DIST_DIR
           mkdir $DIST_DIR
