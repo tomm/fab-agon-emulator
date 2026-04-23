@@ -112,6 +112,7 @@ impl PrtTimer {
                 if self.ctl & PRT_MODE == 0 {
                     // clear RST_EN and PRT_EN
                     self.ctl &= 0b1111_1100;
+                    break;
                 } else {
                     // continuous mode: reload counter
                     self.counter = self.reload;
