@@ -12,6 +12,7 @@ pub struct Uart {
 
     /* number of clock cycles before a byte can be sent again */
     transmit_cooldown: i32,
+    receive_cooldown: i32,
 
     // interrupt enable register
     pub ier: u8,
@@ -32,6 +33,7 @@ impl Uart {
         Uart {
             link,
             transmit_cooldown: 0,
+            receive_cooldown: 0,
             tx_fifo: vec![],
             ier: 0,
             fctl: 0,
@@ -49,7 +51,21 @@ impl Uart {
                 let val = self.tx_fifo.remove(0);
                 // actually send
                 self.link.send(val);
-                self.transmit_cooldown += self.brg_div as i32 * 16 * 9; /* XXX 9 = 8bits data, 1 bit parity */
+                self.transmit_cooldown += self.brg_div as i32 * 16 * 10; /* 10 = 8bits data, 1 start bit, 1 stop bit, 0 parity bits */
+            }
+        }
+        self.receive_cooldown = i32::max(0, self.receive_cooldown - cycles);
+        if self.receive_cooldown == 0 {
+            if self.rx_buf == None {
+                self.rx_buf = self.link.recv();
+            }
+            if self.rx_buf.is_some() {
+                // Note uart0 RX is arbitrarily made 4x slower than tx rate, to keep
+                // bad MOS keyboard routines (mos_getkey) happy with keyboard packets
+                // queued up with no wait between them. Perhaps this difference is due
+                // to emulator frontend only periodically checking for keyboard events,
+                // while the real agon is watching for PS/2 data constantly
+                self.receive_cooldown += self.brg_div as i32 * 64 * 10; /* 10 = 8bits data, 1 start bit, 1 stop bit, 0 parity bits */
             }
         }
     }
@@ -64,17 +80,7 @@ impl Uart {
         }
     }
 
-    pub fn maybe_fill_rx_buf(&mut self) -> Option<u8> {
-        if self.rx_buf == None {
-            self.rx_buf = self.link.recv();
-        }
-        self.rx_buf
-    }
-
     pub fn receive_byte(&mut self) -> u8 {
-        // uart0 receive
-        self.maybe_fill_rx_buf();
-
         let maybe_data = self.rx_buf;
         self.rx_buf = None;
 
@@ -84,10 +90,14 @@ impl Uart {
         }
     }
 
+    pub fn rx_byte_ready(&self) -> bool {
+        self.rx_buf.is_some()
+    }
+
     /** line status register */
     pub fn read_lsr(&mut self) -> u8 {
         // 0x01 = DR (data ready: ie can receive)
-        (if self.maybe_fill_rx_buf().is_some() { 1 } else { 0 }) |
+        (if self.rx_byte_ready() { 1 } else { 0 }) |
         // 0x20 = TRHE (fifo / transmit  holding register empty)
         (if self.tx_fifo.is_empty() { 0x20 } else { 0 }) |
         // 0x40 = TEMT (fifo / transmit holding register empty & transmitter idle)

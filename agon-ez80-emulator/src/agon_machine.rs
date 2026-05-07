@@ -1574,7 +1574,7 @@ impl AgonMachine {
             }
 
             // fire uart interrupt
-            if self.uart0.is_rx_interrupt_enabled() && self.uart0.maybe_fill_rx_buf() != None || // character(s) received
+            if self.uart0.is_rx_interrupt_enabled() && self.uart0.rx_byte_ready() || // character(s) received
                    self.uart0.ier & 0x02 != 0
             {
                 // character(s) to send
