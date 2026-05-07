@@ -60,8 +60,8 @@ ifneq ($(shell ./fab-agon-emulator --prefix),)
 	install -D -t $(shell ./fab-agon-emulator --prefix)/share/fab-agon-emulator/ firmware/vdp_*.so
 	install -D -t $(shell ./fab-agon-emulator --prefix)/share/fab-agon-emulator/ firmware/mos_*.bin
 	install -D -t $(shell ./fab-agon-emulator --prefix)/share/fab-agon-emulator/ firmware/mos_*.map
-	install -D -t $(shell ./fab-agon-emulator --prefix)/bin/ target/release/fab-agon-emulator
-	install -D -t $(shell ./fab-agon-emulator --prefix)/bin/ target/release/agon-cli-emulator
+	install -Dm755 -t $(shell ./fab-agon-emulator --prefix)/bin/ target/release/fab-agon-emulator
+	install -Dm755 -t $(shell ./fab-agon-emulator --prefix)/bin/ target/release/agon-cli-emulator
 else
 	@echo "make install requires an install PREFIX (eg PREFIX=/usr/local make)"
 endif

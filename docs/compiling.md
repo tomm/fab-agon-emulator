@@ -27,6 +27,18 @@ PREFIX=/usr/local make
 sudo make install
 ```
 
+## Compiling for Linux (flatpak)
+
+```
+flatpak-builder --force-clean --user --install-deps-from=flathub \
+  --repo=repo --install builddir dist_scripts/io.github.tomm.fab_agon_emulator.yml
+
+flatpak run io.github.tomm.fab_agon_emulator
+
+# Optionally, to make a distributable flatpak file
+flatpak build-bundle repo fab_agon_emulator.flatpak io.github.tomm.fab_agon_emulator --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+```
+
 ## Compiling for Windows
 
 ### To build on Windows (MSYS2)

@@ -1,0 +1,33 @@
+app-id: io.github.tomm.fab_agon_emulator
+runtime: org.freedesktop.Platform
+runtime-version: "25.08"
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+variables:
+  - version: 1.2.0-beta4
+command: fab-agon-emulator
+finish-args:
+  - --device=dri
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --filesystem=~/.agon-sdcard
+modules:
+  - name: fab-agon-emulator
+    version: $version
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/rust-stable/bin
+      env:
+        CARGO_HOME: /run/build/fab-agon-emulator/cargo
+        APP_VERSION: PLACEHOLDER
+      build-args:
+        - --share=network
+    build-commands:
+      - PREFIX=/${FLATPAK_DEST} FORCE=1 make -j4
+      - make install
+    sources:
+      - type: git
+        url: https://github.com/tomm/fab-agon-emulator.git
+        branch: "main"

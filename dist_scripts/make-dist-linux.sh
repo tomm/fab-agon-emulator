@@ -4,7 +4,7 @@ make -j8
 
 VERSION=`cargo tree --depth 0 | awk '{print $2;}'`
 ARCH=`uname -m`
-DIST_DIR=fab-agon-emulator-$VERSION-linux-$ARCH
+DIST_DIR=fab-agon-emulator-$VERSION-debian13-$ARCH
 
 rm -rf $DIST_DIR
 mkdir $DIST_DIR
