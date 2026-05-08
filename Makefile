@@ -62,6 +62,9 @@ ifneq ($(shell ./fab-agon-emulator --prefix),)
 	install -D -t $(shell ./fab-agon-emulator --prefix)/share/fab-agon-emulator/ firmware/mos_*.map
 	install -Dm755 -t $(shell ./fab-agon-emulator --prefix)/bin/ target/release/fab-agon-emulator
 	install -Dm755 -t $(shell ./fab-agon-emulator --prefix)/bin/ target/release/agon-cli-emulator
+	install -Dm644 -t $(shell ./fab-agon-emulator --prefix)/share/applications/ dist_scripts/io.github.tomm.fab_agon_emulator.desktop 
+	install -Dm644 -t $(shell ./fab-agon-emulator --prefix)/share/icons/hicolor/256x256/apps/ dist_scripts/io.github.tomm.fab_agon_emulator.png
+	install -Dm644 -t $(shell ./fab-agon-emulator --prefix)/share/metainfo/ dist_scripts/io.github.tomm.fab_agon_emulator.metainfo.xml
 else
 	@echo "make install requires an install PREFIX (eg PREFIX=/usr/local make)"
 endif

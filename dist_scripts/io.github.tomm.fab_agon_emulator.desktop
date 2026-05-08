@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Fab Agon Emulator
+Exec=fab-agon-emulator
+Icon=io.github.tomm.fab_agon_emulator
+Type=Application
+Categories=Emulator;Game;
