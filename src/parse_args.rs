@@ -15,6 +15,7 @@ OPTIONS:
   --firmware quark      Use quark 1.04 firmware (default is platform)
   -h, --help            Prints help information
   --mode <n>            Start in a specific screen mode
+  --mouse-accel <n>     Accelerate mouse by <n>x
   --osk                 Enable on-screen-keyboard input (requires OS osk)
   --ralt-hostkey        Use right-alt (AltGr) as the emulator host key
   --scale 4:3           (default) Scale Agon screen to 4:3 aspect ratio
@@ -73,6 +74,7 @@ pub struct AppArgs {
     pub zero: bool,
     pub osk: bool,
     pub scr_mode: Option<u32>,
+    pub mouse_accel: f32,
     pub mos_bin: Option<std::path::PathBuf>,
     pub vdp_dll: Option<std::path::PathBuf>,
     pub firmware: FirmwareVer,
@@ -135,6 +137,10 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         osk: pargs.contains("--osk"),
         swap_caps_and_ctrl: pargs.contains("--swap-caps-and-ctrl"),
         scr_mode: pargs.opt_value_from_str("--mode")?,
+        mouse_accel: pargs
+            .opt_value_from_str("--mouse-accel")
+            .unwrap()
+            .unwrap_or(1.0),
         border: match u32::from_str_radix(border.as_str(), 16) {
             Ok(v) => v,
             Err(_) => {

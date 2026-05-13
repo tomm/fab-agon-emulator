@@ -541,25 +541,27 @@ pub fn main_loop() -> i32 {
                     }
                     Event::MouseWheel { y, .. } => {
                         let mut packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
-                        packet[3] = y as u8;
+                        packet[3] = if y > 0.0 {
+                            1
+                        } else if y < 0.0 {
+                            255
+                        } else {
+                            0
+                        };
                         unsafe {
                             (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
                         }
                     }
                     Event::MouseMotion { xrel, yrel, .. } => {
+                        let x = (xrel * args.mouse_accel).clamp(-256.0, 255.0) as i32;
+                        let y = (-yrel * args.mouse_accel).clamp(-256.0, 255.0) as i32;
                         let mut packet: [u8; 4] = [8 | mouse_btn_state, 0, 0, 0];
-                        if xrel >= 0.0 {
-                            packet[1] = xrel as u8;
-                        } else {
-                            packet[1] = xrel as u8;
-                            packet[0] |= 0x10;
-                        }
-                        if yrel <= 0.0 {
-                            packet[2] = -yrel as u8;
-                        } else {
-                            packet[2] = -yrel as u8;
-                            packet[0] |= 0x20;
-                        }
+                        // packet[1],[2]: int9_t, with sign bits in packet[0] ;-)
+                        packet[1] = x as u8;
+                        packet[2] = y as u8;
+                        packet[0] |= if x < 0 { 0x10 } else { 0 };
+                        packet[0] |= if y < 0 { 0x20 } else { 0 };
+
                         unsafe {
                             (*vdp_interface.sendHostMouseEventToFabgl)(&packet[0] as *const u8);
                         }
