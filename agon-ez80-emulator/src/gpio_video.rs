@@ -8,6 +8,7 @@ pub struct GpioVga {
     pub cycles_hblank_to_picture: u64,
     pub scanlines_vblank_to_picture: u32,
     pub last_img_write_cycle: u64,
+    pub last_audio_sample_cycle: u64,
     pub tx_gpio_vga_frame: std::sync::mpsc::Sender<GpioVgaFrame>,
     pub img: Option<GpioVgaFrame>,
 }
@@ -20,6 +21,7 @@ pub struct GpioVgaFrame {
     pub width: u32,
     pub height: u32,
     pub picture: Vec<u8>, // sized GPIO_VGA_FRAME_MAX_WIDTH*GPIO_VGA_FRAME_MAX_HEIGHT
+    pub audio: Vec<u8>,
 }
 
 /*
@@ -39,6 +41,7 @@ impl GpioVga {
             last_vblank_cycle: 0,
             last_hblank_cycle: 0,
             last_img_write_cycle: 0,
+            last_audio_sample_cycle: 0,
             num_scanlines: 0,
             cycles_hblank_to_picture: 0,
             scanlines_vblank_to_picture: 0,
@@ -80,6 +83,20 @@ impl GpioVga {
     }
 
     pub fn handle_gpiod_write(&mut self, total_cycles_elapsed: u64, old_val: u8, new_val: u8) {
+        // audio data on pin 5
+        if let Some(ref mut img) = self.img {
+            // if we generate at exactly 48khz, with no timing sync
+            // between the frontend, we cause random underruns. so
+            // instead sample at a slightly lower rate. Crappy solution.
+            const STRETCH: u64 = 5;
+            let sample: u8 = if new_val & 0x20 == 0 { 0 } else { 255 };
+            // only collect gpio audio samples if a picture is sync'd
+            while self.last_audio_sample_cycle < total_cycles_elapsed {
+                img.audio.push(sample);
+                self.last_audio_sample_cycle += 18_432_000 / 48000 - STRETCH; /* Sampling at 48khz */
+            }
+        }
+
         // detect change in vblank level
         if new_val & 0x40 != old_val & 0x40 {
             //println!("Vsync change {}", self.total_cycles_elapsed);
@@ -97,7 +114,7 @@ impl GpioVga {
                 if self.num_scanlines >= 200 && self.num_scanlines <= 600 {
                     // send frame
                     if let Some(img) = self.img.take() {
-                        self.tx_gpio_vga_frame.send(img).unwrap();
+                        let _ = self.tx_gpio_vga_frame.send(img);
                     }
                     // Now we have sync, allocate a GpioVgaFrame for the next frame
                     let scanline_duration_cycles = (frame_duration as u32 / self.num_scanlines)
@@ -117,6 +134,7 @@ impl GpioVga {
                         448..=450 => 62, // 640x350@70hz
                         _ => 0,          // unknown mode... just render all scanlines
                     };
+                    self.last_audio_sample_cycle = total_cycles_elapsed;
                     self.img = Some(GpioVgaFrame {
                         cycles_hblank_to_picture,
                         line_length_cycles: scanline_duration_cycles as u64,
@@ -154,6 +172,7 @@ impl GpioVga {
                             0;
                             GPIO_VGA_FRAME_MAX_WIDTH * GPIO_VGA_FRAME_MAX_HEIGHT as usize
                         ],
+                        audio: vec![],
                     });
                 }
                 self.num_scanlines = 0;

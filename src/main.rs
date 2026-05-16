@@ -2,6 +2,7 @@ use crate::parse_args::parse_args;
 use agon_ez80_emulator::debugger::{DebugCmd, DebugResp, DebuggerConnection, PauseReason, Trigger};
 use agon_ez80_emulator::{gpio, AgonMachine, AgonMachineConfig, GpioVgaFrame, RamInit, SerialLink};
 use sdl3;
+use sdl3::audio::AudioStreamOwner;
 use sdl3::event::Event;
 use sdl3_sys::everything::{SDL_ScaleMode, SDL_SetTextureScaleMode};
 use std::sync::mpsc;
@@ -250,39 +251,49 @@ pub fn main_loop() -> i32 {
 
     open_joystick_devices(&mut joysticks, &joystick_subsystem);
 
-    /*println!(
-        "Detected {}x{} scaled native resolution",
-        scaled_native_resolution.w, scaled_native_resolution.h
-    );*/
+    struct AudioStreamSet {
+        vdp: sdl3::audio::AudioStreamWithCallback<audio::VdpAudioStream>,
+        gpio: sdl3::audio::AudioStreamOwner,
+    }
 
-    let _audio_device = match (|| -> Result<sdl3::audio::AudioStreamWithCallback<audio::VdpAudioStream> ,sdl3::Error> {
+    let audio_streams = (|| -> Result<AudioStreamSet, sdl3::Error> {
         let audio_subsystem = sdl_context.audio()?;
-
-        let desired_spec = sdl3::audio::AudioSpec {
+        let device = audio_subsystem.open_playback_device(&sdl3::audio::AudioSpec {
             format: Some(sdl3::audio::AudioFormat::U8),
-            freq: Some(16384), // real VDP uses 16384Hz
+            freq: Some(48000),
             channels: Some(1),
-        };
-        let device = audio_subsystem.open_playback_device(&desired_spec)?;
+        })?;
 
-        let device = audio_subsystem.open_playback_stream_with_callback(&device,
-            &desired_spec,
+        let vdp_audiostream = audio_subsystem.open_playback_stream_with_callback(
+            &device,
+            &sdl3::audio::AudioSpec {
+                format: Some(sdl3::audio::AudioFormat::U8),
+                freq: Some(16384), // real VDP uses 16384Hz
+                channels: Some(1),
+            },
             audio::VdpAudioStream {
                 buffer: vec![],
                 getAudioSamples: vdp_interface.getAudioSamples,
-            }
+            },
         )?;
 
-        device.resume()?;
+        vdp_audiostream.resume()?;
 
-        Ok(device)
-    })() {
-        Ok(device) => Some(device),
-        Err(e) => {
-            eprintln!("Error opening audio device: {}", e);
-            None
-        }
-    };
+        let gpio_audiostream = device.open_device_stream(Some(&sdl3::audio::AudioSpec {
+            format: Some(sdl3::audio::AudioFormat::U8),
+            freq: Some(48000),
+            channels: Some(1),
+        }))?;
+
+        Ok(AudioStreamSet {
+            vdp: vdp_audiostream,
+            gpio: gpio_audiostream,
+        })
+    })()
+    .inspect_err(|e| {
+        eprintln!("Error opening audio stream: {}", e);
+    })
+    .ok();
 
     // VDP thread
     let _vdp_thread = thread::Builder::new()
@@ -606,7 +617,17 @@ pub fn main_loop() -> i32 {
 
                 // If there is an eZ80 GPIO VGA frame, show that
                 if let Ok(img) = rx_gpio_vga_frame.try_recv() {
-                    //println!("Got image width {} height {}", img.width, img.height);
+                    fn put_gpio_audiodata(streams: &Option<AudioStreamSet>, img: &GpioVgaFrame) {
+                        // If less than 50ms of audio data enqueued, put more in
+                        if let Some(ref streams) = streams {
+                            if streams.gpio.queued_bytes().unwrap() < 2400 {
+                                let _ = streams.gpio.put_data(img.audio.as_slice());
+                                let _ = streams.gpio.resume();
+                            }
+                        }
+                    }
+                    put_gpio_audiodata(&audio_streams, &img);
+
                     w = img.width;
                     h = img.height;
 
@@ -624,7 +645,9 @@ pub fn main_loop() -> i32 {
                     got_gpio_vga_sync = 4;
 
                     // drop further queued frames to avoid backlog
-                    while let Ok(_) = rx_gpio_vga_frame.try_recv() {}
+                    while let Ok(_img) = rx_gpio_vga_frame.try_recv() {
+                        put_gpio_audiodata(&audio_streams, &_img);
+                    }
 
                     gpio_frame = Some(img);
                 }
@@ -636,6 +659,11 @@ pub fn main_loop() -> i32 {
 
                     if got_gpio_vga_sync > 0 {
                         got_gpio_vga_sync -= 1;
+                        if got_gpio_vga_sync == 0 {
+                            if let Some(ref streams) = audio_streams {
+                                let _ = streams.gpio.pause();
+                            }
+                        }
                     }
                 }
 
