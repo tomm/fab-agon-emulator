@@ -2,7 +2,7 @@ name: Build macOS release binary
 
 on:
   release:
-    types: [created]
+    types: [created, published]
 
 jobs:
   build-macos:
