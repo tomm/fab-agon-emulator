@@ -1406,8 +1406,9 @@ impl AgonMachine {
         }
 
         match std::fs::File::options()
-            .read(true)
+            .read(mode & mos::FA_READ != 0)
             .write(mode & mos::FA_WRITE != 0)
+            .append(mode & mos::FA_OPEN_APPEND != 0)
             .create((mode & mos::FA_CREATE_NEW != 0) || (mode & mos::FA_CREATE_ALWAYS != 0))
             .truncate(mode & mos::FA_CREATE_ALWAYS != 0)
             .open(self.mos_path_to_host_path(&path))
@@ -1416,9 +1417,12 @@ impl AgonMachine {
                 // wipe the FIL structure
                 z80_mem_tools::memset(self, fptr, 0, mos::SIZEOF_MOS_FIL_STRUCT);
 
+                // Remember file cursor. Might not be start if FA_OPEN_APPEND
+                let file_pos: u64 = f.seek(SeekFrom::Current(0)).unwrap();
+
                 // save the size in the FIL structure
                 let file_len = f.seek(SeekFrom::End(0)).unwrap();
-                f.seek(SeekFrom::Start(0)).unwrap();
+                f.seek(SeekFrom::Start(file_pos)).unwrap();
 
                 // store file len in fatfs FIL structure
                 self._poke24(fptr + mos::FIL_MEMBER_OBJSIZE, file_len as u32);

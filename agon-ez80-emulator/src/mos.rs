@@ -17,10 +17,12 @@ pub const FILINFO_MEMBER_FATTRIB_U8: u32 = 8;
 //pub const FILINFO_MEMBER_ALTNAME_13BYTES: u32 = 9;
 pub const FILINFO_MEMBER_FNAME_256BYTES: u32 = 22;
 // f_open mode (3rd arg)
-//pub const FA_READ: u32 = 1;
+pub const FA_READ: u32 = 1;
 pub const FA_WRITE: u32 = 2;
 pub const FA_CREATE_NEW: u32 = 4;
 pub const FA_CREATE_ALWAYS: u32 = 8;
+//pub const FA_OPEN_ALWAYS: u32 = 0x10;
+pub const FA_OPEN_APPEND: u32 = 0x30;
 
 #[derive(Clone, Default)]
 pub struct MosMap {
