@@ -365,9 +365,9 @@ pub fn main_loop() -> i32 {
             .mouse()
             .set_relative_mouse_mode(&window, is_fullscreen);
 
-        if is_fullscreen {
-            window.set_fullscreen(true).unwrap();
-        }
+        window.set_fullscreen(is_fullscreen).unwrap();
+        window.set_mouse_grab(is_fullscreen);
+        sdl_context.mouse().show_cursor(!is_fullscreen);
 
         let mut canvas = {
             match args.renderer {
@@ -759,9 +759,9 @@ pub fn main_loop() -> i32 {
 }
 
 fn calc_int_scale(canvas_size: (u32, u32), agon_size: (u32, u32)) -> (u32, u32) {
-    // icky hack to make 640x240 mode stretch correctly
-    let agon_scr_adj = if agon_size == (640, 240) {
-        (640, 480)
+    // Hack to make very non-square pixel modes scale nicely
+    let agon_scr_adj = if agon_size.0 / agon_size.1 >= 2 {
+        (agon_size.0, agon_size.1 * 2)
     } else {
         agon_size
     };
