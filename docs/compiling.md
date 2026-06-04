@@ -1,5 +1,8 @@
 # Guide to compiling the Fab Agon Emulator
 
+Fab Agon Emulator's requires SDL3. Be sure to install SDL3 and its headers 
+prior to attempting to build the emulator.
+
 Before compiling (on all architectures), make sure the git submodules are up-to-date:
 
 ```
@@ -7,6 +10,8 @@ git submodule update --init
 ```
 
 ## Compiling for Linux
+
+Install libsdl3. On Debian 13 or Ubuntu you want the `libsdl3-dev` package.
 
 To make an optimised release build, run:
 
