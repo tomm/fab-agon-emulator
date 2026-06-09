@@ -7,6 +7,7 @@ USAGE:
 OPTIONS:
   -h, --help            Prints help information
   --mos PATH            Use a different MOS.bin firmware
+  --ram-size <KiB>      Set a non-standard RAM size (default is 512KiB)
   --sdcard-img <file>   Use a raw SDCard image rather than the host filesystem
   --sdcard <path>       Sets the path of the emulated SDCard
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
@@ -21,6 +22,7 @@ pub struct AppArgs {
     pub unlimited_cpu: bool,
     pub zero: bool,
     pub mos_bin: Option<std::path::PathBuf>,
+    pub ram_size: u32,
 }
 
 pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
@@ -44,6 +46,11 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         unlimited_cpu: pargs.contains(["-u", "--unlimited-cpu"]),
         zero: pargs.contains(["-z", "--zero"]),
         mos_bin: pargs.opt_value_from_str("--mos")?,
+        ram_size: pargs
+            .value_from_str("--ram-size")
+            .unwrap_or(512u32)
+            .next_power_of_two()
+            .min(16384),
     };
 
     let remaining = pargs.finish();

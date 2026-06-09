@@ -7,7 +7,6 @@ use std::io::{Read, Seek, SeekFrom, Write};
 use std::sync::Arc;
 
 const ROM_SIZE: usize = 0x20000; // 128 KiB flash
-const EXTERNAL_RAM_SIZE: usize = 0x80000; // 512 KiB
 const ONCHIP_RAM_SIZE: u32 = 0x2000; // 8KiB
 
 pub enum RamInit {
@@ -16,8 +15,8 @@ pub enum RamInit {
 }
 
 pub struct AgonMachine {
-    mem_external: [u8; EXTERNAL_RAM_SIZE], // 512k external RAM
-    mem_rom: [u8; ROM_SIZE],               // 128K ROM
+    mem_external: Vec<u8>,                        // 512k external RAM
+    mem_rom: [u8; ROM_SIZE],                      // 128K ROM
     mem_internal: [u8; ONCHIP_RAM_SIZE as usize], // 8K SRAM on the EZ80F92
     uart0: uart::Uart,
     uart1: uart::Uart,
@@ -502,13 +501,16 @@ pub struct AgonMachineConfig {
     pub gpios: Arc<gpio::GpioSet>,
     pub tx_gpio_vga_frame: std::sync::mpsc::Sender<gpio_video::GpioVgaFrame>,
     pub interrupt_precision: i32,
+    pub external_ram_size: u32,
 }
 
 impl AgonMachine {
     pub fn new(config: AgonMachineConfig) -> Self {
+        // external ram size must be power of two
+        assert!(config.external_ram_size == config.external_ram_size.next_power_of_two());
         AgonMachine {
             mem_rom: [0; ROM_SIZE],
-            mem_external: [0; EXTERNAL_RAM_SIZE],
+            mem_external: vec![0u8; config.external_ram_size as usize],
             mem_internal: [0; ONCHIP_RAM_SIZE as usize],
             uart0: uart::Uart::new(config.uart0_link),
             uart1: uart::Uart::new(config.uart1_link),
@@ -601,14 +603,13 @@ impl AgonMachine {
 
     #[inline]
     fn get_external_ram_address(&self, address: u32) -> Option<u32> {
-        if address >> 16 >= self.cs0_lbr as u32 && address >> 16 <= self.cs0_ubr as u32 {
-            let offset = (address & 0xffff)
-                | (((address >> 16) & (self.cs0_ubr.wrapping_sub(self.cs0_lbr) as u32)) << 16);
-            if offset < EXTERNAL_RAM_SIZE as u32 {
-                Some(offset)
-            } else {
-                None
-            }
+        let segment = address >> 16;
+        if segment >= self.cs0_lbr as u32 && segment <= self.cs0_ubr as u32 {
+            // XXX Note that self.mem_external.len() must be power-of-two
+            Some(
+                address.wrapping_sub((self.cs0_lbr as u32) << 16)
+                    & (self.mem_external.len() as u32 - 1),
+            )
         } else {
             None
         }
@@ -1620,7 +1621,6 @@ impl AgonMachine {
 
     pub fn start(&mut self, debugger_con: Option<debugger::DebuggerConnection>) {
         let mut cpu = Cpu::new_ez80();
-
         let mut debugger = if debugger_con.is_some() {
             Some(debugger::DebuggerServer::new(debugger_con.unwrap()))
         } else {
@@ -1629,7 +1629,7 @@ impl AgonMachine {
 
         match self.ram_init {
             RamInit::Random => {
-                for i in 0..EXTERNAL_RAM_SIZE {
+                for i in 0..self.mem_external.len() {
                     self.mem_external[i as usize] = rand::thread_rng().gen_range(0..=255);
                 }
 

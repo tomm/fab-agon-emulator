@@ -27,6 +27,7 @@ OPTIONS:
   -u, --unlimited-cpu   Don't limit eZ80 CPU frequency
 
 ADVANCED:
+  --ram-size <KiB>      Set a non-standard RAM size (default is 512KiB)
   --mos PATH            Use a different MOS.bin firmware
   --precise-interrupts  Process interrupts and EZ80 hardware every cycle
   --renderer hw         Use hardware (GL/D3D/Vulkan) renderer (default)
@@ -86,6 +87,7 @@ pub struct AppArgs {
     pub alternative_hostkey: bool,
     pub swap_caps_and_ctrl: bool,
     pub precise_interrupts: bool,
+    pub ram_size: u32,
 }
 
 pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
@@ -191,6 +193,11 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         } else {
             FirmwareVer::platform
         },
+        ram_size: pargs
+            .value_from_str("--ram-size")
+            .unwrap_or(512u32)
+            .next_power_of_two()
+            .min(16384),
     };
 
     let remaining = pargs.finish();

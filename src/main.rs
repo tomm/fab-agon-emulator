@@ -182,6 +182,10 @@ pub fn main_loop() -> i32 {
                     eprintln!("Emulated SDCard: {:?}", sdcard_dir);
                 }
 
+                if args.ram_size != 512 {
+                    println!("Non-standard RAM size: {}KiB", args.ram_size);
+                }
+
                 let uart1_serial: Option<Box<dyn SerialLink>> =
                     args.uart1_device.as_ref().and_then(|device| {
                         let baud = args.uart1_baud.unwrap_or(9600);
@@ -222,6 +226,7 @@ pub fn main_loop() -> i32 {
                     },
                     mos_bin: ez80_firmware,
                     interrupt_precision: if args.precise_interrupts { 1 } else { 16 },
+                    external_ram_size: args.ram_size * 1024,
                 });
                 machine.set_sdcard_directory(sdcard_dir);
                 machine.set_sdcard_image(sdcard_img_file);

@@ -294,6 +294,7 @@ fn main() {
         std::thread::spawn(move || {
             let _ez80_paused = ez80_paused.clone();
             let mut machine = AgonMachine::new(AgonMachineConfig {
+                external_ram_size: args.ram_size * 1024,
                 ram_init: if args.zero {
                     RamInit::Zero
                 } else {
