@@ -1433,6 +1433,10 @@ impl AgonMachine {
 
                 // store file len in fatfs FIL structure
                 self._poke24(fptr + mos::FIL_MEMBER_OBJSIZE, file_len as u32);
+                self.poke(
+                    fptr + mos::FIL_MEMBER_OBJSIZE + 3,
+                    (file_len >> 24) as u8,
+                );
 
                 // store mapping from MOS *FIL to rust File
                 self.open_files.insert(fptr, f);
