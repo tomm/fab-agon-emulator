@@ -77,6 +77,8 @@ purposes:
 | 0x10-0x1f     | Breakpoint (requires --debugger)                                   |
 | 0x20-0x2f     | Print CPU state (requires --debugger)                              |
 | 0x30          | Echo the written char to host stdout                               |
+| 0x40          | Reset CPU cycle counter                                            |
+| 0x41-0x4f     | Print elapsed CPU cycles                                           |
 
 These functions are activated by write (not read), and the upper 8-bits of the
 IO address are ignored. ie:
