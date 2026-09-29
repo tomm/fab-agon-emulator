@@ -42,6 +42,9 @@ pub enum DebugCmd {
         reg: Reg16,
         len: u32,
     },
+    GetMemoryAtPC {
+        len: u32,
+    },
     GetRegisters,
     GetState,
     DisassemblePc {
@@ -327,6 +330,9 @@ impl DebuggerServer {
                     cpu.registers().get16_mbase(*reg)
                 };
                 self.send_mem(machine, cpu, addr, *len);
+            }
+            DebugCmd::GetMemoryAtPC { len } => {
+                self.send_mem(machine, cpu, cpu.state.pc(), *len);
             }
         }
     }

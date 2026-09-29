@@ -171,6 +171,10 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
                     let len = parse_number(tokens).unwrap_or(16);
                     expect_end_of_cmd(tokens)?;
                     Ok(Cmd::Core(DebugCmd::GetMemory { start, len }))
+                } else if parse_exact_caseinsensitive(tokens, "pc") {
+                    let len = parse_number(tokens).unwrap_or(16);
+                    expect_end_of_cmd(tokens)?;
+                    Ok(Cmd::Core(DebugCmd::GetMemoryAtPC { len }))
                 } else {
                     if let Some(reg) = parse_reg16(tokens) {
                         let len = parse_number(tokens).unwrap_or(16);
@@ -222,6 +226,16 @@ pub fn parse_cmd(tokens: &mut Tokens) -> Result<Cmd, String> {
 fn parse_exact(tokens: &mut Tokens, expected: &str) -> bool {
     match tokens.peek() {
         Some(&s) if s == expected => {
+            tokens.next();
+            true
+        }
+        _ => false,
+    }
+}
+
+fn parse_exact_caseinsensitive(tokens: &mut Tokens, expected: &str) -> bool {
+    match tokens.peek() {
+        Some(&s) if s.to_lowercase() == expected.to_lowercase() => {
             tokens.next();
             true
         }
