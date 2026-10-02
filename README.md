@@ -104,5 +104,5 @@ are not signed, so in order to run them on your Mac you need to run the followin
 the directory containing the fab-agon-emulator executable:
 
 ```
-xattr -dr com.apple.quarantine fab-agon-emulator firmware/*.so
+xattr -dr com.apple.quarantine fab-agon-emulator agon-cli-emulator libSDL3.0.dylib firmware/*.so
 ```
