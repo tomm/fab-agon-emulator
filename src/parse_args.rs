@@ -17,6 +17,7 @@ OPTIONS:
   --mode <n>            Start in a specific screen mode
   --mouse-accel <n>     Accelerate mouse by <n>x
   --osk                 Enable on-screen-keyboard input (requires OS osk)
+  --quiet               Do not play sounds
   --ralt-hostkey        Use right-alt (AltGr) as the emulator host key
   --scale 4:3           (default) Scale Agon screen to 4:3 aspect ratio
   --scale integer       Scale Agon screen to an integer multiple
@@ -88,6 +89,7 @@ pub struct AppArgs {
     pub swap_caps_and_ctrl: bool,
     pub precise_interrupts: bool,
     pub ram_size: u32,
+    pub quiet: bool,
 }
 
 pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
@@ -134,6 +136,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         fullscreen: pargs.contains(["-f", "--fullscreen"]),
         alternative_hostkey: pargs.contains("--ralt-hostkey"),
         verbose: pargs.contains("--verbose"),
+        quiet: pargs.contains("--quiet"),
         zero: pargs.contains(["-z", "--zero"]),
         precise_interrupts: pargs.contains("--precise-interrupts"),
         osk: pargs.contains("--osk"),

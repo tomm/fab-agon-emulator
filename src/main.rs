@@ -287,7 +287,7 @@ pub fn main_loop() -> i32 {
         let gpio_audiostream = device.open_device_stream(Some(&sdl3::audio::AudioSpec {
             format: Some(sdl3::audio::AudioFormat::U8),
             freq: Some(48000),
-            channels: Some(1),
+            channels: Some(if (args.quiet) { 0 } else { 1 }),
         }))?;
 
         Ok(AudioStreamSet {
