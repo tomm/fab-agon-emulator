@@ -201,15 +201,7 @@ impl Machine for AgonMachine {
                     self.uart0.ier
                 }
             }
-            0xc2 => {
-                // UART0_IIR
-                if self.uart0.ier & 0x02 != 0 {
-                    self.uart0.ier = self.uart0.ier & 0b11111101;
-                    0x02
-                } else {
-                    0x04
-                }
-            }
+            0xc2 => self.uart0.read_iir(), // UART0_IIR
             0xc3 => self.uart0.lctl,
             0xc5 => self.uart0.read_lsr(),
             0xc6 => self.uart0.read_modem_status_register(),
@@ -1585,9 +1577,7 @@ impl AgonMachine {
             }
 
             // fire uart interrupt
-            if self.uart0.is_rx_interrupt_enabled() && self.uart0.rx_byte_ready() || // character(s) received
-                   self.uart0.ier & 0x02 != 0
-            {
+            if self.uart0.is_interrupt_due() {
                 // character(s) to send
                 let mut env = Environment::new(&mut cpu.state, self);
                 //println!("uart interrupt!");
