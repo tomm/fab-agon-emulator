@@ -1,4 +1,10 @@
 const FCTL_FIFOEN: u8 = 0x1;
+const IER_RIE: u8 = 0x01;
+const IER_TIE: u8 = 0x02;
+const IIR_NO_PENDING: u8 = 0x01;
+const IIR_RX_DATA_READY: u8 = 0x04;
+const IIR_TX_EMPTY: u8 = 0x02;
+const IIR_FIFO_ENABLED: u8 = 0xC0;
 
 pub trait SerialLink {
     fn send(&mut self, byte: u8);
@@ -127,6 +133,107 @@ impl Uart {
     }
 
     pub fn is_rx_interrupt_enabled(&self) -> bool {
-        self.ier & 1 != 0
+        self.ier & IER_RIE != 0
+    }
+
+    pub fn is_interrupt_due(&self) -> bool {
+        (self.is_rx_interrupt_enabled() && self.rx_byte_ready())
+            || (self.ier & IER_TIE != 0 && self.tx_fifo.is_empty())
+    }
+
+    pub fn read_iir(&self) -> u8 {
+        let fifo_status = if self.fctl & FCTL_FIFOEN != 0 {
+            IIR_FIFO_ENABLED
+        } else {
+            0
+        };
+        let cause = if self.is_rx_interrupt_enabled() && self.rx_byte_ready() {
+            IIR_RX_DATA_READY
+        } else if self.ier & IER_TIE != 0 && self.tx_fifo.is_empty() {
+            IIR_TX_EMPTY
+        } else {
+            IIR_NO_PENDING
+        };
+        fifo_status | cause
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::cell::RefCell;
+    use std::collections::VecDeque;
+    use std::rc::Rc;
+
+    #[derive(Default)]
+    struct LinkState {
+        rx: VecDeque<u8>,
+        tx: Vec<u8>,
+    }
+
+    struct TestLink(Rc<RefCell<LinkState>>);
+
+    impl SerialLink for TestLink {
+        fn send(&mut self, byte: u8) {
+            self.0.borrow_mut().tx.push(byte);
+        }
+
+        fn recv(&mut self) -> Option<u8> {
+            self.0.borrow_mut().rx.pop_front()
+        }
+
+        fn read_clear_to_send(&mut self) -> bool {
+            true
+        }
+    }
+
+    fn test_uart() -> (Uart, Rc<RefCell<LinkState>>) {
+        let state = Rc::new(RefCell::new(LinkState::default()));
+        (Uart::new(Box::new(TestLink(state.clone()))), state)
+    }
+
+    #[test]
+    fn iir_reports_no_pending_and_preserves_ier() {
+        let (mut uart, _) = test_uart();
+        uart.write_fctl(FCTL_FIFOEN);
+        uart.ier = IER_RIE;
+
+        assert_eq!(uart.read_iir(), IIR_FIFO_ENABLED | IIR_NO_PENDING);
+        assert_eq!(uart.ier, IER_RIE);
+        assert!(!uart.is_interrupt_due());
+    }
+
+    #[test]
+    fn tx_empty_interrupt_repeats_after_fifo_drains_without_clearing_tie() {
+        let (mut uart, state) = test_uart();
+        uart.write_fctl(FCTL_FIFOEN);
+        uart.ier = IER_TIE;
+
+        assert_eq!(uart.read_iir(), IIR_FIFO_ENABLED | IIR_TX_EMPTY);
+        assert_eq!(uart.ier, IER_TIE);
+        uart.send_byte(b'X');
+        assert!(!uart.is_interrupt_due());
+        assert_eq!(uart.read_iir(), IIR_FIFO_ENABLED | IIR_NO_PENDING);
+
+        uart.apply_ticks(1);
+        assert_eq!(state.borrow().tx, b"X");
+        assert_eq!(uart.read_iir(), IIR_FIFO_ENABLED | IIR_TX_EMPTY);
+        assert_eq!(uart.ier, IER_TIE);
+        assert!(uart.is_interrupt_due());
+    }
+
+    #[test]
+    fn rx_interrupt_requires_data_and_preserves_rie() {
+        let (mut uart, state) = test_uart();
+        uart.write_fctl(FCTL_FIFOEN);
+        uart.ier = IER_RIE;
+        state.borrow_mut().rx.push_back(b'R');
+
+        assert!(!uart.is_interrupt_due());
+        uart.apply_ticks(1);
+        assert_eq!(uart.read_iir(), IIR_FIFO_ENABLED | IIR_RX_DATA_READY);
+        assert_eq!(uart.receive_byte(), b'R');
+        assert_eq!(uart.read_iir(), IIR_FIFO_ENABLED | IIR_NO_PENDING);
+        assert_eq!(uart.ier, IER_RIE);
     }
 }
