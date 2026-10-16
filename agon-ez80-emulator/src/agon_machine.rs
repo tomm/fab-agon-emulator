@@ -473,7 +473,8 @@ impl Machine for AgonMachine {
                     println!(
                         "Debug OUT(0x{:x}): {} CPU cycles elapsed since last OUT(0x40)",
                         address & 0xff,
-                        self.total_cycles_elapsed.wrapping_sub(self.total_cycles_elapsed_benchmark)
+                        self.total_cycles_elapsed
+                            .wrapping_sub(self.total_cycles_elapsed_benchmark)
                     );
                 } else {
                     // the debugger will handle some of these
