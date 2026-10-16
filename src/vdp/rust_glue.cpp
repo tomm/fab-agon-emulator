@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "fabutils.h"
 #include "fake_fabgl.h"
 #include "fabgl.h"
@@ -40,6 +41,30 @@ extern "C" void signal_vblank(void)
 extern "C" void setVdpDebugLogging(bool state)
 {
 	vdp_debug_logging = state;
+}
+
+/* Redirect the VDP's "printer" output (VDU 2) from host stdout into a file.
+ * Returns false if the file could not be opened, so the host can complain
+ * rather than silently carrying on writing to stdout.
+ *
+ * Note we can't hook DBGSerial itself here: it only exists in the console8
+ * firmware, while this file is linked into vdp_electron.so as well. */
+extern "C" bool vdp_set_printer_file(const char *path)
+{
+	// Appending, so that an existing log survives and several runs add to it.
+	// Binary, so that the guest's bytes reach the file unaltered: the Windows
+	// CRT translates a written LF into CR/LF, and the Agon ends its lines with
+	// a CR/LF of its own already.
+	FILE *f = fopen(path, "ab");
+
+	if (f == nullptr) {
+		return false;
+	}
+
+	// unbuffered, so that `tail -f` on the file follows along live
+	setvbuf(f, nullptr, _IONBF, 0);
+	dbg_serial_sink = f;
+	return true;
 }
 
 extern "C" void set_startup_screen_mode(uint32_t mode)
