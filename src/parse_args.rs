@@ -17,6 +17,7 @@ OPTIONS:
   --mode <n>            Start in a specific screen mode
   --mouse-accel <n>     Accelerate mouse by <n>x
   --osk                 Enable on-screen-keyboard input (requires OS osk)
+  --printer-file <path> Append VDU 2 \"printer\" output to this file
   --ralt-hostkey        Use right-alt (AltGr) as the emulator host key
   --scale 4:3           (default) Scale Agon screen to 4:3 aspect ratio
   --scale integer       Scale Agon screen to an integer multiple
@@ -84,6 +85,7 @@ pub struct AppArgs {
     pub border: u32,
     pub uart1_device: Option<String>,
     pub uart1_baud: Option<u32>,
+    pub printer_file: Option<String>,
     pub alternative_hostkey: bool,
     pub swap_caps_and_ctrl: bool,
     pub precise_interrupts: bool,
@@ -166,6 +168,7 @@ pub fn parse_args() -> Result<AppArgs, pico_args::Error> {
         vdp_dll: pargs.opt_value_from_str("--vdp")?,
         uart1_device: pargs.opt_value_from_str("--uart1-device")?,
         uart1_baud: pargs.opt_value_from_str("--uart1-baud")?,
+        printer_file: pargs.opt_value_from_str("--printer-file")?,
         renderer: if let Some(r) = renderer {
             match r.as_str() {
                 "hw" => Renderer::Accelerated,

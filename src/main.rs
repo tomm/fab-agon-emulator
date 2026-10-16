@@ -78,6 +78,29 @@ pub fn main_loop() -> i32 {
 
     unsafe { (*vdp_interface.setVdpDebugLogging)(args.verbose) }
 
+    // Must happen before the VDP starts up, so that no printer output escapes
+    // to stdout before the file is in place
+    if let Some(path) = &args.printer_file {
+        let c_path = match std::ffi::CString::new(path.as_str()) {
+            Ok(p) => p,
+            Err(_) => {
+                eprintln!("Invalid --printer-file path: {}", path);
+                std::process::exit(-1);
+            }
+        };
+        let set_printer_file = match &vdp_interface.vdp_set_printer_file {
+            Some(f) => f,
+            None => {
+                eprintln!("This VDP firmware does not support --printer-file. Rebuild it with `make vdp`.");
+                std::process::exit(-1);
+            }
+        };
+        if !unsafe { set_printer_file(c_path.as_ptr()) } {
+            eprintln!("Could not open --printer-file for writing: {}", path);
+            std::process::exit(-1);
+        }
+    }
+
     let (tx_cmd_debugger, rx_cmd_debugger): (Sender<DebugCmd>, Receiver<DebugCmd>) =
         mpsc::channel();
     let (tx_resp_debugger, rx_resp_debugger): (Sender<DebugResp>, Receiver<DebugResp>) =

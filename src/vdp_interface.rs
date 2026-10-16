@@ -23,6 +23,11 @@ pub struct VdpInterface {
     pub sendHostMouseEventToFabgl:
         libloading::Symbol<'static, unsafe extern "C" fn(mouse_packet: *const u8)>,
     pub setVdpDebugLogging: libloading::Symbol<'static, unsafe extern "C" fn(state: bool) -> ()>,
+    // Optional, so that a VDP dll built before this symbol existed still loads.
+    // Only --printer-file needs it.
+    pub vdp_set_printer_file: Option<
+        libloading::Symbol<'static, unsafe extern "C" fn(path: *const std::os::raw::c_char) -> bool>,
+    >,
     pub getAudioSamples:
         libloading::Symbol<'static, unsafe extern "C" fn(out: *mut u8, length: u32)>,
     pub dump_vdp_mem_stats: libloading::Symbol<'static, unsafe extern "C" fn()>,
@@ -45,6 +50,7 @@ impl VdpInterface {
                 sendPS2KbEventToFabgl: lib.get(b"sendPS2KbEventToFabgl").unwrap(),
                 sendHostMouseEventToFabgl: lib.get(b"sendHostMouseEventToFabgl").unwrap(),
                 setVdpDebugLogging: lib.get(b"setVdpDebugLogging").unwrap(),
+                vdp_set_printer_file: lib.get(b"vdp_set_printer_file").ok(),
                 getAudioSamples: lib.get(b"getAudioSamples").unwrap(),
                 dump_vdp_mem_stats: lib.get(b"dump_vdp_mem_stats").unwrap(),
                 vdp_shutdown: lib.get(b"vdp_shutdown").unwrap(),
