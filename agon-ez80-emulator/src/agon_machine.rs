@@ -616,11 +616,11 @@ impl AgonMachine {
     fn get_external_ram_address(&self, address: u32) -> Option<u32> {
         let segment = address >> 16;
         if segment >= self.cs0_lbr as u32 && segment <= self.cs0_ubr as u32 {
-            // XXX Note that self.mem_external.len() must be power-of-two
-            Some(
-                address.wrapping_sub((self.cs0_lbr as u32) << 16)
-                    & (self.mem_external.len() as u32 - 1),
-            )
+            // Note that self.mem_external.len() must be power-of-two.
+            // On real Agon hardware, CPU address lines ADDR0..ADDR18 connect directly
+            // to external SRAM address pins without offset subtraction.
+            // CS0_LBR and CS0_UBR gate chip select /CE, but do not translate bus addresses.
+            Some(address & (self.mem_external.len() as u32 - 1))
         } else {
             None
         }
