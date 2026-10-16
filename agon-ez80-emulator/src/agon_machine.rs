@@ -201,15 +201,7 @@ impl Machine for AgonMachine {
                     self.uart0.ier
                 }
             }
-            0xc2 => {
-                // UART0_IIR
-                if self.uart0.ier & 0x02 != 0 {
-                    self.uart0.ier = self.uart0.ier & 0b11111101;
-                    0x02
-                } else {
-                    0x04
-                }
-            }
+            0xc2 => self.uart0.read_iir(), // UART0_IIR
             0xc3 => self.uart0.lctl,
             0xc5 => self.uart0.read_lsr(),
             0xc6 => self.uart0.read_modem_status_register(),
@@ -234,15 +226,7 @@ impl Machine for AgonMachine {
                     self.uart1.ier
                 }
             }
-            0xd2 => {
-                // UART1_IIR
-                if self.uart1.ier & 0x02 != 0 {
-                    self.uart1.ier = self.uart1.ier & 0b11111101;
-                    0x02
-                } else {
-                    0x04
-                }
-            }
+            0xd2 => self.uart1.read_iir(), // UART1_IIR
             0xd3 => self.uart1.lctl,
             0xd5 => self.uart1.read_lsr(),
             0xd6 => self.uart1.read_modem_status_register(),
@@ -1539,7 +1523,13 @@ impl AgonMachine {
             self.cycle_counter.set(cycle_count);
         }
 
-        cpu.fast_execute_instruction(self);
+        if cpu.is_halted() {
+            // HALT continues to consume M1 cycles, so peripherals keep ticking.
+            self.cycle_counter
+                .set(self.cycle_counter.get().wrapping_add(4));
+        } else {
+            cpu.fast_execute_instruction(self);
+        }
     }
 
     #[inline]
@@ -1563,6 +1553,13 @@ impl AgonMachine {
     }
 
     #[inline]
+    fn fire_interrupt(&mut self, cpu: &mut Cpu, vector: u32) {
+        // A maskable interrupt releases the CPU from HALT before vectoring.
+        cpu.state.halted = false;
+        Environment::new(&mut cpu.state, self).interrupt(vector);
+    }
+
+    #[inline]
     pub fn fire_gpio_interrupts(
         &mut self,
         cpu: &mut Cpu,
@@ -1570,10 +1567,9 @@ impl AgonMachine {
         interrupts_due: u8,
     ) -> bool {
         if interrupts_due != 0 {
-            let mut env = Environment::new(&mut cpu.state, self);
             for pin in 0..=7 {
                 if interrupts_due & (1 << pin) != 0 {
-                    env.interrupt(vector_base + 2 * pin);
+                    self.fire_interrupt(cpu, vector_base + 2 * pin);
                     return true;
                 }
             }
@@ -1587,26 +1583,26 @@ impl AgonMachine {
             // Interrupts in priority order
             for i in 0..self.prt_timers.len() {
                 if self.prt_timers[i].irq_due() {
-                    Environment::new(&mut cpu.state, self).interrupt(0xa + 2 * (i as u32));
+                    self.fire_interrupt(cpu, 0xa + 2 * (i as u32));
                     return;
                 }
             }
 
             // fire uart interrupt
-            if self.uart0.is_rx_interrupt_enabled() && self.uart0.rx_byte_ready() || // character(s) received
-                   self.uart0.ier & 0x02 != 0
-            {
+            if self.uart0.is_interrupt_due() {
                 // character(s) to send
-                let mut env = Environment::new(&mut cpu.state, self);
-                //println!("uart interrupt!");
-                env.interrupt(0x18); // uart0_handler
+                self.fire_interrupt(cpu, 0x18); // uart0_handler
+                return;
+            }
+
+            // UART1: RX data ready or TX FIFO empty.
+            if self.uart1.is_interrupt_due() {
+                self.fire_interrupt(cpu, 0x1a); // UART1
                 return;
             }
 
             if self.i2c.is_interrupt_due() {
-                let mut env = Environment::new(&mut cpu.state, self);
-                //println!("i2c interrupt!");
-                env.interrupt(0x1c);
+                self.fire_interrupt(cpu, 0x1c);
                 return;
             }
 
