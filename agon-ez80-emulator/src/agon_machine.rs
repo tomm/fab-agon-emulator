@@ -59,6 +59,7 @@ pub struct AgonMachine {
     pub io_unhandled: std::cell::Cell<Option<u16>>,      // address
     pub cycle_counter: std::cell::Cell<i32>,
     pub total_cycles_elapsed: u64,
+    pub total_cycles_elapsed_benchmark: u64,
 }
 
 // a path relative to the hostfs_root_dir
@@ -467,12 +468,12 @@ impl Machine for AgonMachine {
                     // Echo ascii value to host stdout
                     print!("{}", value as char);
                 } else if address & 0xff == 0x40 {
-                    self.total_cycles_elapsed = 0;
+                    self.total_cycles_elapsed_benchmark = self.total_cycles_elapsed;
                 } else if address & 0xf0 == 0x40 {
                     println!(
                         "Debug OUT(0x{:x}): {} CPU cycles elapsed since last OUT(0x40)",
                         address & 0xff,
-                        self.total_cycles_elapsed
+                        self.total_cycles_elapsed.wrapping_sub(self.total_cycles_elapsed_benchmark)
                     );
                 } else {
                     // the debugger will handle some of these
@@ -538,6 +539,7 @@ impl AgonMachine {
             io_unhandled: std::cell::Cell::new(None),
             cycle_counter: std::cell::Cell::new(0),
             total_cycles_elapsed: 0,
+            total_cycles_elapsed_benchmark: 0,
             paused: config.paused,
             mos_bin: config.mos_bin,
             onchip_mem_enable: true,
