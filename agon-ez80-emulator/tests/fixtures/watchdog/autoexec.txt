@@ -1,0 +1,2 @@
+LOAD /wdproof.bin &40000
+RUN &40000

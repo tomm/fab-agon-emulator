@@ -1,4 +1,4 @@
-use crate::{debugger, gpio, gpio_video, i2c, mos, prt_timer, spi_sdcard, uart};
+use crate::{debugger, f92_watchdog, gpio, gpio_video, i2c, mos, prt_timer, spi_sdcard, uart};
 use chrono::{Datelike, Timelike};
 use ez80::*;
 use rand::Rng;
@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 const ROM_SIZE: usize = 0x20000; // 128 KiB flash
 const ONCHIP_RAM_SIZE: u32 = 0x2000; // 8KiB
+const F92_RESET_HOLD_CYCLES: u16 = 257;
 
 pub enum RamInit {
     Zero,
@@ -36,6 +37,10 @@ pub struct AgonMachine {
     exit_status: Arc<std::sync::atomic::AtomicI32>,
     clockspeed_hz: u64,
     prt_timers: [prt_timer::PrtTimer; 6],
+    watchdog: f92_watchdog::Watchdog,
+    watchdog_cycle_cursor: Option<i32>,
+    reset_hold_cycles: u16,
+    cycles_before_peripheral_resume: i32,
     gpios: Arc<gpio::GpioSet>,
     ram_init: RamInit,
     mos_bin: std::path::PathBuf,
@@ -128,6 +133,14 @@ impl Machine for AgonMachine {
             0x8f => self.prt_timers[5].read_ctl(),
             0x90 => self.prt_timers[5].read_counter_low(),
             0x91 => self.prt_timers[5].read_counter_high(),
+            f92_watchdog::CONTROL => {
+                self.settle_watchdog_cycles();
+                self.watchdog.read_control()
+            }
+            f92_watchdog::RELOAD => {
+                self.settle_watchdog_cycles();
+                0 // Write-only register.
+            }
 
             0x9a => self.gpios.b.get_dr(),
             0x9b => self.gpios.b.get_ddr(),
@@ -283,6 +296,14 @@ impl Machine for AgonMachine {
             0x8f => self.prt_timers[5].write_ctl(value),
             0x90 => self.prt_timers[5].write_reload_low(value),
             0x91 => self.prt_timers[5].write_reload_high(value),
+            f92_watchdog::CONTROL => {
+                self.settle_watchdog_cycles();
+                self.watchdog.write_control(value);
+            }
+            f92_watchdog::RELOAD => {
+                self.settle_watchdog_cycles();
+                self.watchdog.write_reload(value);
+            }
 
             0x9a => {
                 self.gpios.b.set_dr(value);
@@ -532,6 +553,10 @@ impl AgonMachine {
                 prt_timer::PrtTimer::new(),
                 prt_timer::PrtTimer::new(),
             ],
+            watchdog: f92_watchdog::Watchdog::default(),
+            watchdog_cycle_cursor: None,
+            reset_hold_cycles: 0,
+            cycles_before_peripheral_resume: 0,
             gpios: config.gpios,
             gpio_vga: gpio_video::GpioVga::new(config.tx_gpio_vga_frame),
             ram_init: config.ram_init,
@@ -1443,8 +1468,79 @@ impl AgonMachine {
     }
 
     #[inline]
-    // returns cycles elapsed
+    fn settle_watchdog_cycles(&mut self) {
+        let now = self.cycle_counter.get();
+        if let Some(previous) = self.watchdog_cycle_cursor.as_mut() {
+            let elapsed = now.wrapping_sub(*previous);
+            debug_assert!(elapsed >= 0);
+            *previous = now;
+            self.watchdog.advance(elapsed as u64, self.clockspeed_hz);
+        }
+    }
+
+    fn take_watchdog_event(&mut self, cpu: &mut Cpu) {
+        match self.watchdog.take_expiry() {
+            Some(f92_watchdog::Expiry::Nmi) => cpu.signal_nmi(),
+            Some(f92_watchdog::Expiry::ChipReset) => {
+                self.reset_from_watchdog(cpu);
+                return;
+            }
+            None => {}
+        }
+        if cpu.state.nmi_pending {
+            self.watchdog_cycle_cursor = Some(self.cycle_counter.get());
+            cpu.accept_pending_ez80_nmi(self);
+            self.settle_watchdog_cycles();
+            self.watchdog_cycle_cursor = None;
+        }
+    }
+
+    fn reset_from_watchdog(&mut self, cpu: &mut Cpu) {
+        cpu.reset_ez80_state();
+        self.reset_hold_cycles = F92_RESET_HOLD_CYCLES;
+        // Outstanding batched clocks precede the new peripheral register
+        // state. Keep them in the scheduler budget, but do not replay them.
+        self.cycles_before_peripheral_resume = self.cycle_counter.get();
+        self.watchdog.reset_after_timeout();
+        self.watchdog_cycle_cursor = None;
+        self.prt_timers = std::array::from_fn(|_| prt_timer::PrtTimer::new());
+        self.gpios.reset();
+        self.gpio_vga = gpio_video::GpioVga::new(self.gpio_vga.tx_gpio_vga_frame.clone());
+        self.uart0.reset();
+        self.uart1.reset();
+        self.i2c.reset();
+        self.spi_sdcard.reset_bus();
+        self.onchip_mem_enable = true;
+        self.onchip_mem_segment = 0xff;
+        self.flash_addr_u = 0;
+        self.cs0_lbr = 0;
+        self.cs0_ubr = 0xff;
+        self.flash_waitstates = 4;
+        self.open_files.clear();
+        self.open_dirs.clear();
+        self.mos_current_dir.0.clear();
+    }
+
+    #[inline]
+    fn finish_watchdog_step(&mut self, cpu: &mut Cpu) {
+        self.settle_watchdog_cycles();
+        self.watchdog_cycle_cursor = None;
+        self.take_watchdog_event(cpu);
+    }
+
+    #[inline]
     pub fn execute_instruction(&mut self, cpu: &mut Cpu) {
+        if self.reset_hold_cycles != 0 {
+            self.reset_hold_cycles -= 1;
+            self.use_cycles(1);
+            self.cycles_before_peripheral_resume = self.cycle_counter.get();
+            self.watchdog.advance(1, self.clockspeed_hz);
+            return;
+        }
+        if self.watchdog.expiry_pending() || (cpu.state.nmi_pending && !cpu.state.reset_pending) {
+            self.take_watchdog_event(cpu);
+            return;
+        }
         let pc = cpu.state.pc();
         // remember PC before instruction executes. the debugger uses this
         // when out-of-bounds memory accesses happen (since they can't be
@@ -1526,13 +1622,15 @@ impl AgonMachine {
             self.cycle_counter.set(cycle_count);
         }
 
+        // Host filesystem accounting is excluded from watchdog time.
+        self.watchdog_cycle_cursor = Some(self.cycle_counter.get());
         if cpu.is_halted() {
-            // HALT continues to consume M1 cycles, so peripherals keep ticking.
-            self.cycle_counter
-                .set(self.cycle_counter.get().wrapping_add(4));
+            // Keep Fab's existing four-clock HALT step.
+            self.use_cycles(4);
         } else {
             cpu.fast_execute_instruction(self);
         }
+        self.finish_watchdog_step(cpu);
     }
 
     #[inline]
@@ -1543,14 +1641,16 @@ impl AgonMachine {
                 .total_cycles_elapsed
                 .wrapping_add(cycles_elapsed as u64);
 
-            for t in &mut self.prt_timers {
-                t.apply_ticks(cycles_elapsed as u16);
+            let peripheral_cycles = cycles_elapsed - self.cycles_before_peripheral_resume;
+            if peripheral_cycles > 0 {
+                for timer in &mut self.prt_timers {
+                    timer.apply_ticks(peripheral_cycles as u16);
+                }
+                self.uart0.apply_ticks(peripheral_cycles);
+                self.uart1.apply_ticks(peripheral_cycles);
             }
-
-            self.uart0.apply_ticks(cycles_elapsed as i32);
-            self.uart1.apply_ticks(cycles_elapsed as i32);
-
             self.cycle_counter.set(0);
+            self.cycles_before_peripheral_resume = 0;
         }
         cycles_elapsed
     }
@@ -1559,7 +1659,9 @@ impl AgonMachine {
     fn fire_interrupt(&mut self, cpu: &mut Cpu, vector: u32) {
         // A maskable interrupt releases the CPU from HALT before vectoring.
         cpu.state.halted = false;
+        self.watchdog_cycle_cursor = Some(self.cycle_counter.get());
         Environment::new(&mut cpu.state, self).interrupt(vector);
+        self.finish_watchdog_step(cpu);
     }
 
     #[inline]
@@ -1582,7 +1684,7 @@ impl AgonMachine {
 
     #[inline]
     pub fn do_interrupts(&mut self, cpu: &mut Cpu) {
-        if cpu.state.reg.get_iff1() {
+        if self.reset_hold_cycles == 0 && cpu.state.reg.get_iff1() {
             // Interrupts in priority order
             for i in 0..self.prt_timers.len() {
                 if self.prt_timers[i].irq_due() {
@@ -1677,7 +1779,9 @@ impl AgonMachine {
             }
 
             // perform a soft reset if requested
-            if self.soft_reset.load(std::sync::atomic::Ordering::Relaxed) {
+            if self.reset_hold_cycles == 0
+                && self.soft_reset.load(std::sync::atomic::Ordering::Relaxed)
+            {
                 // MOS soft reset code always runs from ADL mode.
                 // and set_pc(0) will actually set pc := (mb<<16 + 0) in non-adl mode
                 cpu.state.reg.adl = true;
@@ -1695,3 +1799,15 @@ impl AgonMachine {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "watchdog_fixture.rs"]
+mod watchdog_fixture;
+
+#[cfg(test)]
+#[path = "watchdog_port_control.rs"]
+mod watchdog_port_control;
+
+#[cfg(test)]
+#[path = "watchdog_tests.rs"]
+mod watchdog_tests;

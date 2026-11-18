@@ -50,6 +50,18 @@ impl Uart {
         }
     }
 
+    pub(crate) fn reset(&mut self) {
+        self.rx_buf = None;
+        self.transmit_cooldown = 0;
+        self.receive_cooldown = 0;
+        self.ier = 0;
+        self.fctl = 0;
+        self.lctl = 0;
+        self.brg_div = 2;
+        self.spr = 0;
+        self.tx_fifo.clear();
+    }
+
     pub fn apply_ticks(&mut self, cycles: i32) {
         self.transmit_cooldown = i32::max(0, self.transmit_cooldown - cycles);
         if self.transmit_cooldown == 0 {
