@@ -15,6 +15,16 @@ impl GpioSet {
             d: Gpio::new(),
         }
     }
+
+    pub(crate) fn reset(&self) {
+        for port in [&self.b, &self.c, &self.d] {
+            port.ddr.store(0xff, Relaxed);
+            port.alt1.store(0, Relaxed);
+            port.alt2.store(0, Relaxed);
+            port.dr.store(0, Relaxed);
+            port.interrupt_due.store(0, Relaxed);
+        }
+    }
 }
 
 #[derive(Debug)]

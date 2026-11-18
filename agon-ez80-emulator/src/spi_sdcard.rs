@@ -27,6 +27,11 @@ impl SpiSdcard {
         self.image = file;
     }
 
+    pub(crate) fn reset_bus(&mut self) {
+        // Drop the interrupted transfer and keep the attached image.
+        *self = Self { image: self.image.take(), ..Self::new() };
+    }
+
     pub fn recv_byte(&mut self, val: u8) {
         if let Some(image) = self.image.as_mut() {
             // 0x80 means transfer finished (immediate on the emulator)
